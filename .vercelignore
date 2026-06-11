@@ -1,0 +1,18 @@
+# 敏感：絕對不上傳
+.env
+.env.*
+!.env.example
+
+# 本機資料
+data/
+
+# 開發輸出與本機工具
+dev.log
+dev.err.log
+movie-app-tree.txt
+_archive/
+啟動Treehole.bat
+
+# 開發產物（Vercel 自行 build）
+.next/
+node_modules/
