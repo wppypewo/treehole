@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { tmdbImage } from "@/lib/images";
 import type { SavedMovie } from "@/lib/db";
@@ -100,14 +101,19 @@ export default function LibraryGrid({
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          <AnimatePresence initial={false} mode="popLayout">
           {shown.map((movie) => {
             const poster = tmdbImage(movie.poster_path, "w342");
             const rating =
               movie.vote_average > 0 ? movie.vote_average.toFixed(1) : "—";
             return (
-              // group/libcard 讓 hover scale 作用域包含移除按鈕區域
-              <div
+              <motion.div
                 key={movie.tmdb_id}
+                layout
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
                 className="group/libcard relative hover:z-20 focus-visible:z-20"
               >
                 <Link
@@ -147,9 +153,10 @@ export default function LibraryGrid({
                 >
                   {removing === movie.tmdb_id ? "…" : labels.remove}
                 </button>
-              </div>
+              </motion.div>
             );
           })}
+          </AnimatePresence>
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 interface TorrentResult {
@@ -146,12 +147,22 @@ export default function DownloadButton({
         ⬇ {buttonLabel}
       </button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
-          onClick={() => setOpen(false)}
-        >
-          <div
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
+            onClick={() => setOpen(false)}
+          >
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ type: "spring", stiffness: 380, damping: 28 }}
             className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:rounded-2xl dark:bg-zinc-900"
             onClick={(e) => e.stopPropagation()}
           >
@@ -263,9 +274,10 @@ export default function DownloadButton({
                 </ul>
               )}
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
