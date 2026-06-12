@@ -41,6 +41,52 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* 一次性進場：詳情頁 poster / 文字欄載入時 fade + 輕微上移 */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @theme inline {
   --animate-hero-text-in: hero-text-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-rise: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 詳情頁 section 標籤（eyebrow）：克制的小型標題，與主標題拉開層級 */
+.eyebrow {
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #a1a1aa; /* zinc-400 */
+}
+
+/* 深色站統一 select 外觀：去除原生樣式、自繪 chevron，避免系統淺色 UI 破口 */
+.select-dark {
+  appearance: none;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(255 255 255 / 0.15);
+  background-color: #18181b; /* zinc-900 */
+  color: #f4f4f5; /* zinc-100 */
+  padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.625rem center;
+  background-size: 1rem;
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+.select-dark:hover {
+  border-color: rgb(255 255 255 / 0.3);
+}
+.select-dark:focus {
+  outline: none;
+  border-color: rgb(255 255 255 / 0.5);
+}
+/* Windows / Chrome 下讓展開的選項清單也維持深色 */
+.select-dark option {
+  background-color: #18181b;
+  color: #f4f4f5;
 }

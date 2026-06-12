@@ -88,154 +88,189 @@ export default async function MoviePage({
 
   return (
     // isolate 建立 stacking context，讓 -z-10 的 backdrop 停在 article 範圍內
-    <article className="relative isolate space-y-6">
-      {/* 電影 backdrop 模糊底色：增加視覺縱深，向 Apple TV+ 靠攏 */}
-      {backdrop && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 overflow-hidden"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={backdrop}
-            alt=""
-            className="h-full w-full scale-110 object-cover opacity-[0.15] blur-2xl"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
-        </div>
-      )}
-      <div className="flex flex-col gap-6 sm:flex-row">
-        <div className="mx-auto w-56 shrink-0 sm:mx-0 sm:w-72">
-          <div className="aspect-[2/3] overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
-            {poster ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={poster}
-                alt={movie.title}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-xs text-zinc-400">
-                無海報
-              </div>
-            )}
+    <article className="relative isolate">
+      {/* ===== 首屏：出血 backdrop header band + 主資訊組 ===== */}
+      <header className="relative -mx-4 sm:-mx-6">
+        {backdrop && (
+          // 清晰 backdrop（非 blur 洗色）；由下而上黑色 scrim 將影像收進頁面背景，
+          // 保證疊放的標題可讀。高度用 vw + max 上限預留，避免 CLS。
+          <div className="absolute inset-x-0 top-0 -z-10 h-[58vw] max-h-[280px] overflow-hidden sm:h-[44vw] sm:max-h-[420px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={backdrop}
+              alt=""
+              aria-hidden="true"
+              fetchPriority="high"
+              className="animate-rise h-full w-full object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/75 to-transparent" />
           </div>
-        </div>
+        )}
 
-        <div className="flex-1 space-y-4">
-          <div>
-            <h1 className="text-2xl font-bold">{movie.title}</h1>
-            {showOriginal && (
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {dict.movie.originalTitle}：{movie.original_title}
-              </p>
-            )}
-          </div>
+        <div className="relative px-4 sm:px-6">
+          {/* 返回鍵：有 backdrop 時浮在 band 左上；無 backdrop 時退回上方常規連結 */}
+          <Link
+            href="/"
+            className={
+              backdrop
+                ? "absolute top-4 left-4 z-10 inline-flex items-center gap-1 rounded-full bg-black/40 px-3 py-1.5 text-sm text-zinc-200 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white"
+                : "mb-4 inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-200"
+            }
+          >
+            ← {dict.movie.back}
+          </Link>
 
-          <dl className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-            <div className="flex gap-1">
-              <dt className="text-zinc-500">{dict.movie.rating}</dt>
-              <dd className="font-medium">★ {rating}</dd>
-            </div>
-            <div className="flex gap-1">
-              <dt className="text-zinc-500">{dict.movie.releaseDate}</dt>
-              <dd className="font-medium">{movie.release_date || year}</dd>
-            </div>
-            {movie.runtime ? (
-              <div className="flex gap-1">
-                <dt className="text-zinc-500">{dict.movie.runtime}</dt>
-                <dd className="font-medium">
-                  {movie.runtime} {dict.movie.minutes}
-                </dd>
+          {/* poster 壓在 band 下緣、與標題欄並排，形成電影詳情構圖（非置中） */}
+          <div
+            className={`flex flex-col gap-5 sm:flex-row sm:items-end sm:gap-7 ${
+              backdrop ? "pt-[44vw] sm:pt-[min(26vw,200px)]" : ""
+            }`}
+          >
+            <div className="animate-rise w-36 shrink-0 sm:w-52">
+              <div className="aspect-[2/3] overflow-hidden rounded-xl bg-zinc-800 shadow-2xl shadow-black/50 ring-1 ring-white/10">
+                {poster ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={poster}
+                    alt={movie.title}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xs text-zinc-400">
+                    無海報
+                  </div>
+                )}
               </div>
-            ) : null}
-          </dl>
+            </div>
 
-          {movie.genres.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {movie.genres.map((genre) => (
-                <span
-                  key={genre.id}
-                  className="rounded-full border border-zinc-300 px-2.5 py-0.5 text-xs text-zinc-600 dark:border-zinc-700 dark:text-zinc-300"
-                >
-                  {genre.name}
+            <div className="animate-rise min-w-0 flex-1 space-y-2.5 [animation-delay:90ms] sm:pb-2">
+              <div className="space-y-1">
+                <h1 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
+                  {movie.title}
+                </h1>
+                {showOriginal && (
+                  <p className="text-sm text-zinc-400">
+                    {dict.movie.originalTitle}：{movie.original_title}
+                  </p>
+                )}
+              </div>
+
+              {/* metadata 第一行：★ 評分（票數） · 年份 · 片長 */}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-zinc-300">
+                <span className="font-medium text-amber-300">
+                  ★ {rating}
+                  {movie.vote_count > 0 && (
+                    <span className="text-zinc-400">
+                      {" "}
+                      ({movie.vote_count.toLocaleString()})
+                    </span>
+                  )}
                 </span>
-              ))}
-            </div>
-          )}
+                <span className="text-zinc-600">·</span>
+                <span>{movie.release_date || year}</span>
+                {movie.runtime ? (
+                  <>
+                    <span className="text-zinc-600">·</span>
+                    <span>
+                      {movie.runtime} {dict.movie.minutes}
+                    </span>
+                  </>
+                ) : null}
+              </div>
 
-          {/* 收藏 / 已看過：寫入本機 SQLite。下載：查 Prowlarr → 加入 qBittorrent */}
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <MovieActions
-              movie={{
-                tmdb_id: movie.id,
-                title: movie.title,
-                poster_path: movie.poster_path,
-                vote_average: movie.vote_average,
-              }}
-              initialFavorite={isFavorite(movie.id)}
-              initialWatchlist={isInWatchlist(movie.id)}
-              initialWatched={isWatched(movie.id)}
-              labels={{
-                favorite: dict.actions.favorite,
-                favorited: dict.actions.favorited,
-                watchlist: dict.actions.watchlist,
-                watchlistAdded: dict.actions.watchlistAdded,
-                watched: dict.actions.watched,
-                watchedDone: dict.actions.watchedDone,
-              }}
-            />
-            <DownloadButton
-              query={downloadQuery}
-              buttonLabel={dict.actions.download}
-              t={dict.download}
-            />
+              {/* 導演：弱化為第二行，不硬塞進 metadata 行 */}
+              {credits?.director && (
+                <p className="text-sm text-zinc-400">
+                  {dict.movie.director}：
+                  <Link
+                    href={`/person/${credits.director.id}`}
+                    className="text-zinc-200 transition-colors hover:text-white hover:underline"
+                  >
+                    {credits.director.name}
+                  </Link>
+                </p>
+              )}
+            </div>
           </div>
+        </div>
+      </header>
+
+      {/* 類型（降噪：極淡底文字 chip，非 generic bordered pill）＋ 動作，緊貼首屏資訊組 */}
+      <div className="mt-5 space-y-3 px-1">
+        {movie.genres.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {movie.genres.map((genre) => (
+              <span
+                key={genre.id}
+                className="rounded-md bg-white/5 px-2.5 py-1 text-xs text-zinc-300"
+              >
+                {genre.name}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* 收藏 / 已看過：寫入本機 SQLite。下載：查 Prowlarr → 加入 qBittorrent */}
+        <div className="flex flex-wrap items-center gap-2">
+          <MovieActions
+            movie={{
+              tmdb_id: movie.id,
+              title: movie.title,
+              poster_path: movie.poster_path,
+              vote_average: movie.vote_average,
+            }}
+            initialFavorite={isFavorite(movie.id)}
+            initialWatchlist={isInWatchlist(movie.id)}
+            initialWatched={isWatched(movie.id)}
+            labels={{
+              favorite: dict.actions.favorite,
+              favorited: dict.actions.favorited,
+              watchlist: dict.actions.watchlist,
+              watchlistAdded: dict.actions.watchlistAdded,
+              watched: dict.actions.watched,
+              watchedDone: dict.actions.watchedDone,
+            }}
+          />
+          <DownloadButton
+            query={downloadQuery}
+            buttonLabel={dict.actions.download}
+            t={dict.download}
+          />
         </div>
       </div>
 
-      <section className="space-y-2">
-        <h2 className="text-base font-semibold">{dict.movie.overview}</h2>
-        <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+      {/* ===== 內文：編輯式節奏，刻意疏密（overview 主體 → 後續 section） ===== */}
+      <section className="mt-10 px-1">
+        <h2 className="eyebrow mb-3">{dict.movie.overview}</h2>
+        <p className="max-w-2xl text-[15px] leading-7 text-zinc-200 sm:text-base sm:leading-8">
           {movie.overview || dict.movie.noOverview}
         </p>
       </section>
 
-      <RatingEditor
-        movie={{
-          tmdb_id: movie.id,
-          title: movie.title,
-          poster_path: movie.poster_path,
-          vote_average: movie.vote_average,
-        }}
-        initialScore={myRating?.score ?? null}
-        initialNote={myRating?.note ?? ""}
-        labels={dict.rating}
-      />
+      <div className="mt-8 px-1">
+        <RatingEditor
+          movie={{
+            tmdb_id: movie.id,
+            title: movie.title,
+            poster_path: movie.poster_path,
+            vote_average: movie.vote_average,
+          }}
+          initialScore={myRating?.score ?? null}
+          initialNote={myRating?.note ?? ""}
+          labels={dict.rating}
+        />
+      </div>
 
       {trailerKey && (
-        <section className="space-y-2">
-          <h2 className="text-base font-semibold">{dict.movie.trailer}</h2>
+        <section className="mt-12 px-1">
+          <h2 className="eyebrow mb-3">{dict.movie.trailer}</h2>
           <TrailerPlayer youTubeKey={trailerKey} label={movie.title} />
         </section>
       )}
 
       {credits && (credits.cast.length > 0 || credits.director) && (
-        <section className="space-y-2">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <h2 className="text-base font-semibold">{dict.movie.cast}</h2>
-            {credits.director && (
-              <p className="text-sm text-zinc-500">
-                {dict.movie.director}：
-                <Link
-                  href={`/person/${credits.director.id}`}
-                  className="text-zinc-300 hover:underline"
-                >
-                  {credits.director.name}
-                </Link>
-              </p>
-            )}
-          </div>
+        <section className="mt-10 px-1">
+          <h2 className="eyebrow mb-3">{dict.movie.cast}</h2>
           <div className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6">
             {credits.cast.slice(0, 15).map((c) => (
               <PersonCard
@@ -251,23 +286,14 @@ export default async function MoviePage({
       )}
 
       {related.length > 0 && (
-        <section className="space-y-2">
-          <h2 className="text-base font-semibold">
-            {dict.recommendations.related}
-          </h2>
+        <section className="mt-10 px-1">
+          <h2 className="eyebrow mb-3">{dict.recommendations.related}</h2>
           <MovieGrid
             movies={related}
             emptyText={dict.recommendations.relatedEmpty}
           />
         </section>
       )}
-
-      <Link
-        href="/"
-        className="inline-block text-sm text-zinc-500 hover:underline"
-      >
-        ← {dict.movie.back}
-      </Link>
     </article>
   );
 }

@@ -135,8 +135,8 @@ export default function BrowseClient({
     return () => observer.disconnect();
   }, [loadMore, done, error, loading]);
 
-  const selectCls =
-    "rounded-lg border border-white/15 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-white/40";
+  // 統一深色 select 外觀（定義於 globals.css）
+  const selectCls = "select-dark";
 
   return (
     <div className="space-y-5">
