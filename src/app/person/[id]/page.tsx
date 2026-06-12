@@ -42,7 +42,7 @@ export default async function PersonPage({
   return (
     <article className="space-y-6">
       <div className="flex flex-col gap-6 sm:flex-row">
-        <div className="mx-auto w-44 shrink-0 sm:mx-0">
+        <div className="mx-auto w-44 shrink-0 sm:mx-0 sm:w-52">
           <div className="aspect-[2/3] overflow-hidden rounded-lg bg-zinc-800">
             {photo ? (
               // eslint-disable-next-line @next/next/no-img-element

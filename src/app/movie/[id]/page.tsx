@@ -70,6 +70,9 @@ export default async function MoviePage({
   const myRating = getRating(movie.id);
 
   const poster = tmdbImage(movie.poster_path, "w500");
+  const backdrop = movie.backdrop_path
+    ? tmdbImage(movie.backdrop_path, "w780")
+    : null;
   const year = movie.release_date ? movie.release_date.slice(0, 4) : "—";
   const rating = movie.vote_average > 0 ? movie.vote_average.toFixed(1) : "—";
   const showOriginal =
@@ -84,9 +87,25 @@ export default async function MoviePage({
     .join(" ");
 
   return (
-    <article className="space-y-6">
+    // isolate 建立 stacking context，讓 -z-10 的 backdrop 停在 article 範圍內
+    <article className="relative isolate space-y-6">
+      {/* 電影 backdrop 模糊底色：增加視覺縱深，向 Apple TV+ 靠攏 */}
+      {backdrop && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 overflow-hidden"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={backdrop}
+            alt=""
+            className="h-full w-full scale-110 object-cover opacity-[0.15] blur-2xl"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
+        </div>
+      )}
       <div className="flex flex-col gap-6 sm:flex-row">
-        <div className="mx-auto w-48 shrink-0 sm:mx-0">
+        <div className="mx-auto w-56 shrink-0 sm:mx-0 sm:w-72">
           <div className="aspect-[2/3] overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
             {poster ? (
               // eslint-disable-next-line @next/next/no-img-element
