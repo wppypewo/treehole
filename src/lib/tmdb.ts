@@ -52,7 +52,7 @@ export interface MovieDetails extends MovieSummary {
 }
 
 // v4 read access token 是 JWT（含「.」分隔）；v3 api_key 為 32 碼十六進位、不含「.」
-function isV4Token(key: string): boolean {
+export function isV4Token(key: string): boolean {
   return key.includes(".");
 }
 
@@ -194,7 +194,7 @@ interface TmdbVideo {
 }
 
 // 從影片清單挑一支最適合的預告：官方正片預告 > 正片預告 > 官方先導 > 先導 > 其餘 YouTube
-function pickTrailer(videos: TmdbVideo[]): string | null {
+export function pickTrailer(videos: TmdbVideo[]): string | null {
   const youtube = videos.filter((v) => v.site === "YouTube");
   const rank = (v: TmdbVideo): number => {
     if (v.type === "Trailer") return v.official ? 0 : 1;
