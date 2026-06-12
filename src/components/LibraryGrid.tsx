@@ -17,6 +17,7 @@ interface Labels {
 }
 
 // 收藏 / 想看 / 已看過 列表：可排序與依評分篩選，每張卡片可移除。
+// 卡片外觀與 MovieCard 一致（hover scale、ring、rating badge）。
 export default function LibraryGrid({
   items,
   kind,
@@ -41,7 +42,6 @@ export default function LibraryGrid({
     }
   }
 
-  // 依評分篩選 + 排序（加入時間為原本的資料順序）
   let shown = minRating
     ? list.filter((m) => m.vote_average >= Number(minRating))
     : list;
@@ -95,7 +95,7 @@ export default function LibraryGrid({
       )}
 
       {shown.length === 0 ? (
-        <p className="py-16 text-center text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="py-16 text-center text-sm text-zinc-500">
           {labels.empty}
         </p>
       ) : (
@@ -105,12 +105,16 @@ export default function LibraryGrid({
             const rating =
               movie.vote_average > 0 ? movie.vote_average.toFixed(1) : "—";
             return (
+              // group/libcard 讓 hover scale 作用域包含移除按鈕區域
               <div
                 key={movie.tmdb_id}
-                className="group relative flex flex-col overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
+                className="group/libcard relative hover:z-20 focus-visible:z-20"
               >
-                <Link href={`/movie/${movie.tmdb_id}`} className="flex flex-col">
-                  <div className="relative aspect-[2/3] w-full bg-zinc-100 dark:bg-zinc-800">
+                <Link
+                  href={`/movie/${movie.tmdb_id}`}
+                  className="block focus:outline-none"
+                >
+                  <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-900 shadow-md ring-1 ring-white/5 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/libcard:-translate-y-1 group-hover/libcard:scale-[1.05] group-hover/libcard:shadow-2xl group-hover/libcard:ring-2 group-hover/libcard:ring-white/40">
                     {poster ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -120,25 +124,28 @@ export default function LibraryGrid({
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-xs text-zinc-400">
+                      <div className="flex h-full w-full items-center justify-center text-xs text-zinc-500">
                         無海報
                       </div>
                     )}
-                    <span className="absolute top-1.5 right-1.5 rounded-md bg-black/70 px-1.5 py-0.5 text-xs font-semibold text-amber-300">
+                    <span className="absolute right-2 top-2 rounded-md bg-black/70 px-1.5 py-0.5 text-xs font-semibold text-amber-300 backdrop-blur">
                       ★ {rating}
                     </span>
                   </div>
-                  <h3 className="line-clamp-2 p-2.5 text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                    {movie.title}
-                  </h3>
+                  <div className="mt-2 px-0.5">
+                    <h3 className="line-clamp-1 text-sm font-medium text-zinc-100">
+                      {movie.title}
+                    </h3>
+                  </div>
                 </Link>
+                {/* 移除按鈕：小文字連結，不干擾卡片視覺 */}
                 <button
                   type="button"
                   disabled={removing === movie.tmdb_id}
                   onClick={() => remove(movie.tmdb_id)}
-                  className="m-2.5 mt-0 rounded-md border border-zinc-300 px-2 py-1 text-xs text-zinc-600 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-red-950"
+                  className="mt-0.5 px-0.5 text-xs text-zinc-600 transition-colors hover:text-red-400 disabled:opacity-40"
                 >
-                  {labels.remove}
+                  {removing === movie.tmdb_id ? "…" : labels.remove}
                 </button>
               </div>
             );

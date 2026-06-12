@@ -99,17 +99,17 @@ export default function HeroCarousel({
               type="button"
               aria-label="prev"
               onClick={() => go(-1)}
-              className="absolute top-1/2 left-3 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-xl text-white opacity-0 backdrop-blur transition-opacity duration-300 hover:bg-black/70 group-hover/hero:opacity-100"
+              className="absolute top-1/2 left-3 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur transition-opacity duration-300 hover:bg-black/70 group-hover/hero:opacity-100"
             >
-              ‹
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
             <button
               type="button"
               aria-label="next"
               onClick={() => go(1)}
-              className="absolute top-1/2 right-3 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-xl text-white opacity-0 backdrop-blur transition-opacity duration-300 hover:bg-black/70 group-hover/hero:opacity-100"
+              className="absolute top-1/2 right-3 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur transition-opacity duration-300 hover:bg-black/70 group-hover/hero:opacity-100"
             >
-              ›
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
             </button>
 
             {/* 進度圓點：底部居中，z-10 在 Link 之上 */}

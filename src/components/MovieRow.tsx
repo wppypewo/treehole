@@ -59,17 +59,17 @@ export default function MovieRow({
           type="button"
           aria-label="prev"
           onClick={() => scrollByDir(-1)}
-          className="absolute top-4 bottom-16 left-0 hidden w-12 items-center justify-center rounded-l-xl bg-gradient-to-r from-black/80 to-transparent text-2xl text-white opacity-0 transition-opacity duration-300 group-hover/row:opacity-100 sm:flex"
+          className="absolute top-4 bottom-16 left-0 hidden w-12 items-center justify-center rounded-l-xl bg-gradient-to-r from-black/80 to-transparent text-white opacity-0 transition-opacity duration-300 group-hover/row:opacity-100 sm:flex"
         >
-          ‹
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <button
           type="button"
           aria-label="next"
           onClick={() => scrollByDir(1)}
-          className="absolute top-4 bottom-16 right-0 hidden w-12 items-center justify-center rounded-r-xl bg-gradient-to-l from-black/80 to-transparent text-2xl text-white opacity-0 transition-opacity duration-300 group-hover/row:opacity-100 sm:flex"
+          className="absolute top-4 bottom-16 right-0 hidden w-12 items-center justify-center rounded-r-xl bg-gradient-to-l from-black/80 to-transparent text-white opacity-0 transition-opacity duration-300 group-hover/row:opacity-100 sm:flex"
         >
-          ›
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </div>
     </section>

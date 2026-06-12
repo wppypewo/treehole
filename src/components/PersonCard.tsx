@@ -20,7 +20,7 @@ export default function PersonCard({
       href={`/person/${id}`}
       className="group/person block w-24 shrink-0 text-center"
     >
-      <div className="aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-800 ring-1 ring-white/5 transition-transform duration-300 group-hover/person:scale-[1.04]">
+      <div className="aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-800 ring-1 ring-white/5 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/person:scale-[1.05] group-hover/person:ring-white/30">
         {img ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
