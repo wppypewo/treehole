@@ -1,5 +1,6 @@
 import Link from "next/link";
 import LanguageSwitcher from "./LanguageSwitcher";
+import NavLinks from "./NavLinks";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
@@ -30,15 +31,7 @@ export default function Navbar({
           {dict.appTitle}
         </Link>
         <div className="flex flex-1 flex-wrap items-center gap-1">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="rounded-md px-3 py-1.5 text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              {link.label}
-            </Link>
-          ))}
+          <NavLinks links={links} />
         </div>
         <LanguageSwitcher
           current={locale}

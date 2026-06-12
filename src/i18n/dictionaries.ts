@@ -58,6 +58,7 @@ export interface Dictionary {
     trailer: string;
     cast: string;
     director: string;
+    back: string;
   };
   person: { filmography: string; noBio: string };
   browse: {
@@ -197,6 +198,7 @@ const zhTW: Dictionary = {
     trailer: "預告片",
     cast: "主演",
     director: "導演",
+    back: "返回",
   },
   person: { filmography: "參演作品", noBio: "暫無人物簡介。" },
   browse: {
@@ -338,6 +340,7 @@ const en: Dictionary = {
     trailer: "Trailer",
     cast: "Cast",
     director: "Director",
+    back: "Back",
   },
   person: { filmography: "Filmography", noBio: "No biography available." },
   browse: {

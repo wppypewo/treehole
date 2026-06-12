@@ -266,7 +266,7 @@ export default async function MoviePage({
         href="/"
         className="inline-block text-sm text-zinc-500 hover:underline"
       >
-        ← {dict.nav.popular}
+        ← {dict.movie.back}
       </Link>
     </article>
   );
