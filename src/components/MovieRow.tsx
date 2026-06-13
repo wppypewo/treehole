@@ -6,13 +6,16 @@ import MovieCard from "./MovieCard";
 import type { MovieSummary } from "@/lib/tmdb";
 
 // 橫向捲動分類列（Apple TV 風）：標題 + 查看全部 + 可左右捲的海報列。
+// eyebrow 為可選的小型語境標，未傳則維持原本只有標題的渲染。
 export default function MovieRow({
   title,
+  eyebrow,
   movies,
   moreHref,
   moreLabel,
 }: {
   title: string;
+  eyebrow?: string;
   movies: MovieSummary[];
   moreHref: string;
   moreLabel: string;
@@ -29,8 +32,11 @@ export default function MovieRow({
 
   return (
     <section className="space-y-2">
-      <div className="flex items-center justify-between px-0.5">
-        <h2 className="text-lg font-semibold text-white">{title}</h2>
+      <div className="flex items-end justify-between px-0.5">
+        <div>
+          {eyebrow && <p className="eyebrow mb-1">{eyebrow}</p>}
+          <h2 className="text-lg font-semibold text-white">{title}</h2>
+        </div>
         <Link
           href={moreHref}
           className="text-sm text-zinc-400 transition-colors hover:text-white"

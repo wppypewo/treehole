@@ -97,6 +97,18 @@ export interface Dictionary {
     recommendationsEmpty: string;
     keepBrowsing: string;
   };
+  home: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    rows: {
+      forYou: { eyebrow: string; title: string };
+      popular: { eyebrow: string; title: string };
+      topRated: { eyebrow: string; title: string };
+      grossing: { eyebrow: string; title: string };
+      upcoming: { eyebrow: string; title: string };
+    };
+  };
   common: {
     empty: string;
     loading: string;
@@ -245,6 +257,18 @@ const zhTW: Dictionary = {
     recommendationsEmpty:
       "個人化推薦會依你在本機版收藏與標記已看過的電影產生。這個線上 demo 不保存個人資料，先去看看其他電影吧。",
     keepBrowsing: "瀏覽電影",
+  },
+  home: {
+    eyebrow: "片庫",
+    title: "今晚想看什麼?",
+    subtitle: "收藏和看過的都記在這裡。",
+    rows: {
+      forYou: { eyebrow: "依你看過的", title: "為你挑的" },
+      popular: { eyebrow: "此刻", title: "大家在看的" },
+      topRated: { eyebrow: "歷來", title: "評分最高的" },
+      grossing: { eyebrow: "票房", title: "最賣座的" },
+      upcoming: { eyebrow: "之後", title: "還沒上映的" },
+    },
   },
   common: {
     empty: "目前沒有資料。",
@@ -398,6 +422,18 @@ const en: Dictionary = {
     recommendationsEmpty:
       "Personalized picks come from the movies you favorite and mark as watched in the local version. This online demo doesn't store personal data — browse some movies instead.",
     keepBrowsing: "Browse movies",
+  },
+  home: {
+    eyebrow: "Library",
+    title: "What are you watching tonight?",
+    subtitle: "Your favorites and watched are kept here.",
+    rows: {
+      forYou: { eyebrow: "From your history", title: "Picked for you" },
+      popular: { eyebrow: "Right now", title: "What people are watching" },
+      topRated: { eyebrow: "All-time", title: "Highest rated" },
+      grossing: { eyebrow: "Box office", title: "Biggest earners" },
+      upcoming: { eyebrow: "Soon", title: "Not out yet" },
+    },
   },
   common: {
     empty: "Nothing here yet.",
