@@ -19,12 +19,14 @@ export default function MovieActions({
   initialWatchlist,
   initialWatched,
   labels,
+  isDemo = false,
 }: {
   movie: SavedMovie;
   initialFavorite: boolean;
   initialWatchlist: boolean;
   initialWatched: boolean;
   labels: Labels;
+  isDemo?: boolean;
 }) {
   const [fav, setFav] = useState(initialFavorite);
   const [want, setWant] = useState(initialWatchlist);
@@ -36,7 +38,8 @@ export default function MovieActions({
     active: boolean,
     setActive: (v: boolean) => void,
   ) {
-    if (busy) return;
+    // demo 模式不寫入：不觸發樂觀更新，避免顯示無法保存的「假成功」
+    if (isDemo || busy) return;
     setBusy(true);
     try {
       if (active) {
@@ -68,7 +71,7 @@ export default function MovieActions({
     <div className="flex flex-wrap items-center gap-2 pt-1">
       <button
         type="button"
-        disabled={busy}
+        disabled={isDemo || busy}
         aria-pressed={fav}
         onClick={() => toggle("favorites", fav, setFav)}
         className={`${base} ${fav ? activeCls : idleCls}`}
@@ -77,7 +80,7 @@ export default function MovieActions({
       </button>
       <button
         type="button"
-        disabled={busy}
+        disabled={isDemo || busy}
         aria-pressed={want}
         onClick={() => toggle("watchlist", want, setWant)}
         className={`${base} ${want ? activeCls : idleCls}`}
@@ -86,7 +89,7 @@ export default function MovieActions({
       </button>
       <button
         type="button"
-        disabled={busy}
+        disabled={isDemo || busy}
         aria-pressed={seen}
         onClick={() => toggle("watched", seen, setSeen)}
         className={`${base} ${seen ? activeCls : idleCls}`}

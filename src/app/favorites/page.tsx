@@ -10,6 +10,7 @@ export default async function FavoritesPage() {
   const locale = await getLocale();
   const dict = getDictionary(locale);
   const items = listFavorites();
+  const isDemo = process.env.DEMO_MODE === "1";
 
   return (
     <section className="space-y-4">
@@ -17,6 +18,7 @@ export default async function FavoritesPage() {
       <LibraryGrid
         items={items}
         kind="favorites"
+        isDemo={isDemo}
         labels={{
           remove: dict.library.remove,
           empty: dict.library.emptyFavorites,
@@ -26,6 +28,8 @@ export default async function FavoritesPage() {
           sortRating: dict.browse.sortRating,
           minRating: dict.browse.minRating,
           all: dict.browse.all,
+          demoEmpty: dict.demo.libraryEmpty,
+          browse: dict.demo.keepBrowsing,
         }}
       />
     </section>

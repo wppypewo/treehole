@@ -19,11 +19,15 @@ export default function RatingEditor({
   initialScore,
   initialNote,
   labels,
+  isDemo = false,
+  demoNote,
 }: {
   movie: SavedMovie;
   initialScore: number | null;
   initialNote: string;
   labels: Labels;
+  isDemo?: boolean;
+  demoNote?: string;
 }) {
   const [score, setScore] = useState<number | null>(initialScore);
   const [note, setNote] = useState(initialNote);
@@ -31,7 +35,8 @@ export default function RatingEditor({
   const [saved, setSaved] = useState(false);
 
   async function save() {
-    if (!score || saving) return;
+    // demo 模式不寫入，避免顯示無法保存的「已儲存」假回饋
+    if (isDemo || !score || saving) return;
     setSaving(true);
     setSaved(false);
     try {
@@ -47,7 +52,7 @@ export default function RatingEditor({
   }
 
   async function clearRating() {
-    if (saving) return;
+    if (isDemo || saving) return;
     setSaving(true);
     try {
       await fetch(`/api/ratings?tmdb_id=${movie.tmdb_id}`, {
@@ -72,12 +77,13 @@ export default function RatingEditor({
             <button
               key={n}
               type="button"
+              disabled={isDemo}
               aria-pressed={score === n}
               onClick={() => {
                 setScore(n);
                 setSaved(false);
               }}
-              className={`h-9 w-9 rounded-lg border text-sm font-medium transition-colors ${
+              className={`h-9 w-9 rounded-lg border text-sm font-medium transition-colors disabled:opacity-60 ${
                 score !== null && n <= score
                   ? "border-amber-400 bg-amber-400/20 text-amber-300"
                   : "border-white/15 text-zinc-400 hover:bg-white/10"
@@ -93,13 +99,14 @@ export default function RatingEditor({
         <label className="text-xs text-zinc-500">{labels.note}</label>
         <textarea
           value={note}
+          disabled={isDemo}
           onChange={(e) => {
             setNote(e.target.value);
             setSaved(false);
           }}
           placeholder={labels.notePlaceholder}
           rows={3}
-          className="w-full rounded-lg border border-white/15 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-white/40"
+          className="w-full rounded-lg border border-white/15 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-white/40 disabled:opacity-60"
         />
       </div>
 
@@ -107,12 +114,12 @@ export default function RatingEditor({
         <button
           type="button"
           onClick={save}
-          disabled={!score || saving}
+          disabled={isDemo || !score || saving}
           className="rounded-lg border border-emerald-600 bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
         >
           {saved ? labels.saved : labels.save}
         </button>
-        {score !== null && (
+        {!isDemo && score !== null && (
           <button
             type="button"
             onClick={clearRating}
@@ -123,6 +130,10 @@ export default function RatingEditor({
           </button>
         )}
       </div>
+
+      {isDemo && demoNote && (
+        <p className="text-xs text-zinc-500">{demoNote}</p>
+      )}
     </section>
   );
 }

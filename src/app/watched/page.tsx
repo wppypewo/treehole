@@ -10,6 +10,7 @@ export default async function WatchedPage() {
   const locale = await getLocale();
   const dict = getDictionary(locale);
   const items = listWatched();
+  const isDemo = process.env.DEMO_MODE === "1";
 
   return (
     <section className="space-y-4">
@@ -17,6 +18,7 @@ export default async function WatchedPage() {
       <LibraryGrid
         items={items}
         kind="watched"
+        isDemo={isDemo}
         labels={{
           remove: dict.library.remove,
           empty: dict.library.emptyWatched,
@@ -26,6 +28,8 @@ export default async function WatchedPage() {
           sortRating: dict.browse.sortRating,
           minRating: dict.browse.minRating,
           all: dict.browse.all,
+          demoEmpty: dict.demo.libraryEmpty,
+          browse: dict.demo.keepBrowsing,
         }}
       />
     </section>

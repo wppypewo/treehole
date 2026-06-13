@@ -86,6 +86,9 @@ export default async function MoviePage({
     .filter(Boolean)
     .join(" ");
 
+  // demo 模式下收藏／評分等寫入功能不可用，僅作 UI 文案與停用狀態用途
+  const isDemo = process.env.DEMO_MODE === "1";
+
   return (
     // isolate 建立 stacking context，讓 -z-10 的 backdrop 停在 article 範圍內
     <article className="relative isolate">
@@ -222,6 +225,7 @@ export default async function MoviePage({
             initialFavorite={isFavorite(movie.id)}
             initialWatchlist={isInWatchlist(movie.id)}
             initialWatched={isWatched(movie.id)}
+            isDemo={isDemo}
             labels={{
               favorite: dict.actions.favorite,
               favorited: dict.actions.favorited,
@@ -237,6 +241,11 @@ export default async function MoviePage({
             t={dict.download}
           />
         </div>
+
+        {/* demo 模式：誠實說明這些是本機版功能，取代假成功 */}
+        {isDemo && (
+          <p className="text-xs text-zinc-500">{dict.demo.actionNote}</p>
+        )}
       </div>
 
       {/* ===== 內文：編輯式節奏，刻意疏密（overview 主體 → 後續 section） ===== */}
@@ -258,6 +267,8 @@ export default async function MoviePage({
           initialScore={myRating?.score ?? null}
           initialNote={myRating?.note ?? ""}
           labels={dict.rating}
+          isDemo={isDemo}
+          demoNote={dict.demo.ratingNote}
         />
       </div>
 

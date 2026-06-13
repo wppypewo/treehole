@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getForYouPage } from "@/lib/recommendations";
@@ -11,6 +12,27 @@ export const dynamic = "force-dynamic";
 export default async function RecommendationsPage() {
   const locale = await getLocale();
   const dict = getDictionary(locale);
+  const isDemo = process.env.DEMO_MODE === "1";
+
+  // demo 模式下個人化推薦無種子（片庫為本機版功能），改為誠實說明 + 繼續探索出口
+  if (isDemo) {
+    return (
+      <section className="space-y-4">
+        <h1 className="text-xl font-bold">{dict.pages.recommendations}</h1>
+        <div className="space-y-4 py-16 text-center">
+          <p className="mx-auto max-w-md text-sm text-zinc-500">
+            {dict.demo.recommendationsEmpty}
+          </p>
+          <Link
+            href="/browse"
+            className="inline-block rounded-lg border border-white/15 px-4 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/10"
+          >
+            {dict.demo.keepBrowsing}
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   let first;
   let errorMessage;

@@ -15,6 +15,8 @@ interface Labels {
   sortRating: string;
   minRating: string;
   all: string;
+  demoEmpty: string;
+  browse: string;
 }
 
 // 收藏 / 想看 / 已看過 列表：可排序與依評分篩選，每張卡片可移除。
@@ -23,10 +25,12 @@ export default function LibraryGrid({
   items,
   kind,
   labels,
+  isDemo = false,
 }: {
   items: SavedMovie[];
   kind: "favorites" | "watched" | "watchlist";
   labels: Labels;
+  isDemo?: boolean;
 }) {
   const [list, setList] = useState(items);
   const [removing, setRemoving] = useState<number | null>(null);
@@ -96,9 +100,24 @@ export default function LibraryGrid({
       )}
 
       {shown.length === 0 ? (
-        <p className="py-16 text-center text-sm text-zinc-500">
-          {labels.empty}
-        </p>
+        isDemo && list.length === 0 ? (
+          // demo 模式：誠實說明片庫為本機版功能，並提供繼續探索的出口
+          <div className="space-y-4 py-16 text-center">
+            <p className="mx-auto max-w-md text-sm text-zinc-500">
+              {labels.demoEmpty}
+            </p>
+            <Link
+              href="/browse"
+              className="inline-block rounded-lg border border-white/15 px-4 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/10"
+            >
+              {labels.browse}
+            </Link>
+          </div>
+        ) : (
+          <p className="py-16 text-center text-sm text-zinc-500">
+            {labels.empty}
+          </p>
+        )
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           <AnimatePresence initial={false} mode="popLayout">

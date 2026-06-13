@@ -90,6 +90,13 @@ export interface Dictionary {
     download: string;
     comingSoon: string;
   };
+  demo: {
+    actionNote: string;
+    ratingNote: string;
+    libraryEmpty: string;
+    recommendationsEmpty: string;
+    keepBrowsing: string;
+  };
   common: {
     empty: string;
     loading: string;
@@ -229,6 +236,15 @@ const zhTW: Dictionary = {
     watchedDone: "已看過 ✓",
     download: "下載",
     comingSoon: "後續階段啟用",
+  },
+  demo: {
+    actionNote: "收藏、想看、已看過是本機版功能，這個 demo 不會保存。",
+    ratingNote: "個人評分是本機版功能，這個 demo 不會保存。",
+    libraryEmpty:
+      "收藏、想看、已看過會儲存在本機版。這個線上 demo 只展示 TMDB 內容，不保存個人清單。",
+    recommendationsEmpty:
+      "個人化推薦會依你在本機版收藏與標記已看過的電影產生。這個線上 demo 不保存個人資料，先去看看其他電影吧。",
+    keepBrowsing: "瀏覽電影",
   },
   common: {
     empty: "目前沒有資料。",
@@ -371,6 +387,17 @@ const en: Dictionary = {
     watchedDone: "Watched ✓",
     download: "Download",
     comingSoon: "Coming in a later stage",
+  },
+  demo: {
+    actionNote:
+      "Favorites, watchlist and watched are local-version features. This demo won't save them.",
+    ratingNote:
+      "Personal ratings are a local-version feature. This demo won't save them.",
+    libraryEmpty:
+      "Favorites, watchlist and watched are stored in the local version. This online demo only showcases TMDB content and doesn't keep personal lists.",
+    recommendationsEmpty:
+      "Personalized picks come from the movies you favorite and mark as watched in the local version. This online demo doesn't store personal data — browse some movies instead.",
+    keepBrowsing: "Browse movies",
   },
   common: {
     empty: "Nothing here yet.",
