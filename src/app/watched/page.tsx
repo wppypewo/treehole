@@ -13,8 +13,14 @@ export default async function WatchedPage() {
   const isDemo = process.env.DEMO_MODE === "1";
 
   return (
-    <section className="space-y-4">
-      <h1 className="text-xl font-bold">{dict.pages.watched}</h1>
+    <section className="space-y-6">
+      <header className="animate-rise">
+        <p className="eyebrow mb-2.5">{dict.library.watchedEyebrow}</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
+          {dict.library.watchedTitle}
+        </h1>
+        <p className="mt-2 text-sm text-zinc-400">{dict.library.watchedSubtitle}</p>
+      </header>
       <LibraryGrid
         items={items}
         kind="watched"
@@ -25,9 +31,9 @@ export default async function WatchedPage() {
           sort: dict.browse.sort,
           sortAdded: dict.library.sortAdded,
           sortTitle: dict.library.sortTitle,
-          sortRating: dict.browse.sortRating,
+          sortRating: dict.library.sortRating,
           minRating: dict.browse.minRating,
-          all: dict.browse.all,
+          ratingPlaceholder: dict.library.ratingPlaceholder,
           demoEmpty: dict.demo.libraryEmpty,
           browse: dict.demo.keepBrowsing,
         }}

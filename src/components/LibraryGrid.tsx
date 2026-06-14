@@ -14,7 +14,7 @@ interface Labels {
   sortTitle: string;
   sortRating: string;
   minRating: string;
-  all: string;
+  ratingPlaceholder: string;
   demoEmpty: string;
   browse: string;
 }
@@ -71,15 +71,9 @@ export default function LibraryGrid({
             aria-label={labels.sort}
             className={selectCls}
           >
-            <option value="added">
-              {labels.sort}：{labels.sortAdded}
-            </option>
-            <option value="title">
-              {labels.sort}：{labels.sortTitle}
-            </option>
-            <option value="rating">
-              {labels.sort}：{labels.sortRating}
-            </option>
+            <option value="added">{labels.sortAdded}</option>
+            <option value="title">{labels.sortTitle}</option>
+            <option value="rating">{labels.sortRating}</option>
           </select>
           <select
             value={minRating}
@@ -87,9 +81,7 @@ export default function LibraryGrid({
             aria-label={labels.minRating}
             className={selectCls}
           >
-            <option value="">
-              {labels.minRating}：{labels.all}
-            </option>
+            <option value="">{labels.ratingPlaceholder}</option>
             {["8", "7", "6"].map((r) => (
               <option key={r} value={r}>
                 {r}+
@@ -133,7 +125,7 @@ export default function LibraryGrid({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2 }}
-                className="group/libcard relative hover:z-20 focus-visible:z-20"
+                className="group/libcard relative hover:z-20 focus-within:z-20"
               >
                 <Link
                   href={`/movie/${movie.tmdb_id}`}
@@ -163,12 +155,12 @@ export default function LibraryGrid({
                     </h3>
                   </div>
                 </Link>
-                {/* 移除按鈕：小文字連結，不干擾卡片視覺 */}
+                {/* 移除按鈕：桌面（fine pointer + hover）預設隱藏，hover / focus-within / focus-visible 時浮現；觸控裝置維持常駐可見 */}
                 <button
                   type="button"
                   disabled={removing === movie.tmdb_id}
                   onClick={() => remove(movie.tmdb_id)}
-                  className="mt-0.5 px-0.5 text-xs text-zinc-600 transition-colors hover:text-red-400 disabled:opacity-40"
+                  className="mt-0.5 px-0.5 text-xs text-zinc-600 transition-[color,opacity] hover:text-red-400 focus-visible:text-red-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 disabled:opacity-40 [@media(hover:hover)_and_(pointer:fine)]:opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-hover/libcard:opacity-100 [@media(hover:hover)_and_(pointer:fine)]:group-focus-within/libcard:opacity-100 [@media(hover:hover)_and_(pointer:fine)]:focus-visible:opacity-100"
                 >
                   {removing === movie.tmdb_id ? "…" : labels.remove}
                 </button>

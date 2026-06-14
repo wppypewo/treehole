@@ -43,9 +43,20 @@ export interface Dictionary {
     remove: string;
     sortAdded: string;
     sortTitle: string;
+    sortRating: string;
+    ratingPlaceholder: string;
     emptyFavorites: string;
     emptyWatchlist: string;
     emptyWatched: string;
+    favoritesEyebrow: string;
+    favoritesTitle: string;
+    favoritesSubtitle: string;
+    watchlistEyebrow: string;
+    watchlistTitle: string;
+    watchlistSubtitle: string;
+    watchedEyebrow: string;
+    watchedTitle: string;
+    watchedSubtitle: string;
   };
   history: {
     empty: string;
@@ -221,12 +232,23 @@ const zhTW: Dictionary = {
     subtitle: "輸入片名，或從最近找過的接著看。",
   },
   library: {
-    remove: "移除",
-    sortAdded: "加入時間",
+    remove: "拿掉",
+    sortAdded: "最近加入",
     sortTitle: "片名",
-    emptyFavorites: "還沒有收藏任何電影。到電影詳情頁按「收藏」即可加入。",
-    emptyWatchlist: "想看清單還是空的。到電影詳情頁按「想看」即可加入。",
-    emptyWatched: "還沒有標記任何已看過的電影。",
+    sortRating: "評分",
+    ratingPlaceholder: "不限評分",
+    emptyFavorites: "還沒有收藏。看到喜歡的，就留在這裡。",
+    emptyWatchlist: "清單還空著。挑幾部，排進來。",
+    emptyWatched: "還沒標記看過的片。看完一部，就記在這裡。",
+    favoritesEyebrow: "收藏",
+    favoritesTitle: "留下來的",
+    favoritesSubtitle: "捨不得放掉的那些片，都在這裡。",
+    watchlistEyebrow: "想看",
+    watchlistTitle: "排隊中",
+    watchlistSubtitle: "欠自己的那些片，慢慢看。",
+    watchedEyebrow: "看過",
+    watchedTitle: "走過的",
+    watchedSubtitle: "看完的都記得，回頭再看看。",
   },
   history: {
     empty: "還沒找過任何電影。輸入片名，從這裡開始。",
@@ -410,13 +432,22 @@ const en: Dictionary = {
   },
   library: {
     remove: "Remove",
-    sortAdded: "Added",
+    sortAdded: "Newest added",
     sortTitle: "Title",
-    emptyFavorites:
-      "No favorites yet. Open a movie's detail page and tap Favorite to add it.",
-    emptyWatchlist:
-      "Your watchlist is empty. Open a movie's detail page and tap Watchlist to add it.",
-    emptyWatched: "Nothing marked as watched yet.",
+    sortRating: "By rating",
+    ratingPlaceholder: "Any rating",
+    emptyFavorites: "Nothing saved yet. Find a film you like and keep it here.",
+    emptyWatchlist: "Your list is empty. Pick a few and queue them up.",
+    emptyWatched: "Nothing logged yet. Finish one and mark it here.",
+    favoritesEyebrow: "Saved",
+    favoritesTitle: "The ones you kept",
+    favoritesSubtitle: "The films you couldn't let go of.",
+    watchlistEyebrow: "Up next",
+    watchlistTitle: "Waiting in line",
+    watchlistSubtitle: "Films you owe yourself. Take your time.",
+    watchedEyebrow: "Watched",
+    watchedTitle: "Films you've seen",
+    watchedSubtitle: "Everything you've watched, right here.",
   },
   history: {
     empty: "No searches yet. Type a title to begin.",
