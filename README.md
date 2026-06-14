@@ -10,23 +10,23 @@ Treehole is built around a specific kind of moment: you have an evening, you wan
 
 The product has two layers. The first is a TMDB-powered discovery surface: a hero carousel, curated rows, browse by genre/year/rating, full-text search with recent search memory. The second is a private library: favorites, a watchlist, and a watched log that accumulates over time. Both layers share a consistent cinematic aesthetic — dark, poster-forward, restrained.
 
-The app runs locally (Mac, LAN-accessible) with a SQLite library and optional Prowlarr + qBittorrent integration for downloading. A Vercel demo is available for browsing and discovery; library persistence is intentionally disabled there rather than faked.
+The app can run locally with a SQLite library and optional Prowlarr + qBittorrent integration. A Vercel demo is available for browsing and discovery; library persistence is intentionally disabled there rather than faked.
 
-**Live demo:** [treehole-movie-app.vercel.app](https://treehole-movie-app.vercel.app)
+**Live demo:** https://treehole-movie-app.vercel.app
 
 ---
 
 ## Features
 
 - **Cinematic home entry** — hero backdrop carousel + curated movie rows (trending, top rated, box office, upcoming)
-- **Personalized recommendations** — generated from your watched and favorited films via TMDB's related-movie API, aggregated and deduplicated
+- **Library-seeded recommendations** — uses watched and favorited films as seeds, then pulls related TMDB titles and deduplicates them into a "For You" row
 - **Browse** — filter by genre, decade, minimum rating, and sort order; condition summary updates in real time
 - **Search** — full-text TMDB search with recent search history (stored in SQLite, accessible without typing)
 - **Movie detail page** — backdrop, poster, metadata, director link, cast strip, trailer embed, overview, personal rating editor
 - **Library — Favorites / Watchlist / Watched** — sortable and filterable per-list views; cards have a hover-gated remove action (always visible on touch, hidden until hover on fine-pointer devices)
 - **Personal ratings** — per-film score (1–10) and short note, stored locally
 - **Personalized "For You" row** — appears on home once seeds exist in the library
-- **One-click download** — detail page triggers Prowlarr torrent search → qBittorrent queue; API keys remain server-side only
+- **Local media workflow** — optional Prowlarr + qBittorrent integration can be configured for local use; credentials stay server-side
 - **i18n** — Traditional Chinese and English; language stored in cookie, no URL prefix needed
 - **Demo-safe disabled states** — in demo mode, write actions (library, rating) are disabled with honest explanations rather than pretending to save
 
@@ -41,7 +41,7 @@ The app runs locally (Mac, LAN-accessible) with a SQLite library and optional Pr
 | Personal ratings | Disabled — shown with explanation | Available (SQLite) |
 | Search history | Disabled | Available (SQLite) |
 | Personalized recommendations | Disabled | Available once library has seeds |
-| Torrent download (Prowlarr + qBittorrent) | Disabled | Available when configured |
+| Local media workflow (Prowlarr + qBittorrent) | Disabled | Available when configured |
 
 Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) that returns empty results for reads and no-ops for writes. Actions remain visible but show their disabled state — the goal is an accurate preview of local-mode UI without fake persistence.
 
@@ -90,7 +90,7 @@ Browser
        ├─ Server components — TMDB data fetching, library reads
        ├─ Client components — interactivity (browse filters, hero carousel,
        │   library actions, download dialog, rating editor)
-       ├─ Route handlers (/api/*) — library writes, torrent search proxy
+       ├─ Route handlers (/api/*) — library writes, media search proxy
        ├─ TMDB layer (src/lib/tmdb.ts) — all API calls server-side only
        ├─ DB layer (src/lib/db.ts / db.demo.ts) — swapped by DEMO_MODE
        ├─ Prowlarr / qBittorrent layer — keys stay server-side
@@ -143,9 +143,7 @@ Open `http://localhost:3100`.
 | `QBITTORRENT_USERNAME` | No | qBittorrent Web UI credentials |
 | `QBITTORRENT_PASSWORD` | No | qBittorrent Web UI credentials |
 
-### LAN Access
-
-The dev and production servers bind to `0.0.0.0`. Other devices on the same network can reach the app at `http://<your-machine-ip>:3100`. Find your IP in System Settings → Network.
+The dev and production servers bind to `0.0.0.0`, so other devices on the same network can reach the app at `http://<your-machine-ip>:3100`.
 
 ---
 
