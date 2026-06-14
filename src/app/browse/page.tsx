@@ -36,8 +36,14 @@ export default async function BrowsePage() {
   }
 
   return (
-    <section className="space-y-4">
-      <h1 className="text-xl font-bold">{dict.pages.browse}</h1>
+    <section className="space-y-6">
+      <header className="animate-rise">
+        <p className="eyebrow mb-2.5">{dict.browse.eyebrow}</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
+          {dict.browse.title}
+        </h1>
+        <p className="mt-2 text-sm text-zinc-400">{dict.browse.subtitle}</p>
+      </header>
       <BrowseClient
         genres={genres}
         years={years}
@@ -50,11 +56,21 @@ export default async function BrowsePage() {
           sort: dict.browse.sort,
           minRating: dict.browse.minRating,
           all: dict.browse.all,
-          loading: dict.common.loading,
-          noMore: dict.common.noMore,
+          loading: dict.browse.loading,
+          noMore: dict.browse.noMore,
           loadError: dict.common.loadError,
           retry: dict.common.retry,
-          empty: dict.common.empty,
+          empty: dict.browse.empty,
+          genrePlaceholder: dict.browse.genrePlaceholder,
+          yearPlaceholder: dict.browse.yearPlaceholder,
+          ratingPlaceholder: dict.browse.ratingPlaceholder,
+          summaryPrefix: dict.browse.summaryPrefix,
+          summaryAll: dict.browse.summaryAll,
+          summaryRatingSuffix: dict.browse.summaryRatingSuffix,
+          popularFirst: dict.browse.popularFirst,
+          highestRatedFirst: dict.browse.highestRatedFirst,
+          newestFirst: dict.browse.newestFirst,
+          clearFilters: dict.browse.clearFilters,
         }}
       />
     </section>

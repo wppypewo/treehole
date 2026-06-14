@@ -20,6 +20,16 @@ interface Labels {
   loadError: string;
   retry: string;
   empty: string;
+  genrePlaceholder: string;
+  yearPlaceholder: string;
+  ratingPlaceholder: string;
+  summaryPrefix: string;
+  summaryAll: string;
+  summaryRatingSuffix: string;
+  popularFirst: string;
+  highestRatedFirst: string;
+  newestFirst: string;
+  clearFilters: string;
 }
 
 // 最低評分選項（由高到低）
@@ -58,9 +68,10 @@ export default function BrowseClient({
   initialMovies: MovieSummary[];
   initialHasMore: boolean;
 }) {
+  const defaultSort = sorts[0]?.value ?? "popularity.desc";
   const [genre, setGenre] = useState("");
   const [year, setYear] = useState("");
-  const [sort, setSort] = useState(sorts[0]?.value ?? "popularity.desc");
+  const [sort, setSort] = useState(defaultSort);
   const [minRating, setMinRating] = useState("");
   const [results, setResults] = useState<MovieSummary[]>(initialMovies);
   const [page, setPage] = useState(initialMovies.length > 0 ? 1 : 0);
@@ -69,6 +80,30 @@ export default function BrowseClient({
   const [error, setError] = useState<string | null>(null);
   const seen = useRef<Set<number>>(new Set(initialMovies.map((m) => m.id)));
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // 目前是否為全預設條件
+  const isDefaultFilters = !genre && !year && !minRating && sort === defaultSort;
+
+  // 目前條件摘要文字
+  const sortSummaryMap: Record<string, string> = {
+    "popularity.desc": labels.popularFirst,
+    "vote_average.desc": labels.highestRatedFirst,
+    "primary_release_date.desc": labels.newestFirst,
+  };
+  const sortSummaryLabel = sortSummaryMap[sort] ?? labels.popularFirst;
+
+  const genreLabel = genre
+    ? (genres.find((g) => String(g.id) === genre)?.name ?? genre)
+    : labels.summaryAll;
+
+  // 排序只在「全預設」或「排序本身非預設」時顯示
+  const showSortInSummary = isDefaultFilters || sort !== defaultSort;
+
+  const summaryParts = [labels.summaryPrefix, genreLabel];
+  if (year) summaryParts.push(year);
+  if (minRating) summaryParts.push(minRating + labels.summaryRatingSuffix);
+  if (showSortInSummary) summaryParts.push(sortSummaryLabel);
+  const summaryText = summaryParts.join(" · ");
 
   // 套用新篩選：清空並載入第一頁（由 select 的 onChange 觸發）
   async function applyFilters(g: string, y: string, s: string, r: string) {
@@ -95,6 +130,15 @@ export default function BrowseClient({
     } finally {
       setLoading(false);
     }
+  }
+
+  // 清除所有條件並回到預設結果
+  function resetFilters() {
+    setGenre("");
+    setYear("");
+    setSort(defaultSort);
+    setMinRating("");
+    applyFilters("", "", defaultSort, "");
   }
 
   const loadMore = useCallback(async () => {
@@ -139,7 +183,7 @@ export default function BrowseClient({
   const selectCls = "select-dark";
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
         <select
           value={genre}
@@ -150,9 +194,7 @@ export default function BrowseClient({
           aria-label={labels.genre}
           className={selectCls}
         >
-          <option value="">
-            {labels.genre}：{labels.all}
-          </option>
+          <option value="">{labels.genrePlaceholder}</option>
           {genres.map((g) => (
             <option key={g.id} value={g.id}>
               {g.name}
@@ -168,9 +210,7 @@ export default function BrowseClient({
           aria-label={labels.year}
           className={selectCls}
         >
-          <option value="">
-            {labels.year}：{labels.all}
-          </option>
+          <option value="">{labels.yearPlaceholder}</option>
           {years.map((y) => (
             <option key={y} value={y}>
               {y}
@@ -186,9 +226,7 @@ export default function BrowseClient({
           aria-label={labels.minRating}
           className={selectCls}
         >
-          <option value="">
-            {labels.minRating}：{labels.all}
-          </option>
+          <option value="">{labels.ratingPlaceholder}</option>
           {RATINGS.map((r) => (
             <option key={r} value={r}>
               {r}+
@@ -212,8 +250,22 @@ export default function BrowseClient({
         </select>
       </div>
 
+      {/* 目前條件摘要 */}
+      <div className="flex items-baseline gap-3">
+        <p className="text-sm text-zinc-400">{summaryText}</p>
+        {!isDefaultFilters && (
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="text-xs text-zinc-600 transition-colors hover:text-zinc-400"
+          >
+            {labels.clearFilters}
+          </button>
+        )}
+      </div>
+
       {results.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="animate-rise grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {results.map((m) => (
             <MovieCard key={m.id} movie={m} />
           ))}

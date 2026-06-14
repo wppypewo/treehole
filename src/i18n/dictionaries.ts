@@ -81,6 +81,22 @@ export interface Dictionary {
     sortPopular: string;
     sortRating: string;
     sortNewest: string;
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    genrePlaceholder: string;
+    yearPlaceholder: string;
+    ratingPlaceholder: string;
+    loading: string;
+    empty: string;
+    noMore: string;
+    clearFilters: string;
+    summaryPrefix: string;
+    summaryAll: string;
+    summaryRatingSuffix: string;
+    popularFirst: string;
+    highestRatedFirst: string;
+    newestFirst: string;
   };
   rating: {
     title: string;
@@ -251,6 +267,22 @@ const zhTW: Dictionary = {
     sortPopular: "人氣",
     sortRating: "評分",
     sortNewest: "最新",
+    eyebrow: "挑片",
+    title: "慢慢挑",
+    subtitle: "收窄條件，找今晚那一部。",
+    genrePlaceholder: "所有類型",
+    yearPlaceholder: "不限年份",
+    ratingPlaceholder: "不限評分",
+    loading: "整理片單中…",
+    empty: "這個條件下沒有片。換個條件再挑。",
+    noMore: "到底了，這個條件就這些。",
+    clearFilters: "清除",
+    summaryPrefix: "正在看",
+    summaryAll: "全部電影",
+    summaryRatingSuffix: " 分以上",
+    popularFirst: "依人氣",
+    highestRatedFirst: "依評分",
+    newestFirst: "依最新",
   },
   rating: {
     title: "我的評分",
@@ -425,6 +457,22 @@ const en: Dictionary = {
     sortPopular: "Popular",
     sortRating: "Rating",
     sortNewest: "Newest",
+    eyebrow: "Browse",
+    title: "Take your time",
+    subtitle: "Narrow the list and find the one for tonight.",
+    genrePlaceholder: "All genres",
+    yearPlaceholder: "Any year",
+    ratingPlaceholder: "Any rating",
+    loading: "Sorting the list…",
+    empty: "No films under these filters. Try another set.",
+    noMore: "That is everything for these filters.",
+    clearFilters: "Clear",
+    summaryPrefix: "Browsing",
+    summaryAll: "All films",
+    summaryRatingSuffix: "+",
+    popularFirst: "Popular first",
+    highestRatedFirst: "Highest rated first",
+    newestFirst: "Newest first",
   },
   rating: {
     title: "My rating",
