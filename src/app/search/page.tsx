@@ -35,16 +35,17 @@ export default async function SearchPage({
   if (!query) {
     // 尚未輸入關鍵字時，顯示搜尋紀錄（點關鍵字可重新搜尋、可清除）
     body = (
-      <div className="space-y-3">
-        <h2 className="text-sm text-zinc-500 dark:text-zinc-400">
-          {dict.pages.history}
-        </h2>
-        <HistoryList
-          items={listHistory()}
-          clearLabel={dict.history.clear}
-          emptyText={dict.search.prompt}
-        />
-      </div>
+      <HistoryList
+        items={listHistory()}
+        clearLabel={dict.history.clearShort}
+        emptyText={dict.history.empty}
+        relTimeLabels={{
+          justNow: dict.history.justNow,
+          earlierToday: dict.history.earlierToday,
+          yesterday: dict.history.yesterday,
+          daysAgo: dict.history.daysAgo,
+        }}
+      />
     );
   } else if (errorMessage) {
     body = <ErrorNotice message={errorMessage} />;
@@ -61,6 +62,15 @@ export default async function SearchPage({
 
   return (
     <section className="space-y-8">
+      {!query && (
+        <header className="mx-auto w-full max-w-2xl animate-rise">
+          <p className="eyebrow mb-2.5">{dict.search.eyebrow}</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
+            {dict.search.title}
+          </h1>
+          <p className="mt-2 text-sm text-zinc-400">{dict.search.subtitle}</p>
+        </header>
+      )}
       <div className="mx-auto w-full max-w-2xl pt-2">
         <form action="/search" method="get" className="relative">
           {/* 放大鏡圖示：純裝飾，不攔截點擊 */}
@@ -82,7 +92,7 @@ export default async function SearchPage({
             name="q"
             defaultValue={query}
             placeholder={dict.search.placeholder}
-            className="w-full rounded-xl border border-white/10 bg-zinc-900/60 py-3 pr-28 pl-11 text-base text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors focus:border-white/30 focus:bg-zinc-900"
+            className="w-full rounded-xl border border-white/10 bg-zinc-900/60 py-3 pr-28 pl-11 text-base text-zinc-100 placeholder:text-zinc-500 outline-none transition-[border-color,background-color,box-shadow] focus:border-white/30 focus:bg-zinc-900 focus:shadow-[0_0_0_4px_rgba(255,255,255,0.06)]"
           />
           <button
             type="submit"

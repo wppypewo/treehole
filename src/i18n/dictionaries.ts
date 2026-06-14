@@ -35,6 +35,9 @@ export interface Dictionary {
     prompt: string;
     resultsFor: string;
     noResults: string;
+    eyebrow: string;
+    title: string;
+    subtitle: string;
   };
   library: {
     remove: string;
@@ -44,7 +47,15 @@ export interface Dictionary {
     emptyWatchlist: string;
     emptyWatched: string;
   };
-  history: { empty: string; clear: string };
+  history: {
+    empty: string;
+    clear: string;
+    clearShort: string;
+    justNow: string;
+    earlierToday: string;
+    yesterday: string;
+    daysAgo: string;
+  };
   recommendations: { related: string; relatedEmpty: string; forYouEmpty: string };
   movie: {
     overview: string;
@@ -189,6 +200,9 @@ const zhTW: Dictionary = {
     prompt: "輸入關鍵字開始搜尋電影。",
     resultsFor: "搜尋結果",
     noResults: "找不到符合的電影。",
+    eyebrow: "找片",
+    title: "在找哪一部?",
+    subtitle: "輸入片名，或從最近找過的接著看。",
   },
   library: {
     remove: "移除",
@@ -198,7 +212,15 @@ const zhTW: Dictionary = {
     emptyWatchlist: "想看清單還是空的。到電影詳情頁按「想看」即可加入。",
     emptyWatched: "還沒有標記任何已看過的電影。",
   },
-  history: { empty: "還沒有搜尋紀錄。", clear: "清除全部" },
+  history: {
+    empty: "還沒找過任何電影。輸入片名，從這裡開始。",
+    clear: "清除全部",
+    clearShort: "清除",
+    justNow: "剛剛",
+    earlierToday: "今晚稍早",
+    yesterday: "昨天",
+    daysAgo: "{n} 天前",
+  },
   recommendations: {
     related: "相關推薦",
     relatedEmpty: "暫無相關推薦。",
@@ -350,6 +372,9 @@ const en: Dictionary = {
     prompt: "Type a keyword to start searching.",
     resultsFor: "Search results",
     noResults: "No matching movies found.",
+    eyebrow: "Find",
+    title: "What are you looking for?",
+    subtitle: "Type a title, or pick up where you left off.",
   },
   library: {
     remove: "Remove",
@@ -361,7 +386,15 @@ const en: Dictionary = {
       "Your watchlist is empty. Open a movie's detail page and tap Watchlist to add it.",
     emptyWatched: "Nothing marked as watched yet.",
   },
-  history: { empty: "No search history yet.", clear: "Clear all" },
+  history: {
+    empty: "No searches yet. Type a title to begin.",
+    clear: "Clear all",
+    clearShort: "Clear",
+    justNow: "Just now",
+    earlierToday: "Earlier today",
+    yesterday: "Yesterday",
+    daysAgo: "{n} days ago",
+  },
   recommendations: {
     related: "You might also like",
     relatedEmpty: "No related movies.",
