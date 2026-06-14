@@ -180,7 +180,6 @@ Screenshots will be added after the final production capture pass.
 ## Future Improvements
 
 - Add production screenshot set
-- Add GitHub Actions CI (currently no `.github/workflows/`)
 - Expand integration tests around the demo/local DB boundary
 - Document the local Prowlarr indexer setup in more detail
 - Optional: add a case study writeup for portfolio context
