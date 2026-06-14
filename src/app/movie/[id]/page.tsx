@@ -184,7 +184,7 @@ export default async function MoviePage({
               {/* 導演：弱化為第二行，不硬塞進 metadata 行 */}
               {credits?.director && (
                 <p className="text-sm text-zinc-400">
-                  {dict.movie.director}：
+                  {dict.movie.director}
                   <Link
                     href={`/person/${credits.director.id}`}
                     className="text-zinc-200 transition-colors hover:text-white hover:underline"
