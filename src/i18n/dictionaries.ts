@@ -337,7 +337,7 @@ const zhTW: Dictionary = {
   home: {
     eyebrow: "片庫",
     title: "今晚想看什麼?",
-    subtitle: "收藏和看過的都記在這裡。",
+    subtitle: "從這裡開始，慢慢找今晚那一部。",
     rows: {
       forYou: { eyebrow: "依你看過的", title: "為你挑的" },
       popular: { eyebrow: "此刻", title: "大家在看的" },
@@ -538,7 +538,7 @@ const en: Dictionary = {
   home: {
     eyebrow: "Library",
     title: "What are you watching tonight?",
-    subtitle: "Your favorites and watched are kept here.",
+    subtitle: "Start here, then find the one for tonight.",
     rows: {
       forYou: { eyebrow: "From your history", title: "Picked for you" },
       popular: { eyebrow: "Right now", title: "What people are watching" },
