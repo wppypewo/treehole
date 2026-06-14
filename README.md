@@ -173,13 +173,26 @@ npm run build      # production build
 
 ## Screenshots
 
-Screenshots will be added after the final production capture pass.
+### Desktop
+
+| Home | Detail |
+|---|---|
+| ![Treehole home desktop](docs/screenshots/home-desktop.png) | ![Treehole movie detail desktop](docs/screenshots/detail-desktop.png) |
+
+| Browse | Search |
+|---|---|
+| ![Treehole browse desktop](docs/screenshots/browse-desktop.png) | ![Treehole search desktop](docs/screenshots/search-desktop.png) |
+
+### Mobile
+
+| Home | Detail |
+|---|---|
+| ![Treehole home mobile](docs/screenshots/home-mobile.png) | ![Treehole movie detail mobile](docs/screenshots/detail-mobile.png) |
 
 ---
 
 ## Future Improvements
 
-- Add production screenshot set
 - Expand integration tests around the demo/local DB boundary
 - Document the local Prowlarr indexer setup in more detail
 - Optional: add a case study writeup for portfolio context
