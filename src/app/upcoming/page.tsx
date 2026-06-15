@@ -4,6 +4,7 @@ import { getUpcoming } from "@/lib/tmdb";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import MovieGrid from "@/components/MovieGrid";
 import ErrorNotice from "@/components/ErrorNotice";
+import PageHeader from "@/components/PageHeader";
 
 export default async function UpcomingPage() {
   const locale = await getLocale();
@@ -22,8 +23,12 @@ export default async function UpcomingPage() {
   }
 
   return (
-    <section className="space-y-4">
-      <h1 className="text-xl font-bold">{dict.pages.upcoming}</h1>
+    <section className="space-y-6">
+      <PageHeader
+        eyebrow={dict.home.rows.upcoming.eyebrow}
+        title={dict.pages.upcoming}
+        subtitle={dict.pages.upcomingSubtitle}
+      />
       <MovieGrid movies={movies ?? []} emptyText={dict.common.empty} />
     </section>
   );

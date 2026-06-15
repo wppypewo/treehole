@@ -19,14 +19,20 @@ export interface Dictionary {
   language: { label: string; zhTW: string; en: string };
   pages: {
     popular: string;
+    popularSubtitle: string;
     upcoming: string;
+    upcomingSubtitle: string;
     favorites: string;
     watchlist: string;
     watched: string;
     history: string;
     recommendations: string;
+    recommendationsEyebrow: string;
+    recommendationsSubtitle: string;
     topRated: string;
+    topRatedSubtitle: string;
     highestGrossing: string;
+    highestGrossingSubtitle: string;
     browse: string;
   };
   search: {
@@ -211,14 +217,20 @@ const zhTW: Dictionary = {
   language: { label: "語言", zhTW: "繁體中文", en: "English" },
   pages: {
     popular: "熱門電影",
+    popularSubtitle: "從這裡看大家都在看什麼。",
     upcoming: "即將上映（台灣）",
+    upcomingSubtitle: "即將在台灣上映的片，先排好。",
     favorites: "我的收藏",
     watchlist: "想看清單",
     watched: "已看過",
     history: "搜尋紀錄",
     recommendations: "為你推薦",
+    recommendationsEyebrow: "為你",
+    recommendationsSubtitle: "依你看過、留下的，一點一點更新。",
     topRated: "影史評分最高",
+    topRatedSubtitle: "評分扛得住時間的，都在這裡。",
     highestGrossing: "史上最賣座（票房）",
+    highestGrossingSubtitle: "按全球票房排序。",
     browse: "瀏覽電影",
   },
   search: {
@@ -410,14 +422,20 @@ const en: Dictionary = {
   language: { label: "Language", zhTW: "繁體中文", en: "English" },
   pages: {
     popular: "Popular Movies",
+    popularSubtitle: "See what everyone is watching right now.",
     upcoming: "Upcoming (Taiwan)",
+    upcomingSubtitle: "Coming soon to Taiwan. Start planning.",
     favorites: "My Favorites",
     watchlist: "Watchlist",
     watched: "Watched",
     history: "Search History",
     recommendations: "For You",
+    recommendationsEyebrow: "For You",
+    recommendationsSubtitle: "Updates as you watch and save more.",
     topRated: "Top Rated of All Time",
+    topRatedSubtitle: "Films that have held up over time.",
     highestGrossing: "Highest Grossing",
+    highestGrossingSubtitle: "Ranked by worldwide box office.",
     browse: "Browse",
   },
   search: {

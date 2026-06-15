@@ -4,6 +4,7 @@ import { getHighestGrossing } from "@/lib/tmdb";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import InfiniteMovieGrid from "@/components/InfiniteMovieGrid";
 import ErrorNotice from "@/components/ErrorNotice";
+import PageHeader from "@/components/PageHeader";
 
 // 史上最賣座（票房）完整頁：縱向無限捲動到第 20 頁
 export default async function HighestGrossingPage() {
@@ -23,8 +24,12 @@ export default async function HighestGrossingPage() {
   }
 
   return (
-    <section className="space-y-4">
-      <h1 className="text-xl font-bold">{dict.pages.highestGrossing}</h1>
+    <section className="space-y-6">
+      <PageHeader
+        eyebrow={dict.home.rows.grossing.eyebrow}
+        title={dict.pages.highestGrossing}
+        subtitle={dict.pages.highestGrossingSubtitle}
+      />
       <InfiniteMovieGrid
         endpoint="/api/highest-grossing"
         initialMovies={data?.results ?? []}

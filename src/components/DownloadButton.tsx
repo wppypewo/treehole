@@ -142,7 +142,7 @@ export default function DownloadButton({
       <button
         type="button"
         onClick={openDialog}
-        className="rounded-lg border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+        className="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
       >
         ⬇ {buttonLabel}
       </button>
@@ -264,7 +264,7 @@ export default function DownloadButton({
                           type="button"
                           disabled={isAdding || isAdded}
                           onClick={() => addOne(r.guid)}
-                          className="shrink-0 rounded-md border border-emerald-600 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50 dark:text-emerald-400 dark:hover:bg-emerald-950"
+                          className="shrink-0 rounded-md border border-white/25 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:border-white/50 hover:text-white disabled:opacity-50"
                         >
                           {isAdded ? t.added : isAdding ? t.adding : t.add}
                         </button>

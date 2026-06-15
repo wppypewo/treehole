@@ -4,6 +4,7 @@ import { getPopular } from "@/lib/tmdb";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import InfiniteMovieGrid from "@/components/InfiniteMovieGrid";
 import ErrorNotice from "@/components/ErrorNotice";
+import PageHeader from "@/components/PageHeader";
 
 // 熱門完整頁：縱向無限捲動到第 20 頁
 export default async function PopularPage() {
@@ -23,8 +24,12 @@ export default async function PopularPage() {
   }
 
   return (
-    <section className="space-y-4">
-      <h1 className="text-xl font-bold">{dict.pages.popular}</h1>
+    <section className="space-y-6">
+      <PageHeader
+        eyebrow={dict.home.rows.popular.eyebrow}
+        title={dict.pages.popular}
+        subtitle={dict.pages.popularSubtitle}
+      />
       <InfiniteMovieGrid
         endpoint="/api/popular"
         initialMovies={data?.results ?? []}

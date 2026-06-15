@@ -22,8 +22,8 @@ body {
   /* 系統字體堆疊：在 Mac 上即為 San Francisco，外觀貼近 Apple TV；
      Windows 退回 Segoe UI。不嵌入 Apple 專有字體檔。 */
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
-    "Microsoft JhengHei", system-ui, sans-serif;
+    var(--font-geist-sans), "PingFang TC", "Microsoft JhengHei",
+    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 }
 
 /* 橫向捲動分類列用：隱藏捲軸但保留可捲動 */
