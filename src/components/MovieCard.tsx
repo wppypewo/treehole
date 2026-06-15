@@ -43,9 +43,12 @@ export default function MovieCard({ movie }: { movie: MovieSummary }) {
             無海報
           </div>
         )}
-        <span className="absolute right-2 top-2 rounded-md bg-black/70 px-1.5 py-0.5 text-xs font-semibold text-amber-300 backdrop-blur">
-          ★ {rating}
-        </span>
+        {/* 評分未知時不顯示 badge，避免「★ —」破壞海報視覺 */}
+        {movie.vote_average > 0 && (
+          <span className="absolute right-2 top-2 rounded-md bg-black/70 px-1.5 py-0.5 text-xs font-semibold text-amber-300 backdrop-blur">
+            ★ {rating}
+          </span>
+        )}
       </div>
       <div className="mt-2 px-0.5">
         <h3 className="line-clamp-1 text-sm font-medium text-zinc-100">

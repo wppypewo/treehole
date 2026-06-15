@@ -131,13 +131,16 @@ export default function LibraryGrid({
                   href={`/movie/${movie.tmdb_id}`}
                   className="block focus:outline-none"
                 >
-                  <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-900 shadow-md ring-1 ring-white/5 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/libcard:-translate-y-1 group-hover/libcard:scale-[1.05] group-hover/libcard:shadow-2xl group-hover/libcard:ring-2 group-hover/libcard:ring-white/40">
+                  <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-900 shadow-md ring-1 ring-white/5 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/libcard:-translate-y-1 group-hover/libcard:scale-[1.05] group-hover/libcard:shadow-2xl group-hover/libcard:ring-2 group-hover/libcard:ring-white/40 group-active/libcard:scale-[0.98] group-active/libcard:duration-150 group-focus-within/libcard:-translate-y-1 group-focus-within/libcard:scale-[1.05] group-focus-within/libcard:ring-2 group-focus-within/libcard:ring-white/60">
                     {poster ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
+                        ref={(el) => { if (el?.complete) el.style.opacity = "1"; }}
                         src={poster}
                         alt={movie.title}
                         loading="lazy"
+                        onLoad={(e) => { e.currentTarget.style.opacity = "1"; }}
+                        style={{ opacity: 0, transition: "opacity 0.7s ease-out" }}
                         className="h-full w-full object-cover"
                       />
                     ) : (

@@ -277,17 +277,17 @@ export default function BrowseClient({
       <div className="py-4 text-center text-sm text-zinc-500">
         {error ? (
           <div className="space-y-2">
-            <p className="text-red-400">{error}</p>
+            <p className="text-zinc-300">{error}</p>
             <button
               type="button"
               onClick={loadMore}
-              className="rounded-lg border border-white/20 px-4 py-2 text-zinc-200 transition-colors hover:bg-white/10"
+              className="rounded-md border border-white/15 px-4 py-1.5 text-zinc-300 transition-colors hover:border-white/30 hover:text-white"
             >
               {labels.retry}
             </button>
           </div>
         ) : loading ? (
-          labels.loading
+          <span className="animate-pulse">{labels.loading}</span>
         ) : results.length === 0 ? (
           labels.empty
         ) : done ? (

@@ -11,7 +11,7 @@ export default function MovieGrid({
 }) {
   if (movies.length === 0) {
     return (
-      <p className="py-16 text-center text-sm text-zinc-500 dark:text-zinc-400">
+      <p className="py-16 text-center text-sm text-zinc-500">
         {emptyText}
       </p>
     );

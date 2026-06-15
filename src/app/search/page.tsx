@@ -52,9 +52,10 @@ export default async function SearchPage({
   } else {
     body = (
       <div className="space-y-4">
-        <h2 className="text-sm text-zinc-500 dark:text-zinc-400">
-          {dict.search.resultsFor} · {query}
-        </h2>
+        <div>
+          <p className="eyebrow mb-1">{dict.search.resultsFor}</p>
+          <p className="text-sm font-medium text-zinc-200">{query}</p>
+        </div>
         <MovieGrid movies={movies ?? []} emptyText={dict.search.noResults} />
       </div>
     );
