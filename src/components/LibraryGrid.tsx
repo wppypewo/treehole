@@ -94,21 +94,31 @@ export default function LibraryGrid({
       {shown.length === 0 ? (
         isDemo && list.length === 0 ? (
           // demo 模式：誠實說明片庫為本機版功能，並提供繼續探索的出口
-          <div className="space-y-4 py-16 text-center">
-            <p className="mx-auto max-w-md text-sm text-zinc-500">
+          <div className="space-y-5 py-16 text-center">
+            <p className="mx-auto max-w-md text-sm text-zinc-400">
               {labels.demoEmpty}
             </p>
             <Link
               href="/browse"
-              className="inline-block rounded-lg border border-white/15 px-4 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/10"
+              className="inline-block rounded-lg border border-white/15 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-zinc-100"
+            >
+              {labels.browse}
+            </Link>
+          </div>
+        ) : list.length === 0 ? (
+          // 非 demo、片庫確實為空：提供探索出口
+          <div className="space-y-5 py-16 text-center">
+            <p className="mx-auto max-w-sm text-sm text-zinc-400">{labels.empty}</p>
+            <Link
+              href="/browse"
+              className="inline-block rounded-lg border border-white/15 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-zinc-100"
             >
               {labels.browse}
             </Link>
           </div>
         ) : (
-          <p className="py-16 text-center text-sm text-zinc-500">
-            {labels.empty}
-          </p>
+          // 有片但篩選後歸零：上方篩選控制項仍可見，純文字提示即可
+          <p className="py-16 text-center text-sm text-zinc-500">{labels.empty}</p>
         )
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">

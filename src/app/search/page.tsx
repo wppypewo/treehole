@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { searchMovies } from "@/lib/tmdb";
@@ -49,14 +50,32 @@ export default async function SearchPage({
     );
   } else if (errorMessage) {
     body = <ErrorNotice message={errorMessage} />;
+  } else if (!movies || movies.length === 0) {
+    // 有查詢字但找不到符合結果
+    body = (
+      <div className="space-y-4 py-16 text-center">
+        <div>
+          <p className="eyebrow mb-1">{dict.search.resultsFor}</p>
+          <p className="text-sm font-medium text-zinc-200">{query}</p>
+        </div>
+        <p className="text-sm text-zinc-500">{dict.search.noResults}</p>
+        <Link
+          href="/browse"
+          className="inline-block rounded-lg border border-white/15 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-zinc-100"
+        >
+          {dict.demo.keepBrowsing}
+        </Link>
+      </div>
+    );
   } else {
+    // 有結果
     body = (
       <div className="space-y-4">
         <div>
           <p className="eyebrow mb-1">{dict.search.resultsFor}</p>
           <p className="text-sm font-medium text-zinc-200">{query}</p>
         </div>
-        <MovieGrid movies={movies ?? []} emptyText={dict.search.noResults} />
+        <MovieGrid movies={movies} emptyText={dict.search.noResults} />
       </div>
     );
   }

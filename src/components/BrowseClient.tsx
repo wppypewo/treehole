@@ -183,7 +183,8 @@ export default function BrowseClient({
   const selectCls = "select-dark";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
         <select
           value={genre}
@@ -257,11 +258,12 @@ export default function BrowseClient({
           <button
             type="button"
             onClick={resetFilters}
-            className="text-xs text-zinc-600 transition-colors hover:text-zinc-400"
+            className="text-xs text-zinc-500 transition-colors hover:text-zinc-200"
           >
             {labels.clearFilters}
           </button>
         )}
+      </div>
       </div>
 
       {results.length > 0 && (
