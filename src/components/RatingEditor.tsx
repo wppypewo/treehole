@@ -115,7 +115,7 @@ export default function RatingEditor({
           type="button"
           onClick={save}
           disabled={isDemo || !score || saving}
-          className="rounded-lg bg-white px-4 py-1.5 text-sm font-medium text-black transition-colors hover:bg-zinc-200 disabled:opacity-50"
+          className="rounded-lg border border-white/50 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:border-white/70 hover:bg-white/10 disabled:opacity-50"
         >
           {saved ? labels.saved : labels.save}
         </button>

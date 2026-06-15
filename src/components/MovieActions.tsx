@@ -62,10 +62,11 @@ export default function MovieActions({
 
   const base =
     "rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50";
-  const activeCls =
-    "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900";
+  // active：微亮底色 + 全白文字，示意「已開啟」但不搶下載按鈕的首要視覺
+  const activeCls = "border-white/30 bg-white/10 text-white";
+  // idle：極淡邊框 + 柔灰文字，有 hover 回饋但退讓於下載
   const idleCls =
-    "border-zinc-300 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800";
+    "border-white/15 text-zinc-400 hover:border-white/30 hover:text-zinc-100";
 
   return (
     <div className="flex flex-wrap items-center gap-2 pt-1">
