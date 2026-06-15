@@ -68,7 +68,7 @@ export default function RatingEditor({
 
   return (
     <section className="space-y-3">
-      <h2 className="text-base font-semibold">{labels.title}</h2>
+      <h2 className="eyebrow mb-3">{labels.title}</h2>
 
       <div className="space-y-1">
         <p className="text-xs text-zinc-500">{labels.scorePrompt}</p>

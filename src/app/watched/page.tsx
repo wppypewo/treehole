@@ -2,6 +2,7 @@ import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { listWatched } from "@/lib/db";
 import LibraryGrid from "@/components/LibraryGrid";
+import PageHeader from "@/components/PageHeader";
 
 // 讀取本機 SQLite，需於每次請求即時取得最新資料
 export const dynamic = "force-dynamic";
@@ -14,13 +15,11 @@ export default async function WatchedPage() {
 
   return (
     <section className="space-y-6">
-      <header className="animate-rise">
-        <p className="eyebrow mb-2.5">{dict.library.watchedEyebrow}</p>
-        <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
-          {dict.library.watchedTitle}
-        </h1>
-        <p className="mt-2 text-sm text-zinc-400">{dict.library.watchedSubtitle}</p>
-      </header>
+      <PageHeader
+        eyebrow={dict.library.watchedEyebrow}
+        title={dict.library.watchedTitle}
+        subtitle={dict.library.watchedSubtitle}
+      />
       <LibraryGrid
         items={items}
         kind="watched"

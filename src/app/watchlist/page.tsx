@@ -2,6 +2,7 @@ import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { listWatchlist } from "@/lib/db";
 import LibraryGrid from "@/components/LibraryGrid";
+import PageHeader from "@/components/PageHeader";
 
 // 讀取本機 SQLite，需於每次請求即時取得最新資料
 export const dynamic = "force-dynamic";
@@ -14,13 +15,11 @@ export default async function WatchlistPage() {
 
   return (
     <section className="space-y-6">
-      <header className="animate-rise">
-        <p className="eyebrow mb-2.5">{dict.library.watchlistEyebrow}</p>
-        <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
-          {dict.library.watchlistTitle}
-        </h1>
-        <p className="mt-2 text-sm text-zinc-400">{dict.library.watchlistSubtitle}</p>
-      </header>
+      <PageHeader
+        eyebrow={dict.library.watchlistEyebrow}
+        title={dict.library.watchlistTitle}
+        subtitle={dict.library.watchlistSubtitle}
+      />
       <LibraryGrid
         items={items}
         kind="watchlist"
