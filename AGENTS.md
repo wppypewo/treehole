@@ -24,7 +24,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | 本機資料庫 | better-sqlite3 ^12.10.0（local 版專用） |
 | 型別 | TypeScript ^5 |
 | Lint | ESLint ^9（eslint-config-next 16.2.6） |
-| 動畫 | 尚未安裝（GSAP / Lenis / Motion 為計畫方向，尚未引入） |
+| 動畫 | Motion ^12.40.0（已安裝、使用中，如 `motion/react` 的 popLayout）；GSAP / Lenis 尚未安裝（計畫方向） |
 
 ## 技術邊界（禁止跨越）
 
@@ -39,9 +39,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 目標調性：高級電影網站感。參考：Apple TV+ / Letterboxd / A24 / MUBI。
 
-動畫分工（計畫中，尚未安裝）：
-- GSAP + Lenis：cinematic scroll、timeline、pinned sequence、hero transition
-- Motion（framer-motion）：限小型元件動畫，必要時才用
+動畫分工（GSAP / Lenis 計畫中、尚未安裝；Motion 已安裝）：
+- GSAP + Lenis：cinematic scroll、timeline、pinned sequence、hero transition（尚未安裝，待授權才引入）
+- Motion（framer-motion）：已安裝、限小型元件動畫，必要時才用
 - 禁止以 Motion 為主動畫引擎
 
 可用元件來源：React Bits、Motion Primitives、Aceternity UI、Animate UI

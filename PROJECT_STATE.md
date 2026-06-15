@@ -26,7 +26,7 @@
 * CI status: 有 GitHub Actions `.github/workflows/ci.yml`，push / PR 到 main 觸發 `typecheck → test → build`（build 帶 `DEMO_MODE=1`）；另有 `.github/dependabot.yml`
 * Test status: Vitest；README 載明 58 tests / 6 files（utility 層）；本次未執行測試，未驗證即時數字
 * Demo mode status: 由 `DEMO_MODE=1` 切換。`next.config.ts` 的 turbopack `resolveAlias` 在 demo 時把 `@/lib/db` 指向 `src/lib/db.demo.ts`（stub：讀回空、寫入 no-op）；UI 寫入動作仍顯示但呈 disabled 並誠實說明，不假裝儲存
-* Known limitations: 缺 demo/local DB 邊界的整合測試（README future）；測試僅涵蓋 utility 層，UI 與 API 整合未覆蓋；AGENTS.md 對動畫套件的描述已過時（見下方 Tech Stack 註）
+* Known limitations: 缺 demo/local DB 邊界的整合測試（README future）；測試僅涵蓋 utility 層，UI 與 API 整合未覆蓋
 
 ## Tech Stack
 
@@ -38,7 +38,7 @@
 * Testing: Vitest（`vitest.config.ts`）
 * Deployment: Vercel（demo）；本機為 Node 20+ LAN server（bind `0.0.0.0`）
 
-> 動畫套件註記（文件落差）：AGENTS.md 寫「動畫尚未安裝（GSAP / Lenis / Motion 為計畫方向）」，但 `package.json` 已含 `motion` ^12.40.0，README 與設計決策亦載明用 `motion/react`（如 `popLayout`、`.animate-rise`）。**Motion 已安裝並使用中**；GSAP / Lenis 仍未安裝。AGENTS.md 此處需更新。
+> 動畫套件現況：`package.json` 含 `motion` ^12.40.0，**Motion 已安裝並使用中**（`motion/react` 的 `popLayout`、`.animate-rise`）；GSAP / Lenis 尚未安裝（計畫方向）。README、設計決策與 AGENTS.md 描述已一致（AGENTS.md 於 2026-06-15 修正對齊）。
 
 ## Available Commands
 
@@ -72,7 +72,7 @@
 
 ## Next 3 Allowed Tasks
 
-1. 修正 AGENTS.md 動畫套件描述落差：將「Motion 尚未安裝」更新為「Motion 已安裝並使用中；GSAP/Lenis 未安裝」（屬改文件，需先授權；不改產品碼）。
+1. ~~修正 AGENTS.md 動畫套件描述落差~~（已完成 2026-06-15：AGENTS.md 改為「Motion 已安裝並使用中；GSAP/Lenis 未安裝」，與 README 一致）。
 2. demo/local DB 邊界整合測試「可行性盤點」：先列缺口與測試方案，不直接大改（對應 README future 第一項）。
 3. 作品集 closeout 檢查：確認 README、live demo、screenshots、demo/local 邊界說明、CI 狀態彼此一致。
 
