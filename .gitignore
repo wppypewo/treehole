@@ -46,6 +46,11 @@ movie-app-tree.txt
 /data/*.sqlite-journal
 /data/*.sqlite-wal
 /data/*.sqlite-shm
+# 手動備份。注意：資料庫跑 WAL 模式，直接 cp 主檔會漏掉還在 WAL 裡的資料，
+# 要用 better-sqlite3 的 db.backup() 產生。
+/data/*.bak
+/data/*.bak-wal
+/data/*.bak-shm
 
 # vercel
 .vercel

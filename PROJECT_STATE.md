@@ -479,3 +479,42 @@ typecheck 過不代表動畫還在。實際在瀏覽器點「拿掉」：卡片�
 基準已重算（`#8 from 6.0.3 to 7.0.2`、`#6 from 24.13.3 to 26.2.0`）。
 
 `npm audit`：0 vulnerabilities。
+
+---
+
+## 2026-08-23 階段 11：Tailwind 配對同步、片庫備份（已完成）
+
+### `@tailwindcss/postcss` 漏升
+
+`npm outdated` 抓到的：`tailwindcss` 已經 4.3.3，但 `@tailwindcss/postcss`
+還停在 4.3.0。這兩個是配對的套件，dependabot 的 PR 只提了前者，我也只升了
+前者。已補到 4.3.3。
+
+驗證方式不只跑 build——另外檢查產出的 CSS chunk 確實含有全部自訂 class
+（`.page-shell` / `.rail-gutter` / `.scrim-bottom` / `.tap-safe` / `.reveal` /
+`.btn-line` / `.t-film`），確認 Tailwind 沒有靜默失效。
+
+`gsap` 3.15.0 與 `lenis` 1.3.26 查證後皆已是最新，無事可做。
+
+### 片庫備份：先前那份是壞的
+
+`data/movies.sqlite` 跑 **WAL 模式**。實際狀況是主檔只有 28KB 且 mtime 停在
+7/30，而 `-wal` 檔有 **436KB**——近期資料幾乎全在 WAL 裡。
+
+也就是說階段 10 我用 `cp` 複製單一 `.sqlite` 檔做的那份備份，內容其實是
+七月的狀態，真要拿來還原會丟掉之後所有資料。當時沒用到，運氣好。
+
+已改用 `db.backup()` 重做，它會把 WAL 內容 checkpoint 進目的檔：
+
+```
+data/movies.sqlite.2026-08-23.bak
+  favorites 4 / watchlist 0 / watched 4 / ratings 0 / search_history 5
+  integrity_check: ok
+```
+
+`.gitignore` 加上 `/data/*.bak`（含 `-wal` / `-shm` 附屬檔），並在註解裡寫明
+**不能用 cp**，要用 `db.backup()`。
+
+> 仍未解決：片庫是使用者唯一一份個人資料，正確地被 gitignore 排除在版控外，
+> 但也因此沒有任何自動備份機制。目前只有這一份手動備份。要不要做成常態流程
+> 需使用者決定。
