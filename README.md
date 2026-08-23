@@ -8,7 +8,7 @@ A cinematic movie discovery and private film library experience.
 
 Treehole is built around a specific kind of moment: you have an evening, you want to watch something, and you need a space that helps you find it — not just search a database.
 
-The product has two layers. The first is a TMDB-powered discovery surface: a hero carousel, curated rows, browse by genre/year/rating, full-text search with recent search memory. The second is a private library: favorites, a watchlist, and a watched log that accumulates over time. Both layers share a consistent cinematic aesthetic — dark, poster-forward, restrained.
+The product has two layers. The first is a TMDB-powered discovery surface: one featured film per visit, curated rows, an editorial ranked index, browse by genre/year/rating, and full-text search with recent search memory. The second is a private library: favorites, a watchlist, and a watched log that accumulates over time. Both layers share one visual language: dark, poster-forward, sharp-cornered, editorial.
 
 The app runs locally with a SQLite library. A Vercel demo is available for browsing and discovery; library persistence is intentionally disabled there rather than faked.
 
@@ -18,7 +18,7 @@ The app runs locally with a SQLite library. A Vercel demo is available for brows
 
 ## Features
 
-- **Cinematic home entry** — hero backdrop carousel + curated movie rows (trending, top rated, box office, upcoming)
+- **Editorial home entry** — one featured film per visit (no auto-rotating carousel), then curated rows at two card scales, a numbered ranked index, and a date-led upcoming strip
 - **Library-seeded recommendations** — uses watched and favorited films as seeds, then pulls related TMDB titles and deduplicates them into a "For You" row
 - **Browse** — filter by genre, decade, minimum rating, and sort order; condition summary updates in real time
 - **Search** — full-text TMDB search with recent search history (stored in SQLite, accessible without typing)
@@ -47,11 +47,19 @@ Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) 
 
 ## Product & Design Decisions
 
-**Posters and backdrops are the primary visual material.** The detail page is built around the backdrop image with a gradient scrim; the poster anchors the metadata column. MovieCards use a lift-and-ring-reveal on hover. Nothing competes with the imagery.
+**Every corner is square.** Border radius is zero site-wide, reset in `globals.css`. Posters are printed rectangles, so buttons, inputs and cards are rectangles too. This one decision separates the interface from the rounded-card language every streaming service shares.
 
-**Dark UI for focus, not for aesthetics.** The zinc/black palette came from the use case — watching in the evening, low ambient light — not from trend-following. The one accent color is amber (ratings). No blue-to-purple gradients, no glow layers, no glassmorphism.
+**Cards do not grow on hover.** Hovering a poster does not scale or lift it. An inset hairline frame fades in, like a slide mount, and the title shifts from grey to white. The row stays still while you scan it.
 
-**Motion is used for orientation, not spectacle.** Entry animations (`.animate-rise`, `cubic-bezier(0.22, 1, 0.36, 1)`) indicate something has loaded. Library card removal uses `motion/react`'s `popLayout` so the grid reflows without visual pop. There is no scroll hijacking, no stagger cascade, no GSAP timeline.
+**One accent color, chosen from a real object.** Curtain red (`#c8503f`) comes from the velvet in a projection room. It appears only where the user has left a mark: an added library item, a saved rating, the active nav underline, text selection. Everything else is a three-step neutral scale, all passing WCAG AA on the page background.
+
+**Type carries the identity.** Bodoni Moda sets film titles, section headings and numerals; it belongs to the same high-contrast didone tradition as film-festival posters. Traditional Chinese headings use Noto Serif TC, because the typographic tradition for Chinese film writing is 明體, not a sans. Interface text and metadata stay on Geist.
+
+**One scroll animation, used twice.** Backdrops sink slowly as you scroll past them (GSAP ScrollTrigger, scrubbed, never self-playing), on the home feature and the detail hero. Lenis exists to make that scrub continuous rather than stepped. Nothing else hijacks the scroll.
+
+**Reveals are driven by scroll position, not events.** The ranked index reveals with CSS `animation-timeline: view()`. An IntersectionObserver reveal can be skipped entirely by one fast flick, leaving content stuck at zero opacity; a scroll-driven animation lands at the correct progress no matter how you got there, and the default state is visible.
+
+**Text is never placed over an image on small screens.** On mobile the backdrop is a band and the title sits below it on solid ink. Overlaying titles on stills means readability depends on how bright that particular still happens to be.
 
 **Demo mode does not fake persistence.** If an action is not available, it says so. The alternative — letting users click "Add to favorites" and having it silently disappear — would give a misleading picture of the product.
 
@@ -70,8 +78,9 @@ Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) 
 |---|---|
 | Framework | Next.js 16.2.6 (App Router, Turbopack) |
 | UI | React 19, TypeScript |
-| Styling | Tailwind CSS v4 |
-| Animation | motion (framer-motion v12) |
+| Type | Bodoni Moda + Noto Serif TC (display), Geist (interface), via `next/font` |
+| Styling | Tailwind CSS v4, design tokens in `globals.css` |
+| Animation | GSAP + ScrollTrigger (scroll), Lenis (scroll rhythm), motion v12 (component-level) |
 | Local DB | better-sqlite3 (local mode only) |
 | Movie data | TMDB API (v3 / v4 token) |
 | Tests | Vitest |

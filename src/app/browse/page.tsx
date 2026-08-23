@@ -36,13 +36,13 @@ export default async function BrowsePage() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="page-shell space-y-8">
       <header className="animate-rise">
         <p className="eyebrow mb-2.5">{dict.browse.eyebrow}</p>
-        <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
+        <h1 className="text-3xl font-semibold tracking-tight text-paper">
           {dict.browse.title}
         </h1>
-        <p className="mt-2 text-sm text-zinc-400">{dict.browse.subtitle}</p>
+        <p className="mt-2 text-sm text-paper-dim">{dict.browse.subtitle}</p>
       </header>
       <BrowseClient
         genres={genres}

@@ -23,9 +23,8 @@ export default async function UpcomingPage() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="page-shell space-y-8">
       <PageHeader
-        eyebrow={dict.home.rows.upcoming.eyebrow}
         title={dict.pages.upcoming}
         subtitle={dict.pages.upcomingSubtitle}
       />

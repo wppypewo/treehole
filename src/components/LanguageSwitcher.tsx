@@ -34,10 +34,10 @@ export default function LanguageSwitcher({
             type="button"
             onClick={() => switchTo(locale)}
             aria-pressed={active}
-            className={`rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+            className={`tap-safe px-1 text-[0.6875rem] tracking-[0.12em] uppercase transition-colors ${
               active
-                ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-                : "text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                ? "text-paper underline decoration-curtain decoration-1 underline-offset-4"
+                : "text-paper-faint hover:text-paper-dim"
             }`}
           >
             {labels[locale]}

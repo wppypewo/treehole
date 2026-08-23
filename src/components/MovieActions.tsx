@@ -12,7 +12,9 @@ interface Labels {
   watchedDone: string;
 }
 
-// 詳情頁動作列：收藏 / 想看 / 已看過 可切換（呼叫 API 寫入 SQLite）。下載另由 DownloadButton 負責。
+// 詳情頁動作列：收藏 / 想看 / 已看過 可切換（呼叫 API 寫入 SQLite）。
+// 三顆一律用 .btn-line，開啟時填簾幕紅——這是全站唯一會出現彩色填塊的地方，
+// 因為它代表「這部片進了你的片庫」，是使用者在這頁唯一能留下的痕跡。
 export default function MovieActions({
   movie,
   initialFavorite,
@@ -60,22 +62,15 @@ export default function MovieActions({
     }
   }
 
-  const base =
-    "rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50";
-  // active：微亮底色 + 全白文字，示意「已開啟」但不搶下載按鈕的首要視覺
-  const activeCls = "border-white/30 bg-white/10 text-white";
-  // idle：極淡邊框 + 柔灰文字，有 hover 回饋但退讓於下載
-  const idleCls =
-    "border-white/15 text-zinc-400 hover:border-white/30 hover:text-zinc-100";
-
   return (
-    <div className="flex flex-wrap items-center gap-2 pt-1">
+    <div className="flex flex-wrap items-center gap-3">
       <button
         type="button"
         disabled={isDemo || busy}
         aria-pressed={fav}
+        data-on={fav}
         onClick={() => toggle("favorites", fav, setFav)}
-        className={`${base} ${fav ? activeCls : idleCls}`}
+        className="btn-line"
       >
         {fav ? labels.favorited : labels.favorite}
       </button>
@@ -83,8 +78,9 @@ export default function MovieActions({
         type="button"
         disabled={isDemo || busy}
         aria-pressed={want}
+        data-on={want}
         onClick={() => toggle("watchlist", want, setWant)}
-        className={`${base} ${want ? activeCls : idleCls}`}
+        className="btn-line"
       >
         {want ? labels.watchlistAdded : labels.watchlist}
       </button>
@@ -92,8 +88,9 @@ export default function MovieActions({
         type="button"
         disabled={isDemo || busy}
         aria-pressed={seen}
+        data-on={seen}
         onClick={() => toggle("watched", seen, setSeen)}
-        className={`${base} ${seen ? activeCls : idleCls}`}
+        className="btn-line"
       >
         {seen ? labels.watchedDone : labels.watched}
       </button>

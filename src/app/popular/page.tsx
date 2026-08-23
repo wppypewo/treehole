@@ -24,9 +24,8 @@ export default async function PopularPage() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="page-shell space-y-8">
       <PageHeader
-        eyebrow={dict.home.rows.popular.eyebrow}
         title={dict.pages.popular}
         subtitle={dict.pages.popularSubtitle}
       />

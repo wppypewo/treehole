@@ -8,6 +8,8 @@ import NavLinks from "./NavLinks";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
+// 導覽列：實色底 + 一條 hairline。不用 backdrop-blur——
+// 毛玻璃在這裡沒有承擔任何資訊，只是裝飾。
 export default function Navbar({
   locale,
   dict,
@@ -42,57 +44,53 @@ export default function Navbar({
   } as Record<Locale, string>;
 
   return (
-    <header className="sticky top-0 z-20 border-b border-white/10 bg-black/60 backdrop-blur-xl">
-      <nav className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
+    <header className="sticky top-0 z-30 border-b border-hairline bg-ink">
+      <nav className="mx-auto flex h-16 max-w-[1400px] items-center gap-8 px-5 sm:px-8">
         <Link
           href="/"
-          className="shrink-0 whitespace-nowrap text-base font-bold text-white"
+          className="t-film tap-safe shrink-0 text-xl whitespace-nowrap text-paper"
         >
           {dict.appTitle}
         </Link>
 
         {/* Desktop nav links */}
-        <div className="hidden flex-1 items-center gap-1 sm:flex">
+        <div className="hidden flex-1 items-center gap-7 sm:flex">
           <NavLinks links={links} />
         </div>
 
-        {/* Desktop language switcher */}
         <div className="hidden sm:block">
           <LanguageSwitcher current={locale} labels={langLabels} />
         </div>
 
         {/* Mobile: language + hamburger */}
-        <div className="flex flex-1 items-center justify-end gap-2 sm:hidden">
+        <div className="flex flex-1 items-center justify-end gap-3 sm:hidden">
           <LanguageSwitcher current={locale} labels={langLabels} />
           <button
             type="button"
-            aria-label={menuOpen ? "關閉選單" : "開啟選單"}
+            aria-label={menuOpen ? dict.nav.closeMenu : dict.nav.openMenu}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((o) => !o)}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+            className="-mr-2 flex h-11 w-11 items-center justify-center text-paper-dim transition-colors hover:text-paper"
           >
-            {/* Hamburger ↔ X icon cross-fade */}
+            {/* 兩條線 ↔ 叉：交叉淡出，讓開關狀態有回饋 */}
             <span className="relative h-4 w-4" aria-hidden="true">
               <svg
                 viewBox="0 0 16 16"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
+                strokeWidth="1.25"
                 className={`absolute inset-0 h-full w-full transition-opacity duration-200 ${
                   menuOpen ? "opacity-0" : "opacity-100"
                 }`}
               >
-                <line x1="2" y1="4" x2="14" y2="4" />
-                <line x1="2" y1="8" x2="14" y2="8" />
-                <line x1="2" y1="12" x2="14" y2="12" />
+                <line x1="1" y1="5" x2="15" y2="5" />
+                <line x1="1" y1="11" x2="15" y2="11" />
               </svg>
               <svg
                 viewBox="0 0 16 16"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
+                strokeWidth="1.25"
                 className={`absolute inset-0 h-full w-full transition-opacity duration-200 ${
                   menuOpen ? "opacity-100" : "opacity-0"
                 }`}
@@ -105,18 +103,15 @@ export default function Navbar({
         </div>
       </nav>
 
-      {/* Mobile menu panel — max-height transition for smooth open/close */}
-      {/* inert 讓收合時的連結完全脫離 Tab 順序；aria-hidden 給螢幕閱讀器 */}
+      {/* Mobile menu：max-height 過渡；inert 讓收合時完全脫離 Tab 順序 */}
       <div
         inert={!menuOpen}
         aria-hidden={!menuOpen}
-        className={`overflow-hidden transition-[max-height,opacity] duration-200 ease-out sm:hidden ${
-          menuOpen
-            ? "max-h-64 opacity-100"
-            : "max-h-0 opacity-0 pointer-events-none"
+        className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out sm:hidden ${
+          menuOpen ? "max-h-80 opacity-100" : "pointer-events-none max-h-0 opacity-0"
         }`}
       >
-        <div className="flex flex-col gap-0.5 border-t border-white/10 px-4 pb-4 pt-2">
+        <div className="flex flex-col border-t border-hairline px-5 pb-5">
           {links.map((link) => {
             const isActive =
               pathname === link.href ||
@@ -126,10 +121,8 @@ export default function Navbar({
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className={`rounded-md px-3 py-2.5 text-sm transition-colors ${
-                  isActive
-                    ? "bg-white/10 text-white"
-                    : "text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
+                className={`border-b border-hairline py-4 text-sm tracking-wide transition-colors ${
+                  isActive ? "text-paper" : "text-paper-dim hover:text-paper"
                 }`}
               >
                 {link.label}

@@ -24,7 +24,7 @@
 * Production / deployment: Vercel demo（README 載明 `https://treehole-movie-app.vercel.app`，以 `DEMO_MODE=1` 運作、不連真實 DB）；本 repo **無 `vercel.json`**（部署設定在 Vercel 端，未進 repo），另有 `.vercelignore`。AGENTS.md：不動 Vercel 部署設定，除非明確指示
 * README / portfolio status: 已是作品集狀態（Treehole 標題、live demo、features、demo/local 對照表、設計決策、tech stack、architecture、testing、screenshots、future）
 * CI status: 有 GitHub Actions `.github/workflows/ci.yml`，push / PR 到 main 觸發 `typecheck → test → build`（build 帶 `DEMO_MODE=1`）；另有 `.github/dependabot.yml`
-* Test status: Vitest；43 tests / 5 files（utility 層），2026-08-23 實測通過
+* Test status: Vitest；43 tests / 5 files（utility 層），2026-08-23 實測通過。lint 已清到 0 error 0 warning
 * Demo mode status: 由 `DEMO_MODE=1` 切換。`next.config.ts` 的 turbopack `resolveAlias` 在 demo 時把 `@/lib/db` 指向 `src/lib/db.demo.ts`（stub：讀回空、寫入 no-op）；UI 寫入動作仍顯示但呈 disabled 並誠實說明，不假裝儲存
 * Known limitations: 缺 demo/local DB 邊界的整合測試（README future）；測試僅涵蓋 utility 層，UI 與 API 整合未覆蓋
 
@@ -38,7 +38,7 @@
 * Testing: Vitest（`vitest.config.ts`）
 * Deployment: Vercel（demo）；本機為 Node 20+ LAN server（bind `0.0.0.0`）
 
-> 動畫套件現況：`package.json` 含 `motion` ^12.40.0，**Motion 已安裝並使用中**（`motion/react` 的 `popLayout`、`.animate-rise`）；GSAP / Lenis 尚未安裝（計畫方向）。README、設計決策與 AGENTS.md 描述已一致（AGENTS.md 於 2026-06-15 修正對齊）。
+> 動畫套件現況（2026-08-23 更新）：`gsap` ^3.15、`lenis` ^1.3、`motion` ^12.40 皆已安裝並使用中。分工見 AGENTS.md。
 
 ## Available Commands
 
@@ -80,10 +80,9 @@
 
 > 以下為已討論但**不屬於**目前 Maintenance / 收尾階段的項目，預設不執行。
 
-* **Cinematic UI 優化 pass（GSAP + Lenis）**
-  * 這是**新功能 / 大改動**（AGENTS.md「UI 優化方向：已確認方向，尚未授權執行」；需安裝 GSAP/Lenis，屬新 package）。
-  * 不屬於目前 Maintenance 階段。
-  * 只有使用者明確開啟 design / feature phase 時才可做。
+* ~~**Cinematic UI 優化 pass（GSAP + Lenis）**~~ 已於 2026-08-23 執行（首頁 + 詳情頁），見下方階段 2 紀錄。
+* **其餘 12 個頁面的版面重做**：目前只做了 token 對齊（配色、圓角、字體自動跟著新系統），
+  版面本身仍是舊結構。需使用者確認才進行。
 
 ## Forbidden Scope
 
@@ -138,3 +137,42 @@ Do not broaden scope.
 
 **已確認的設計方向（階段 2）**：MUBI 式編輯策展、換字體（含中文字型）、給一個強調色、
 授權安裝 GSAP + Lenis、拿掉首頁自動輪播 hero、先做首頁 + 詳情頁定調、雙語維持。
+
+---
+
+## 2026-08-23 階段 2：首頁與詳情頁改版（已完成）
+
+方向由使用者選定：**MUBI 式編輯策展**。Dials：VARIANCE 6 / MOTION 5 / DENSITY 3。
+刻意不把 variance 拉更高——MUBI 的版面其實相當規律，識別來自留白與字體；
+這是找片工具，打散版面會直接傷害功能。
+
+**新套件（使用者明確授權）**：`gsap` ^3.15.0、`lenis` ^1.3.26
+
+**新增元件**：`SmoothScroll`（Lenis + GSAP ticker 接線）、`ParallaxImage`、
+`FeatureFilm`（取代 HeroCarousel）、`RankedList`、`UpcomingStrip`
+
+**刪除**：`HeroCarousel.tsx`（自動輪播）
+
+**Token 層**（`globals.css`）：形狀鎖 radius 0、中性三階 + 單一強調色 curtain red、
+`.t-film` / `.t-section` / `.t-prose` / `.t-meta` 字級、`.btn-line` / `.btn-solid`、
+`.scrim-bottom`、`.rail-gutter`、`.page-shell`、`.tap-safe`、`.reveal`
+
+**字體**：Bodoni Moda + Noto Serif TC + Geist，全部走 `next/font`。
+Noto Serif TC 設 `preload: false`（CJK 檔大），已實測確認 CJK 分片有實際載入。
+
+**改版過程中修掉的真實 bug**：
+1. `whileInView` 揭露在快速捲動時可能整段不觸發，內容永久停在 opacity 0
+   → 改用 CSS `animation-timeline: view()`，預設可見
+2. 手機版片名壓在劇照上可讀性取決於該張劇照亮度 → 改為影像與文字上下分離
+3. `RankedList` 的 `<li>` 是 grid item（預設 `min-width: auto`），內含 `truncate`
+   標題把它撐到 min-content 寬度，造成手機整頁橫向溢出 → 加 `min-w-0`
+4. 觸控目標：wordmark 20px、語言鍵 25px、漢堡鍵 36px → 全數補到 44px（`.tap-safe`）
+5. `prefers-reduced-motion` 原本一刀砍掉所有 transition，連狀態回饋一起殺掉
+   → 改為只停 animation 與 transform，保留顏色／邊框過渡
+6. 兩個既有 lint error（`error.tsx`、`HistoryList.tsx` 的 effect-setState）
+   → 改用 `useSyncExternalStore`；`HistoryList` 順帶讓相對時間每分鐘刷新
+
+**其餘頁面**：只做 token 對齊（配色／圓角／字體），版面未重做。
+
+**環境注意**：Turbopack 的 CSS 快取會漏掉新加的 class（`.tap-safe` 就中過）。
+改 `globals.css` 後若樣式沒生效，先 `rm -rf .next` 再重啟，不要先懷疑程式碼。

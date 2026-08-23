@@ -56,12 +56,12 @@ export default async function SearchPage({
       <div className="space-y-4 py-16 text-center">
         <div>
           <p className="eyebrow mb-1">{dict.search.resultsFor}</p>
-          <p className="text-sm font-medium text-zinc-200">{query}</p>
+          <p className="text-sm font-medium text-paper">{query}</p>
         </div>
-        <p className="text-sm text-zinc-500">{dict.search.noResults}</p>
+        <p className="text-sm text-paper-faint">{dict.search.noResults}</p>
         <Link
           href="/browse"
-          className="inline-block rounded-lg border border-white/15 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-zinc-100"
+          className="inline-block border border-hairline px-4 py-2.5 text-sm text-paper-dim transition-colors hover:bg-white/10 hover:text-paper"
         >
           {dict.demo.keepBrowsing}
         </Link>
@@ -73,7 +73,7 @@ export default async function SearchPage({
       <div className="space-y-4">
         <div>
           <p className="eyebrow mb-1">{dict.search.resultsFor}</p>
-          <p className="text-sm font-medium text-zinc-200">{query}</p>
+          <p className="text-sm font-medium text-paper">{query}</p>
         </div>
         <MovieGrid movies={movies} emptyText={dict.search.noResults} />
       </div>
@@ -81,14 +81,14 @@ export default async function SearchPage({
   }
 
   return (
-    <section className="space-y-8">
+    <section className="page-shell space-y-8">
       {!query && (
         <header className="mx-auto w-full max-w-2xl animate-rise">
           <p className="eyebrow mb-2.5">{dict.search.eyebrow}</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
+          <h1 className="text-3xl font-semibold tracking-tight text-paper">
             {dict.search.title}
           </h1>
-          <p className="mt-2 text-sm text-zinc-400">{dict.search.subtitle}</p>
+          <p className="mt-2 text-sm text-paper-dim">{dict.search.subtitle}</p>
         </header>
       )}
       <div className="mx-auto w-full max-w-2xl pt-2">
@@ -102,7 +102,7 @@ export default async function SearchPage({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-zinc-500"
+            className="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-paper-faint"
           >
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.3-4.3" />
@@ -112,11 +112,11 @@ export default async function SearchPage({
             name="q"
             defaultValue={query}
             placeholder={dict.search.placeholder}
-            className="w-full rounded-xl border border-white/10 bg-zinc-900/60 py-3 pr-28 pl-11 text-base text-zinc-100 placeholder:text-zinc-500 outline-none transition-[border-color,background-color,box-shadow] focus:border-white/30 focus:bg-zinc-900 focus:shadow-[0_0_0_4px_rgba(255,255,255,0.06)]"
+            className="w-full border border-hairline bg-ink-raised py-3 pr-28 pl-11 text-base text-paper placeholder:text-paper-faint outline-none transition-[border-color,background-color,box-shadow] focus:border-paper-dim focus:bg-ink-raised focus:shadow-[0_0_0_4px_rgba(255,255,255,0.06)]"
           />
           <button
             type="submit"
-            className="absolute top-1/2 right-2 -translate-y-1/2 rounded-lg bg-white px-4 py-1.5 text-sm font-medium text-black transition-colors hover:bg-zinc-200"
+            className="btn-solid absolute top-1/2 right-2 -translate-y-1/2 py-1.5"
           >
             {dict.search.button}
           </button>

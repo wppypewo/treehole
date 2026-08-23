@@ -76,7 +76,7 @@ export default function InfiniteMovieGrid({
 
   if (movies.length === 0) {
     return (
-      <p className="py-16 text-center text-sm text-zinc-500">{labels.empty}</p>
+      <p className="py-16 text-center text-sm text-paper-faint">{labels.empty}</p>
     );
   }
 
@@ -91,14 +91,14 @@ export default function InfiniteMovieGrid({
       {/* 捲動哨兵：進入視窗就載入下一頁 */}
       <div ref={sentinelRef} className="h-1" />
 
-      <div className="py-4 text-center text-sm text-zinc-500">
+      <div className="py-4 text-center text-sm text-paper-faint">
         {error ? (
           <div className="space-y-3">
-            <p className="text-zinc-300">{error}</p>
+            <p className="text-paper-dim">{error}</p>
             <button
               type="button"
               onClick={loadMore}
-              className="rounded-md border border-white/15 px-4 py-1.5 text-zinc-300 transition-colors hover:border-white/30 hover:text-white"
+              className="border border-hairline px-4 py-1.5 text-paper-dim transition-colors hover:border-paper-dim hover:text-paper"
             >
               {labels.retry}
             </button>

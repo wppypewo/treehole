@@ -8,12 +8,12 @@ export default async function NotFound() {
   const dict = getDictionary(locale);
 
   return (
-    <div className="space-y-4 py-20 text-center">
-      <p className="text-4xl font-bold text-zinc-100">404</p>
-      <p className="text-sm text-zinc-400">{dict.errors.notFound}</p>
+    <div className="page-shell space-y-4 py-32 text-center">
+      <p className="text-4xl font-bold text-paper">404</p>
+      <p className="text-sm text-paper-dim">{dict.errors.notFound}</p>
       <Link
         href="/"
-        className="inline-block rounded-lg border border-white/20 px-4 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/10"
+        className="inline-block border border-paper-dim px-4 py-2 text-sm text-paper transition-colors hover:bg-white/10"
       >
         {dict.appTitle}
       </Link>

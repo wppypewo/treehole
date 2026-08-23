@@ -56,3 +56,6 @@ next-env.d.ts
 
 # Local Windows launcher
 啟動Treehole.bat
+
+# local dev preview config
+.claude/launch.json

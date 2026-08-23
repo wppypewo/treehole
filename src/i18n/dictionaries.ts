@@ -15,6 +15,8 @@ export interface Dictionary {
     topRated: string;
     highestGrossing: string;
     browse: string;
+    openMenu: string;
+    closeMenu: string;
   };
   language: { label: string; zhTW: string; en: string };
   pages: {
@@ -142,14 +144,12 @@ export interface Dictionary {
   };
   home: {
     eyebrow: string;
-    title: string;
-    subtitle: string;
     rows: {
-      forYou: { eyebrow: string; title: string };
-      popular: { eyebrow: string; title: string };
-      topRated: { eyebrow: string; title: string };
-      grossing: { eyebrow: string; title: string };
-      upcoming: { eyebrow: string; title: string };
+      forYou: string;
+      popular: string;
+      topRated: string;
+      grossing: string;
+      upcoming: string;
     };
   };
   common: {
@@ -160,6 +160,8 @@ export interface Dictionary {
     retry: string;
     seeAll: string;
     viewDetails: string;
+    prev: string;
+    next: string;
   };
   errors: {
     missingKey: string;
@@ -185,6 +187,8 @@ const zhTW: Dictionary = {
     topRated: "影史評分",
     highestGrossing: "史上最賣座",
     browse: "瀏覽",
+    openMenu: "開啟選單",
+    closeMenu: "關閉選單",
   },
   language: { label: "語言", zhTW: "繁體中文", en: "English" },
   pages: {
@@ -318,15 +322,13 @@ const zhTW: Dictionary = {
     keepBrowsing: "瀏覽電影",
   },
   home: {
-    eyebrow: "片庫",
-    title: "今晚想看什麼?",
-    subtitle: "從這裡開始，慢慢找今晚那一部。",
+    eyebrow: "今晚這部",
     rows: {
-      forYou: { eyebrow: "依你看過的", title: "為你挑的" },
-      popular: { eyebrow: "此刻", title: "大家在看的" },
-      topRated: { eyebrow: "歷來", title: "評分最高的" },
-      grossing: { eyebrow: "票房", title: "最賣座的" },
-      upcoming: { eyebrow: "之後", title: "還沒上映的" },
+      forYou: "為你挑的",
+      popular: "大家在看的",
+      topRated: "評分最高的",
+      grossing: "最賣座的",
+      upcoming: "還沒上映的",
     },
   },
   common: {
@@ -337,6 +339,8 @@ const zhTW: Dictionary = {
     retry: "重試",
     seeAll: "查看全部",
     viewDetails: "查看詳情",
+    prev: "上一批",
+    next: "下一批",
   },
   errors: {
     missingKey: "尚未設定 TMDB 金鑰，請在 .env 填入 TMDB_API_KEY 後重新整理。",
@@ -362,6 +366,8 @@ const en: Dictionary = {
     topRated: "Top Rated",
     highestGrossing: "Highest Grossing",
     browse: "Browse",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
   },
   language: { label: "Language", zhTW: "繁體中文", en: "English" },
   pages: {
@@ -497,15 +503,13 @@ const en: Dictionary = {
     keepBrowsing: "Browse movies",
   },
   home: {
-    eyebrow: "Library",
-    title: "What are you watching tonight?",
-    subtitle: "Start here, then find the one for tonight.",
+    eyebrow: "Tonight",
     rows: {
-      forYou: { eyebrow: "From your history", title: "Picked for you" },
-      popular: { eyebrow: "Right now", title: "What people are watching" },
-      topRated: { eyebrow: "All-time", title: "Highest rated" },
-      grossing: { eyebrow: "Box office", title: "Biggest earners" },
-      upcoming: { eyebrow: "Soon", title: "Not out yet" },
+      forYou: "Picked for you",
+      popular: "What people are watching",
+      topRated: "Highest rated",
+      grossing: "Biggest earners",
+      upcoming: "Not out yet",
     },
   },
   common: {
@@ -516,6 +520,8 @@ const en: Dictionary = {
     retry: "Retry",
     seeAll: "See all",
     viewDetails: "View details",
+    prev: "Previous",
+    next: "Next",
   },
   errors: {
     missingKey:

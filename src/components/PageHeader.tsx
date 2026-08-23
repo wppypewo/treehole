@@ -10,13 +10,17 @@ export default function PageHeader({
   className?: string;
 }) {
   return (
-    <header className={`animate-rise${className ? ` ${className}` : ""}`}>
-      {eyebrow && <p className="eyebrow mb-2.5">{eyebrow}</p>}
-      <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
+    <header
+      className={`animate-rise border-b border-hairline pb-6${
+        className ? ` ${className}` : ""
+      }`}
+    >
+      {eyebrow && <p className="eyebrow mb-3">{eyebrow}</p>}
+      <h1 className="t-film text-[2rem] text-paper sm:text-[2.75rem]">
         {title}
       </h1>
       {subtitle && (
-        <p className="mt-2 text-sm text-zinc-400">{subtitle}</p>
+        <p className="mt-3 max-w-[52ch] text-sm text-paper-dim">{subtitle}</p>
       )}
     </header>
   );

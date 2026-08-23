@@ -253,12 +253,12 @@ export default function BrowseClient({
 
       {/* 目前條件摘要 */}
       <div className="flex items-baseline gap-3">
-        <p className="text-sm text-zinc-400">{summaryText}</p>
+        <p className="text-sm text-paper-dim">{summaryText}</p>
         {!isDefaultFilters && (
           <button
             type="button"
             onClick={resetFilters}
-            className="text-xs text-zinc-500 transition-colors hover:text-zinc-200"
+            className="text-xs text-paper-faint transition-colors hover:text-paper"
           >
             {labels.clearFilters}
           </button>
@@ -276,14 +276,14 @@ export default function BrowseClient({
 
       <div ref={sentinelRef} className="h-1" />
 
-      <div className="py-4 text-center text-sm text-zinc-500">
+      <div className="py-4 text-center text-sm text-paper-faint">
         {error ? (
           <div className="space-y-2">
-            <p className="text-zinc-300">{error}</p>
+            <p className="text-paper-dim">{error}</p>
             <button
               type="button"
               onClick={loadMore}
-              className="rounded-md border border-white/15 px-4 py-1.5 text-zinc-300 transition-colors hover:border-white/30 hover:text-white"
+              className="border border-hairline px-4 py-1.5 text-paper-dim transition-colors hover:border-paper-dim hover:text-paper"
             >
               {labels.retry}
             </button>

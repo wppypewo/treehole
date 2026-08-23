@@ -24,9 +24,8 @@ export default async function TopRatedPage() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="page-shell space-y-8">
       <PageHeader
-        eyebrow={dict.home.rows.topRated.eyebrow}
         title={dict.pages.topRated}
         subtitle={dict.pages.topRatedSubtitle}
       />

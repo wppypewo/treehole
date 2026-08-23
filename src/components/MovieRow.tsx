@@ -5,20 +5,31 @@ import Link from "next/link";
 import MovieCard from "./MovieCard";
 import type { MovieSummary } from "@/lib/tmdb";
 
-// 橫向捲動分類列（Apple TV 風）：標題 + 查看全部 + 可左右捲的海報列。
-// eyebrow 為可選的小型語境標，未傳則維持原本只有標題的渲染。
+/**
+ * 橫向策展列。
+ *
+ * size="lg" 給當頁最重要的一列（為你挑的／熱門），卡片明顯大一階；
+ * 其餘用 sm。首頁靠這個尺寸差製造疏密，而不是每列都一樣寬。
+ *
+ * 捲動箭頭常駐但低對比，不做 hover 才浮現——箭頭是導覽件，
+ * 藏起來只是為了畫面乾淨，代價是使用者不知道這列可以捲。
+ */
 export default function MovieRow({
   title,
-  eyebrow,
   movies,
   moreHref,
   moreLabel,
+  size = "sm",
+  prevLabel,
+  nextLabel,
 }: {
   title: string;
-  eyebrow?: string;
   movies: MovieSummary[];
   moreHref: string;
   moreLabel: string;
+  size?: "sm" | "lg";
+  prevLabel: string;
+  nextLabel: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -27,56 +38,63 @@ export default function MovieRow({
   // 每次捲動約一個可視寬度的 80%
   function scrollByDir(dir: number) {
     const el = ref.current;
-    if (el) el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: "smooth" });
+    if (el)
+      el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: "smooth" });
   }
 
+  const cardWidth =
+    size === "lg"
+      ? "w-[46vw] max-w-[260px] sm:w-56 md:w-64"
+      : "w-[32vw] max-w-[180px] sm:w-36 md:w-40";
+
   return (
-    <section className="space-y-2">
-      <div className="flex items-end justify-between px-0.5">
-        <div>
-          {eyebrow && <p className="eyebrow mb-1">{eyebrow}</p>}
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
+    <section>
+      <div className="mx-auto flex max-w-[1400px] items-baseline justify-between gap-6 px-5 sm:px-8">
+        <h2 className="t-section text-paper">{title}</h2>
+        <div className="flex items-center gap-4">
+          <Link
+            href={moreHref}
+            className="tap-safe text-[0.75rem] tracking-[0.08em] text-paper-faint transition-colors hover:text-paper"
+          >
+            {moreLabel}
+          </Link>
+          <div className="hidden items-center gap-1 sm:flex">
+            <button
+              type="button"
+              aria-label={prevLabel}
+              onClick={() => scrollByDir(-1)}
+              className="flex h-10 w-10 items-center justify-center text-paper-faint transition-colors hover:text-paper"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+            </button>
+            <button
+              type="button"
+              aria-label={nextLabel}
+              onClick={() => scrollByDir(1)}
+              className="flex h-10 w-10 items-center justify-center text-paper-faint transition-colors hover:text-paper"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+            </button>
+          </div>
         </div>
-        <Link
-          href={moreHref}
-          className="text-sm text-zinc-400 transition-colors hover:text-white"
-        >
-          {moreLabel} ›
-        </Link>
       </div>
 
-      {/* 負外距延伸到頁面邊距，並當作箭頭的定位參考，使箭頭落在內容邊緣外側 */}
-      <div className="group/row relative -mx-4 sm:-mx-6">
-        <div
-          ref={ref}
-          // 內距留出緩衝：overflow-x 會連帶裁切四邊，留白讓海報放大／上移時不被切，
-          // 且第一張卡仍對齊標題。
-          className="scrollbar-hide flex gap-4 overflow-x-auto scroll-smooth px-4 py-4 sm:px-6"
-        >
-          {movies.map((m) => (
-            <div key={m.id} className="w-32 shrink-0 sm:w-40 md:w-44">
-              <MovieCard movie={m} />
-            </div>
-          ))}
-        </div>
-
-        {/* 左右捲動箭頭：桌面 hover 時浮現 */}
-        <button
-          type="button"
-          aria-label="prev"
-          onClick={() => scrollByDir(-1)}
-          className="absolute top-4 bottom-16 left-0 hidden w-12 items-center justify-center rounded-l-xl bg-gradient-to-r from-black/80 to-transparent text-white opacity-0 transition-opacity duration-300 group-hover/row:opacity-100 sm:flex"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <button
-          type="button"
-          aria-label="next"
-          onClick={() => scrollByDir(1)}
-          className="absolute top-4 bottom-16 right-0 hidden w-12 items-center justify-center rounded-r-xl bg-gradient-to-l from-black/80 to-transparent text-white opacity-0 transition-opacity duration-300 group-hover/row:opacity-100 sm:flex"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
+      {/* 捲動容器出血到視窗邊緣，但第一張卡仍與標題切齊。
+          右側刻意不留白，讓最後一張被裁切，暗示這列還有內容。 */}
+      <div
+        ref={ref}
+        className={`scrollbar-hide mt-6 flex overflow-x-auto scroll-smooth ${
+          size === "lg" ? "gap-5" : "gap-4"
+        }`}
+      >
+        {/* 左側墊片：對齊 Container 的內距 */}
+        <div aria-hidden className="rail-gutter" />
+        {movies.map((m) => (
+          <div key={m.id} className={`${cardWidth} shrink-0`}>
+            <MovieCard movie={m} size={size} />
+          </div>
+        ))}
+        <div aria-hidden className="rail-gutter" />
       </div>
     </section>
   );

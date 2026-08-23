@@ -24,7 +24,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | 本機資料庫 | better-sqlite3 ^12.10.0（local 版專用） |
 | 型別 | TypeScript ^5 |
 | Lint | ESLint ^9（eslint-config-next 16.2.6） |
-| 動畫 | Motion ^12.40.0（已安裝、使用中，如 `motion/react` 的 popLayout）；GSAP / Lenis 尚未安裝（計畫方向） |
+| 動畫 | GSAP ^3.15 + ScrollTrigger（scroll 敘事）、Lenis ^1.3（捲動節奏）、Motion ^12.40（元件級，如 popLayout） |
+| 字體 | Bodoni Moda + Noto Serif TC（標題）、Geist（介面），皆走 `next/font` |
 
 ## 技術邊界（禁止跨越）
 
@@ -34,18 +35,27 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - 禁止改動 Vercel 部署設定，除非我明確指示
 - 禁止安裝新 package，除非我明確確認
 
-## UI 優化方向（已確認方向，尚未授權執行）
+## 視覺方向（2026-08-23 已實作，首頁與詳情頁）
 
-目標調性：高級電影網站感。參考：Apple TV+ / Letterboxd / A24 / MUBI。
+**MUBI 式編輯策展**。不是 Netflix / Apple TV 的海報牆語彙。
 
-動畫分工（GSAP / Lenis 計畫中、尚未安裝；Motion 已安裝）：
-- GSAP + Lenis：cinematic scroll、timeline、pinned sequence、hero transition（尚未安裝，待授權才引入）
-- Motion（framer-motion）：已安裝、限小型元件動畫，必要時才用
-- 禁止以 Motion 為主動畫引擎
+已鎖定、不得單方面推翻的決定：
+- **形狀鎖**：全站 `border-radius: 0`（`globals.css` 的 `*` reset）
+- **配色鎖**：中性三階（`--paper` / `--paper-dim` / `--paper-faint`，皆過 WCAG AA）
+  + 唯一強調色 `--curtain: #c8503f`（戲院簾幕紅）。只用在「使用者留下的痕跡」
+- **字體**：Bodoni Moda（西文標題）+ Noto Serif TC（中文標題）+ Geist（介面）
+- **卡片 hover 不放大**：只浮現內縮 hairline 框（片夾），整列保持安靜
+- **首頁不做自動輪播**：一次只推一部
+- **手機不把文字壓在影像上**：影像一段、文字一段
+
+動畫分工：
+- GSAP + ScrollTrigger：**只有一種** scroll 動畫（影像隨捲動下沉），用在首頁開場與詳情頁首屏
+- Lenis：捲動節奏基礎設施，讓 scrub 連續。不是特效
+- CSS `animation-timeline: view()`：捲動揭露。**不用 IntersectionObserver**——
+  快速捲動可能整段不觸發，內容會永久停在 opacity 0
+- Motion：僅元件級（LibraryGrid 的 popLayout）
 
 可用元件來源：React Bits、Motion Primitives、Aceternity UI、Animate UI
-
-上述方向是已確認的設計意圖，不是開始實作的指令。UI 優化須等使用者明確授權後才能進行。
 
 ## Rules 位置
 

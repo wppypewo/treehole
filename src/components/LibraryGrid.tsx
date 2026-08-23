@@ -95,12 +95,12 @@ export default function LibraryGrid({
         isDemo && list.length === 0 ? (
           // demo 模式：誠實說明片庫為本機版功能，並提供繼續探索的出口
           <div className="space-y-5 py-16 text-center">
-            <p className="mx-auto max-w-md text-sm text-zinc-400">
+            <p className="mx-auto max-w-md text-sm text-paper-dim">
               {labels.demoEmpty}
             </p>
             <Link
               href="/browse"
-              className="inline-block rounded-lg border border-white/15 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-zinc-100"
+              className="inline-block border border-hairline px-4 py-2.5 text-sm text-paper-dim transition-colors hover:bg-white/10 hover:text-paper"
             >
               {labels.browse}
             </Link>
@@ -108,17 +108,17 @@ export default function LibraryGrid({
         ) : list.length === 0 ? (
           // 非 demo、片庫確實為空：提供探索出口
           <div className="space-y-5 py-16 text-center">
-            <p className="mx-auto max-w-sm text-sm text-zinc-400">{labels.empty}</p>
+            <p className="mx-auto max-w-sm text-sm text-paper-dim">{labels.empty}</p>
             <Link
               href="/browse"
-              className="inline-block rounded-lg border border-white/15 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-zinc-100"
+              className="inline-block border border-hairline px-4 py-2.5 text-sm text-paper-dim transition-colors hover:bg-white/10 hover:text-paper"
             >
               {labels.browse}
             </Link>
           </div>
         ) : (
           // 有片但篩選後歸零：上方篩選控制項仍可見，純文字提示即可
-          <p className="py-16 text-center text-sm text-zinc-500">{labels.empty}</p>
+          <p className="py-16 text-center text-sm text-paper-faint">{labels.empty}</p>
         )
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
@@ -141,7 +141,7 @@ export default function LibraryGrid({
                   href={`/movie/${movie.tmdb_id}`}
                   className="block focus:outline-none"
                 >
-                  <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-900 shadow-md ring-1 ring-white/5 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/libcard:-translate-y-1 group-hover/libcard:scale-[1.05] group-hover/libcard:shadow-2xl group-hover/libcard:ring-2 group-hover/libcard:ring-white/40 group-active/libcard:scale-[0.98] group-active/libcard:duration-150 group-focus-within/libcard:-translate-y-1 group-focus-within/libcard:scale-[1.05] group-focus-within/libcard:ring-2 group-focus-within/libcard:ring-white/60">
+                  <div className="relative aspect-[2/3] w-full overflow-hidden bg-ink-raised shadow-md ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/libcard:-translate-y-1 group-hover/libcard:scale-[1.05] group-hover/libcard:shadow-2xl group-hover/libcard:ring-2 group-hover/libcard:ring-white/40 group-active/libcard:scale-[0.98] group-active/libcard:duration-150 group-focus-within/libcard:-translate-y-1 group-focus-within/libcard:scale-[1.05] group-focus-within/libcard:ring-2 group-focus-within/libcard:ring-white/60">
                     {poster ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -154,16 +154,16 @@ export default function LibraryGrid({
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-xs text-zinc-500">
+                      <div className="flex h-full w-full items-center justify-center text-xs text-paper-faint">
                         無海報
                       </div>
                     )}
-                    <span className="absolute right-2 top-2 rounded-md bg-black/70 px-1.5 py-0.5 text-xs font-semibold text-amber-300 backdrop-blur">
+                    <span className="absolute right-2 top-2 bg-black/70 px-1.5 py-0.5 text-xs font-semibold text-paper backdrop-blur">
                       ★ {rating}
                     </span>
                   </div>
                   <div className="mt-2 px-0.5">
-                    <h3 className="line-clamp-1 text-sm font-medium text-zinc-100">
+                    <h3 className="line-clamp-1 text-sm font-medium text-paper">
                       {movie.title}
                     </h3>
                   </div>
@@ -173,7 +173,7 @@ export default function LibraryGrid({
                   type="button"
                   disabled={removing === movie.tmdb_id}
                   onClick={() => remove(movie.tmdb_id)}
-                  className="mt-0.5 px-0.5 text-xs text-zinc-600 transition-[color,opacity] hover:text-red-400 focus-visible:text-red-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 disabled:opacity-40 [@media(hover:hover)_and_(pointer:fine)]:opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-hover/libcard:opacity-100 [@media(hover:hover)_and_(pointer:fine)]:group-focus-within/libcard:opacity-100 [@media(hover:hover)_and_(pointer:fine)]:focus-visible:opacity-100"
+                  className="mt-0.5 px-0.5 text-xs text-paper-faint transition-[color,opacity] hover:text-red-400 focus-visible:text-red-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 disabled:opacity-40 [@media(hover:hover)_and_(pointer:fine)]:opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-hover/libcard:opacity-100 [@media(hover:hover)_and_(pointer:fine)]:group-focus-within/libcard:opacity-100 [@media(hover:hover)_and_(pointer:fine)]:focus-visible:opacity-100"
                 >
                   {removing === movie.tmdb_id ? "…" : labels.remove}
                 </button>

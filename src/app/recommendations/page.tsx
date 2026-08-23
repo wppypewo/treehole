@@ -18,19 +18,19 @@ export default async function RecommendationsPage() {
   // demo 模式下個人化推薦無種子（片庫為本機版功能），改為誠實說明 + 繼續探索出口
   if (isDemo) {
     return (
-      <section className="space-y-6">
+      <section className="page-shell space-y-8">
         <PageHeader
           eyebrow={dict.pages.recommendationsEyebrow}
           title={dict.pages.recommendations}
           subtitle={dict.pages.recommendationsSubtitle}
         />
         <div className="space-y-4 py-16 text-center">
-          <p className="mx-auto max-w-md text-sm text-zinc-500">
+          <p className="mx-auto max-w-md text-sm text-paper-faint">
             {dict.demo.recommendationsEmpty}
           </p>
           <Link
             href="/browse"
-            className="inline-block rounded-lg border border-white/15 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/10 hover:text-zinc-100"
+            className="inline-block border border-hairline px-4 py-2.5 text-sm text-paper-dim transition-colors hover:bg-white/10 hover:text-paper"
           >
             {dict.demo.keepBrowsing}
           </Link>
@@ -52,7 +52,7 @@ export default async function RecommendationsPage() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="page-shell space-y-8">
       <PageHeader
         eyebrow={dict.pages.recommendationsEyebrow}
         title={dict.pages.recommendations}

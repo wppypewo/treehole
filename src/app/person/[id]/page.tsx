@@ -40,11 +40,11 @@ export default async function PersonPage({
   const photo = tmdbImage(person.profile_path, "w342");
 
   return (
-    <article className="space-y-8">
+    <article className="page-shell space-y-10">
       {/* 返回首頁：與 movie detail 無 backdrop 狀態同樣的返回連結樣式 */}
       <Link
         href="/"
-        className="inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-200"
+        className="inline-flex items-center gap-1 text-sm text-paper-faint transition-colors hover:text-paper"
       >
         ← {dict.movie.back}
       </Link>
@@ -52,7 +52,7 @@ export default async function PersonPage({
       {/* 人物首屏：照片 + 姓名 + 簡介並排 */}
       <div className="animate-rise flex flex-col gap-6 sm:flex-row sm:items-start">
         <div className="mx-auto w-44 shrink-0 sm:mx-0 sm:w-52">
-          <div className="aspect-[2/3] overflow-hidden rounded-xl bg-zinc-900 ring-1 ring-white/5">
+          <div className="aspect-[2/3] overflow-hidden bg-ink-raised ring-1 ring-hairline">
             {photo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -62,7 +62,7 @@ export default async function PersonPage({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-3xl text-zinc-600">
+              <div className="flex h-full w-full items-center justify-center text-3xl text-paper-faint">
                 {person.name.slice(0, 1)}
               </div>
             )}
@@ -70,10 +70,10 @@ export default async function PersonPage({
         </div>
 
         <div className="flex-1 space-y-3">
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
+          <h1 className="text-3xl font-semibold tracking-tight text-paper">
             {person.name}
           </h1>
-          <p className="line-clamp-[12] text-sm leading-relaxed whitespace-pre-line text-zinc-300">
+          <p className="line-clamp-[12] text-sm leading-relaxed whitespace-pre-line text-paper-dim">
             {person.biography || dict.person.noBio}
           </p>
         </div>

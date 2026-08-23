@@ -14,7 +14,7 @@ export default async function FavoritesPage() {
   const isDemo = process.env.DEMO_MODE === "1";
 
   return (
-    <section className="space-y-6">
+    <section className="page-shell space-y-8">
       <PageHeader
         eyebrow={dict.library.favoritesEyebrow}
         title={dict.library.favoritesTitle}

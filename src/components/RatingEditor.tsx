@@ -67,37 +67,48 @@ export default function RatingEditor({
   }
 
   return (
-    <section className="space-y-3">
-      <h2 className="eyebrow mb-3">{labels.title}</h2>
+    <section className="max-w-2xl border-t border-hairline pt-8">
+      <h2 className="t-section text-paper">{labels.title}</h2>
 
-      <div className="space-y-1">
-        <p className="text-xs text-zinc-500">{labels.scorePrompt}</p>
-        <div className="flex flex-wrap gap-1">
-          {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-            <button
-              key={n}
-              type="button"
-              disabled={isDemo}
-              aria-pressed={score === n}
-              onClick={() => {
-                setScore(n);
-                setSaved(false);
-              }}
-              className={`h-9 w-9 rounded-lg border text-sm font-medium transition-colors disabled:opacity-60 ${
-                score !== null && n <= score
-                  ? "border-amber-400 bg-amber-400/20 text-amber-300"
-                  : "border-white/15 text-zinc-400 hover:bg-white/10"
-              }`}
-            >
-              {n}
-            </button>
-          ))}
+      <div className="mt-6">
+        <p className="text-xs text-paper-faint">{labels.scorePrompt}</p>
+        {/* 十格刻度：選到的分數以下全部填實，像溫度計而不是十顆獨立按鈕。
+            填色用簾幕紅，與片庫動作同一個「這是你留下的」語意。 */}
+        <div className="mt-3 flex flex-wrap gap-px">
+          {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
+            const on = score !== null && n <= score;
+            return (
+              <button
+                key={n}
+                type="button"
+                disabled={isDemo}
+                aria-pressed={score === n}
+                onClick={() => {
+                  setScore(n);
+                  setSaved(false);
+                }}
+                className={`h-11 w-11 border text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                  on
+                    ? "border-curtain bg-curtain text-paper"
+                    : "border-hairline-strong text-paper-faint hover:border-paper-dim hover:text-paper"
+                }`}
+              >
+                {n}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="space-y-1">
-        <label className="text-xs text-zinc-500">{labels.note}</label>
+      <div className="mt-7">
+        <label
+          htmlFor="rating-note"
+          className="block text-xs text-paper-faint"
+        >
+          {labels.note}
+        </label>
         <textarea
+          id="rating-note"
           value={note}
           disabled={isDemo}
           onChange={(e) => {
@@ -106,16 +117,16 @@ export default function RatingEditor({
           }}
           placeholder={labels.notePlaceholder}
           rows={3}
-          className="w-full rounded-lg border border-white/15 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-white/40 disabled:opacity-60"
+          className="mt-2 w-full border border-hairline bg-ink-raised px-4 py-3 text-sm text-paper outline-none transition-colors placeholder:text-paper-faint focus:border-paper-dim disabled:cursor-not-allowed disabled:opacity-50"
         />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="mt-5 flex items-center gap-3">
         <button
           type="button"
           onClick={save}
           disabled={isDemo || !score || saving}
-          className="rounded-lg border border-white/50 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:border-white/70 hover:bg-white/10 disabled:opacity-50"
+          className="btn-line"
         >
           {saved ? labels.saved : labels.save}
         </button>
@@ -124,7 +135,7 @@ export default function RatingEditor({
             type="button"
             onClick={clearRating}
             disabled={saving}
-            className="rounded-lg border border-white/15 px-3 py-1.5 text-sm text-zinc-300 transition-colors hover:bg-white/10 disabled:opacity-50"
+            className="tap-safe text-[0.8125rem] tracking-[0.04em] text-paper-faint transition-colors hover:text-paper disabled:opacity-50"
           >
             {labels.clear}
           </button>
@@ -132,7 +143,7 @@ export default function RatingEditor({
       </div>
 
       {isDemo && demoNote && (
-        <p className="text-xs text-zinc-500">{demoNote}</p>
+        <p className="mt-4 text-xs text-paper-faint">{demoNote}</p>
       )}
     </section>
   );

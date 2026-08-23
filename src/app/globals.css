@@ -1,32 +1,255 @@
 @import "tailwindcss";
 
-/* 固定深色主題（Apple TV 風格）：讓所有 dark: 樣式改依 .dark class 生效，
-   而非跟隨系統明暗，這樣全站維持沉浸式深色。 */
+/* 固定深色主題：讓所有 dark: 樣式依 .dark class 生效而非跟隨系統，全站維持單一調性。
+   Page Theme Lock——沒有任何 section 會翻成淺色。 */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #08080b;
-  --foreground: #f4f4f5;
+  /* ── 底色 ────────────────────────────────────────────────
+     近黑帶一點暖，不用純黑（純黑會讓海報邊緣失去深度）。 */
+  --ink: #0a0a0b;
+  --ink-raised: #101012;
+  --ink-sunken: #060607;
+
+  /* ── 文字：膠片白三階，全部對 --ink 通過 WCAG AA ──────────
+     paper 15.4:1／paper-dim 7.7:1／paper-faint 4.6:1 */
+  --paper: #edeae4;
+  --paper-dim: #a5a19a;
+  --paper-faint: #7d7a75;
+
+  /* ── 唯一強調色：戲院簾幕紅 ───────────────────────────────
+     依據是實物——放映廳的絨布簾幕與座椅。不是趨勢色，也不是
+     科技藍紫。全站只有這一個彩色，其餘一律中性。
+     curtain 用於填色與線條（大面積 4.4:1，僅限非內文）；
+     curtain-ink 用於小字（7.7:1，通過 AA）。 */
+  --curtain: #c8503f;
+  --curtain-ink: #e4897b;
+
+  /* ── 分隔線 ───────────────────────────────────────────── */
+  --hairline: rgb(255 255 255 / 0.11);
+  --hairline-strong: rgb(255 255 255 / 0.22);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-ink: var(--ink);
+  --color-ink-raised: var(--ink-raised);
+  --color-ink-sunken: var(--ink-sunken);
+  --color-paper: var(--paper);
+  --color-paper-dim: var(--paper-dim);
+  --color-paper-faint: var(--paper-faint);
+  --color-curtain: var(--curtain);
+  --color-curtain-ink: var(--curtain-ink);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  /* 系統字體堆疊：在 Mac 上即為 San Francisco，外觀貼近 Apple TV；
-     Windows 退回 Segoe UI。不嵌入 Apple 專有字體檔。 */
-  font-family:
-    var(--font-geist-sans), "PingFang TC", "Microsoft JhengHei",
+  /* 標題／片名：Bodoni Moda 是海報與影展視覺的字體傳統（高反差 didone），
+     中文接思源宋體與系統宋體——中文電影書寫的排版傳統是明體，不是黑體。 */
+  --font-display: var(--font-bodoni), var(--font-noto-serif-tc), "Songti TC",
+    "Noto Serif CJK TC", "PMingLiU", Georgia, serif;
+  /* 介面與內文：Geist 撐資訊層，中文交給系統字（PingFang TC）零下載成本。 */
+  --font-sans: var(--font-geist-sans), "PingFang TC", "Microsoft JhengHei",
     -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 }
 
-/* 橫向捲動分類列用：隱藏捲軸但保留可捲動 */
+/* ── 形狀鎖 ────────────────────────────────────────────────
+   全站圓角 = 0。海報是矩形，按鈕是矩形，輸入框是矩形。
+   這是本站最主要的識別決定，也是與 Netflix/Apple TV 語彙的分界。
+   唯一例外是 focus ring 與語言切換的 active 指示。 */
+* {
+  border-radius: 0;
+}
+
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-sans);
+  /* 中文西文混排時，讓標點與英數之間有呼吸 */
+  text-spacing-trim: space-first;
+}
+
+::selection {
+  background: var(--curtain);
+  color: var(--paper);
+}
+
+/* 全站統一 focus：不用 outline 預設，改為簾幕紅細框，鍵盤可見度足夠 */
+:focus-visible {
+  outline: 2px solid var(--curtain-ink);
+  outline-offset: 2px;
+}
+
+/* ── 字級：編輯型階層 ──────────────────────────────────────
+   標題靠字體與尺寸拉開，不靠色彩或裝飾。 */
+.t-film {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+}
+.t-section {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+@media (min-width: 768px) {
+  .t-section {
+    font-size: 1.875rem;
+  }
+}
+
+/* 編輯型內文：字級比一般 UI 大一階，行長收在 62ch，為了讀而不是為了塞 */
+.t-prose {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--paper-dim);
+  max-width: 62ch;
+}
+@media (min-width: 768px) {
+  .t-prose {
+    font-size: 1.1875rem;
+  }
+}
+
+/* metadata 行：年份・片長・導演。用 tabular 數字讓數值對齊 */
+.t-meta {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--paper-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* eyebrow：全站配額極少，只在首頁開場與詳情頁各用一次 */
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--paper-faint);
+}
+
+/* ── 元件基礎 ──────────────────────────────────────────── */
+
+/* 文字按鈕：hairline 外框，hover 時框變亮並填入極淡底色。
+   沒有放大、沒有陰影、沒有漸層。 */
+.btn-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--hairline-strong);
+  padding: 0.625rem 1.125rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  color: var(--paper);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease,
+    color 200ms ease;
+}
+.btn-line:hover:not(:disabled) {
+  border-color: var(--paper);
+  background: rgb(255 255 255 / 0.05);
+}
+.btn-line:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.btn-line:disabled {
+  cursor: not-allowed;
+  color: var(--paper-faint);
+  border-color: var(--hairline);
+}
+/* 已啟用狀態（已收藏／已看過）：簾幕紅實填，是全站唯一的彩色填塊 */
+.btn-line[data-on="true"] {
+  border-color: var(--curtain);
+  background: var(--curtain);
+  color: var(--paper);
+}
+.btn-line[data-on="true"]:hover {
+  background: #b04537;
+  border-color: #b04537;
+}
+
+/* 主要動作：反白實心。用在「看這部」這種單一入口 */
+.btn-solid {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition:
+    background-color 200ms ease,
+    transform 120ms ease;
+}
+.btn-solid:hover {
+  background: #ffffff;
+}
+.btn-solid:active {
+  transform: translateY(1px);
+}
+
+/* 影像底部遮罩：保證壓在影像上的片名與 metadata 一定讀得到。
+   單層 to-t 漸層在亮圖上不夠——手機版的詳情頁就因此糊掉過。
+   這裡底部 24% 是實色，中段才開始透，上緣才完全放開影像。 */
+.scrim-bottom {
+  background: linear-gradient(
+    to top,
+    rgb(10 10 11 / 1) 0%,
+    rgb(10 10 11 / 1) 24%,
+    rgb(10 10 11 / 0.82) 46%,
+    rgb(10 10 11 / 0.45) 68%,
+    rgb(10 10 11 / 0.12) 88%,
+    rgb(10 10 11 / 0) 100%
+  );
+}
+
+/* 一般頁面的內容欄。<main> 本身不設寬度與內距（首頁與詳情頁要出血），
+   其餘頁面在根元素套這個 class 取回內容欄。 */
+.page-shell {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1400px;
+  padding-inline: 1.25rem;
+  padding-top: 2.5rem;
+  padding-bottom: 6rem;
+}
+@media (min-width: 640px) {
+  .page-shell {
+    padding-inline: 2rem;
+    padding-top: 3.5rem;
+  }
+}
+
+/* 策展列的左右墊片：讓出血的捲動列，第一張卡仍與 Container 的內距切齊。
+   用 % 而非 vw，避免捲軸寬度造成偏移。 */
+.rail-gutter {
+  flex-shrink: 0;
+  width: max(1.25rem, calc((100% - 1400px) / 2 + 1.25rem));
+}
+@media (min-width: 640px) {
+  .rail-gutter {
+    width: max(2rem, calc((100% - 1400px) / 2 + 2rem));
+  }
+}
+
+/* 純文字連結（查看全部、清除評分等）的觸控區：視覺不變，
+   靠上下 padding 撐到 44px 再用負 margin 收回，不影響排版。 */
+.tap-safe {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: 0.75rem;
+  margin-block: -0.75rem;
+}
+
+/* 橫向捲動用：隱藏捲軸但保留可捲動 */
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -35,58 +258,81 @@ body {
   display: none;
 }
 
-/* Hero 文字進場：slide-up + fade-in，每次換片觸發 */
-@keyframes hero-text-in {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* 一次性進場：詳情頁 poster / 文字欄載入時 fade + 輕微上移 */
-@keyframes rise {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@theme inline {
-  --animate-hero-text-in: hero-text-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-rise: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-/* 詳情頁 section 標籤（eyebrow）：克制的小型標題，與主標題拉開層級 */
-.eyebrow {
-  font-size: 0.6875rem; /* 11px */
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #a1a1aa; /* zinc-400 */
-}
-
-/* 深色站統一 select 外觀：去除原生樣式、自繪 chevron，避免系統淺色 UI 破口 */
+/* 深色站統一 select 外觀：自繪 chevron，避免系統淺色 UI 破口 */
 .select-dark {
   appearance: none;
-  border-radius: 0.5rem;
-  border: 1px solid rgb(255 255 255 / 0.15);
-  background-color: #18181b; /* zinc-900 */
-  color: #f4f4f5; /* zinc-100 */
+  border: 1px solid var(--hairline-strong);
+  background-color: var(--ink-raised);
+  color: var(--paper);
   padding: 0.5rem 2.25rem 0.5rem 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.25rem;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a5a19a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
   background-repeat: no-repeat;
   background-position: right 0.625rem center;
   background-size: 1rem;
   cursor: pointer;
-  transition: border-color 150ms ease, background-color 150ms ease;
+  transition: border-color 150ms ease;
 }
 .select-dark:hover {
-  border-color: rgb(255 255 255 / 0.3);
+  border-color: var(--paper-dim);
 }
-.select-dark:focus {
-  outline: none;
-  border-color: rgb(255 255 255 / 0.5);
-}
-/* Windows / Chrome 下讓展開的選項清單也維持深色 */
 .select-dark option {
-  background-color: #18181b;
-  color: #f4f4f5;
+  background-color: var(--ink-raised);
+  color: var(--paper);
+}
+
+/* ── 進場動畫 ──────────────────────────────────────────────
+   只有一種：往上浮起 + 淡入。用於「這塊內容剛到位」的提示，
+   不用於裝飾。全部在 reduced-motion 下失效。 */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@theme inline {
+  --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 捲動揭露：由捲動位置直接驅動，不靠 IntersectionObserver 事件。
+   這很重要——事件式的揭露（whileInView）在一次跨越整段的快速捲動中
+   可能完全不觸發，內容會永久停在 opacity 0。scroll-driven animation
+   是每一幀依位置計算進度，跳過去就是直接停在結束狀態。
+
+   預設狀態是「已顯示」，動畫只在支援且使用者沒要求減少動態時才接手，
+   所以任何不支援的瀏覽器看到的都是正常內容。 */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 22%;
+    }
+  }
+}
+
+/* 減少動態：拿掉的是位移與進場，不是狀態回饋。
+   全站的 transition 都只作用在顏色與邊框——那是「這個東西可以點／已經開啟」
+   的資訊，一併砍掉會讓介面變啞。所以這裡只停掉 animation 與 transform。 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-property: color, background-color, border-color, outline-color,
+      opacity !important;
+    transition-duration: 120ms !important;
+    scroll-behavior: auto !important;
+  }
+  .btn-line:active,
+  .btn-solid:active {
+    transform: none;
+  }
 }

@@ -24,9 +24,8 @@ export default async function HighestGrossingPage() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="page-shell space-y-8">
       <PageHeader
-        eyebrow={dict.home.rows.grossing.eyebrow}
         title={dict.pages.highestGrossing}
         subtitle={dict.pages.highestGrossingSubtitle}
       />

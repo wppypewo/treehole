@@ -13,7 +13,7 @@ export default function TrailerPlayer({
   const [play, setPlay] = useState(false);
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-zinc-900">
+    <div className="relative aspect-video w-full overflow-hidden bg-ink-raised">
       {play ? (
         <iframe
           src={`https://www.youtube.com/embed/${youTubeKey}?autoplay=1`}
@@ -35,8 +35,8 @@ export default function TrailerPlayer({
             alt={label}
             className="h-full w-full object-cover"
           />
-          <span className="absolute inset-0 flex items-center justify-center bg-black/30 transition-colors group-hover:bg-black/45">
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 pl-1 text-2xl text-black transition-transform group-hover:scale-110">
+          <span className="absolute inset-0 flex items-center justify-center bg-ink/35 transition-colors group-hover:bg-ink/20">
+            <span className="flex h-14 w-14 items-center justify-center border border-paper/70 pl-1 text-lg text-paper transition-colors group-hover:border-paper group-hover:bg-paper group-hover:text-ink">
               ▶
             </span>
           </span>
