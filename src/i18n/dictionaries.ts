@@ -135,6 +135,7 @@ export interface Dictionary {
     network: string;
     http: string;
     notFound: string;
+    pageNotFound: string;
     generic: string;
   };
 }
@@ -280,6 +281,7 @@ const zhTW: Dictionary = {
     network: "無法連線到 TMDB，請檢查網路後重試。",
     http: "TMDB 服務回應異常，請稍後重試。",
     notFound: "找不到這部電影。",
+    pageNotFound: "找不到這個頁面。",
     generic: "載入失敗，請稍後重試。",
   },
 };
@@ -428,6 +430,7 @@ const en: Dictionary = {
     network: "Cannot reach TMDB. Check your network and retry.",
     http: "TMDB returned an unexpected response. Please retry later.",
     notFound: "Movie not found.",
+    pageNotFound: "Page not found.",
     generic: "Failed to load. Please retry later.",
   },
 };

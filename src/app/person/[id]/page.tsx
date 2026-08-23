@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getPerson, getPersonMovieCredits } from "@/lib/tmdb";
 import type { MovieSummary } from "@/lib/tmdb";
+import { TmdbError } from "@/lib/tmdb";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import ErrorNotice from "@/components/ErrorNotice";
@@ -18,14 +20,19 @@ export default async function PersonPage({
   const { id } = await params;
   const personId = Number(id);
 
+  // 同詳情頁：不存在的 id 回真正的 404。
+  // 這裡先前還會顯示「找不到這部電影」——人物頁講電影，文案張冠李戴。
   if (!Number.isInteger(personId) || personId <= 0) {
-    return <ErrorNotice message={dict.errors.notFound} />;
+    notFound();
   }
 
   let person;
   try {
     person = await getPerson(locale, personId);
   } catch (error) {
+    if (error instanceof TmdbError && error.kind === "not-found") {
+      notFound();
+    }
     return <ErrorNotice message={tmdbErrorMessage(error, dict)} />;
   }
 

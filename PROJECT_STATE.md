@@ -518,3 +518,48 @@ data/movies.sqlite.2026-08-23.bak
 > 仍未解決：片庫是使用者唯一一份個人資料，正確地被 gitignore 排除在版控外，
 > 但也因此沒有任何自動備份機制。目前只有這一份手動備份。要不要做成常態流程
 > 需使用者決定。
+
+---
+
+## 2026-08-23 階段 12：無效 ID 的處理與 404 文案（已完成）
+
+impeccable 更新到 v4.1.1 後的全面檢查中發現的。
+
+### 無效 ID 原本回 200 配一句錯誤訊息
+
+`/movie/abc`、`/movie/0`、`/person/0`、TMDB 查無此 id ——這些以前都是
+回 HTTP 200，然後在版面中央塞一個 `ErrorNotice`。已經有設計好的 404 頁
+卻沒被用到。
+
+改用 Next 的 `notFound()`：id 格式不對、或 TMDB 回 `not-found` 分類的錯誤，
+都導向 404 頁。其他錯誤（金鑰、網路、5xx）維持 `ErrorNotice` ——
+那類是「這頁存在但現在載不出來」，語意不同。
+
+### 狀態碼仍是 200，這是串流的既定取捨
+
+`notFound()` 之後狀態碼還是 200。查 `node_modules/next/dist/docs` 的
+`not-found.md` 確認這是**文件載明的行為**，不是實作錯誤：
+
+> Because the check runs inside the `<Suspense>` boundary, the response has
+> already begun streaming as a `200`, and the status can't change once
+> streaming has started. The `noindex` tag keeps a soft 404 out of search
+> results. To return a real `404` status, the resource has to be checked
+> before the response streams... run that check in `proxy` instead.
+
+已驗證 Next 確實注入了 `<meta name="robots" content="noindex">`（無效 id 有、
+正常頁沒有），那是官方指定的緩解手段。要真正的 404 狀態碼得寫 `proxy`，
+而 proxy 只能檢查 id 格式、無法得知 TMDB 有沒有這筆，價值有限，未實作。
+
+### 404 頁的文案張冠李戴
+
+`not-found.tsx` 用的是 `dict.errors.notFound` =「找不到這部電影。」，
+但這頁也會接到人物頁的 404 ——人物頁講電影。新增
+`errors.pageNotFound`（「找不到這個頁面。」/ Page not found.）給 404 頁用；
+`errors.notFound` 保留給 `tmdb-error` 的 not-found 分類，那裡確實在講電影。
+
+### 這一輪的教訓
+
+測試時 `npm run start` 因為 port 3100 被舊行程佔用而啟動失敗（EADDRINUSE），
+我卻對著舊建置驗證了兩輪、得到錯誤結論。**先確認 server 真的起來了再測。**
+另外 grep HTML 找文案會撞到序列化進 RSC payload 的完整字典，
+要看實際畫面請用瀏覽器而不是 grep。

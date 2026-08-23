@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import {
@@ -8,6 +9,7 @@ import {
   getMovieCredits,
 } from "@/lib/tmdb";
 import type { MovieSummary, MovieCredits } from "@/lib/tmdb";
+import { TmdbError } from "@/lib/tmdb";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import { isFavorite, isInWatchlist, isWatched, getRating } from "@/lib/db";
@@ -32,14 +34,21 @@ export default async function MoviePage({
   const { id } = await params;
   const movieId = Number(id);
 
+  // 網址裡的 id 不是正整數，就不存在這個資源——回真正的 404，
+  // 不是 200 配一句錯誤訊息。已經有設計好的 404 頁，用它。
   if (!Number.isInteger(movieId) || movieId <= 0) {
-    return <ErrorNotice message={dict.errors.notFound} />;
+    notFound();
   }
 
   let movie;
   try {
     movie = await getMovieDetails(locale, movieId);
   } catch (error) {
+    // TMDB 說找不到，語意上就是 404；其他錯誤（金鑰、網路、5xx）才是
+    // 「這頁存在但現在載不出來」，那種才顯示錯誤訊息並保留 200。
+    if (error instanceof TmdbError && error.kind === "not-found") {
+      notFound();
+    }
     return <ErrorNotice message={tmdbErrorMessage(error, dict)} />;
   }
 
