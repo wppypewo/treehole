@@ -67,12 +67,9 @@ Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) 
 
 **Demo mode does not fake persistence.** If an action is not available, it says so. The alternative — letting users click "Add to favorites" and having it silently disappear — would give a misleading picture of the product.
 
-**Library pages are personal memory spaces, not management tables.** The header copy for each library page reflects how the list feels rather than what it does:
-- Favorites: "The ones you kept" — *留下來的*
-- Watchlist: "Waiting in line" — *排隊中*
-- Watched: "Films you've seen" — *走過的*
+**Page headers say the page's name and nothing else.** An earlier pass gave every page a three-part header: a small uppercase label, a title, and a sentence underneath. The label just repeated the nav item the user had clicked, and the sentence never changed what anyone could do. Both are gone. Titles are now the plain name of the destination, and the only two remaining small labels do real work: `Tonight` marks the editorial pick on the home page, and `Search results` tells you the large serif word is your query rather than a film title.
 
-**UI copy is part of product identity.** Browse says "Take your time" and "Narrow the list and find the one for tonight." Home says "Start here, then find the one for tonight." These are not placeholder text — they carry the product's voice.
+**A row title and the page it opens use the same words.** The home rows once read "What people are watching" and "Not out yet" while the pages they linked to were titled "Popular" and "Upcoming". Same destination, two different names. They now match.
 
 ---
 

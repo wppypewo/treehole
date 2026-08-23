@@ -302,3 +302,35 @@ eyebrow + 標題 + 副標，其中兩層是多餘的。
 
 **`language.label` 沒刪，改成有用的**：語言切換原本是兩顆沒有群組語意的按鈕，
 現在包上 `role="group" aria-label`，螢幕閱讀器才知道那兩顆是一組。
+
+---
+
+## 2026-08-23 階段 7：標題改為直白名稱（已完成）
+
+承階段 6，使用者要求連標題本身的文藝腔也拿掉。
+
+| 頁面 | 之前 | 之後 |
+|---|---|---|
+| /favorites | 留下來的 / The ones you kept | 收藏 / Favorites |
+| /watchlist | 排隊中 / Waiting in line | 想看 / Watchlist |
+| /watched | 走過的 / Films you've seen | 已看過 / Watched |
+| /browse | 慢慢挑 / Take your time | 瀏覽 / Browse |
+| /search | 在找哪一部? / What are you looking for? | 搜尋 / Search |
+| /top-rated | 影史評分最高 | 評分最高 |
+
+**首頁策展列一併處理**（同一個腔調，且原本與目的地頁面對不上）：
+大家在看的→熱門、還沒上映的→即將上映、最賣座的→最賣座、
+評分最高的→評分最高、為你挑的→為你推薦。
+
+現在**每一條策展列的標題與它連到的頁面標題完全一致**——先前
+「大家在看的」連到標題是「熱門電影」的頁面，同一個目的地兩個名字。
+
+**順帶修掉一個視覺 bug**：三個空狀態（`MovieGrid`、`InfiniteMovieGrid`、
+`LibraryGrid`）都畫了 `border-t`，但它們緊接在 `PageHeader` 的 `border-b`
+下方，畫面上是兩條相距 27px 的平行線，看起來像畫錯。已移除，並在
+`LibraryGrid` 加註說明避免以後又加回來。
+
+**未動**：空狀態的引導句（「清單還空著。挑幾部，排進來。」）保留——
+那不是標題，而且空狀態本來就需要一句話告訴使用者下一步做什麼。
+首頁的 eyebrow「今晚這部」也保留，它標示的是「這部片是被挑出來的」，
+有實際作用。

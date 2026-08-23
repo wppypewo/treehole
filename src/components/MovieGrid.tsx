@@ -19,7 +19,7 @@ export default function MovieGrid({
 }) {
   if (movies.length === 0) {
     return (
-      <p className="border-t border-hairline py-20 text-center text-sm text-paper-faint">
+      <p className="py-20 text-center text-sm text-paper-faint">
         {emptyText}
       </p>
     );
