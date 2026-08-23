@@ -22,7 +22,7 @@
 ## Product Status
 
 * Production / deployment: Vercel demo（README 載明 `https://treehole-movie-app.vercel.app`，以 `DEMO_MODE=1` 運作、不連真實 DB）；本 repo **無 `vercel.json`**（部署設定在 Vercel 端，未進 repo），另有 `.vercelignore`。AGENTS.md：不動 Vercel 部署設定，除非明確指示
-* README / portfolio status: 已是作品集狀態（Treehole 標題、live demo、features、demo/local 對照表、設計決策、tech stack、architecture、testing、screenshots、future）
+* README status: Treehole 標題、live demo、features、demo/local 對照表、設計決策、tech stack、architecture、testing、future。**2026-08-23 移除截圖區**（見階段 5）
 * CI status: 有 GitHub Actions `.github/workflows/ci.yml`，push / PR 到 main 觸發 `typecheck → test → build`（build 帶 `DEMO_MODE=1`）；另有 `.github/dependabot.yml`
 * Test status: Vitest；50 tests / 5 files（utility 層），2026-08-23 實測通過。lint 已清到 0 error 0 warning
 * Demo mode status: 由 `DEMO_MODE=1` 切換。`next.config.ts` 的 turbopack `resolveAlias` 在 demo 時把 `@/lib/db` 指向 `src/lib/db.demo.ts`（stub：讀回空、寫入 no-op）；UI 寫入動作仍顯示但呈 disabled 並誠實說明，不假裝儲存
@@ -58,8 +58,6 @@
 * Demo mode：寫入動作 disabled + 誠實空狀態，不假裝持久化（commit `92a8b3d 修正 demo 模式 action 與空狀態語意`）。
 * better-sqlite3 / `db.demo.ts` alias：已實作，`next.config.ts` 依 `DEMO_MODE` 切換 `@/lib/db` → `db.demo.ts`。
 * GitHub Actions：`ci.yml`（typecheck→test→build，build 帶 DEMO_MODE=1）+ `dependabot.yml` 已建立。
-* README screenshots：README 已嵌入桌機 / 手機截圖。
-* Production screenshots：`docs/screenshots/` 已有 6 張（home/detail/browse/search desktop + home/detail mobile；commit `3249b1a`）。
 * UI cinematic pass：一系列互動 / 質感 commit（`5bf0af0 優化電影卡片與詳情頁互動質感`、`14a18b6`、`6f423dd`、`f15db11`、`22623a1` 等）。
 * demo mode action / empty-state semantics：見上 `92a8b3d`。
 * final README correction：近 4 個 commit 整理作品集 README（`9bd48ad`、`d5adfd1`、`2643879`）與文案語義（`c5053f4`、`1cac0cb`）。
@@ -74,7 +72,7 @@
 
 1. ~~修正 AGENTS.md 動畫套件描述落差~~（已完成 2026-06-15：AGENTS.md 改為「Motion 已安裝並使用中；GSAP/Lenis 未安裝」，與 README 一致）。
 2. demo/local DB 邊界整合測試「可行性盤點」：先列缺口與測試方案，不直接大改（對應 README future 第一項）。
-3. 作品集 closeout 檢查：確認 README、live demo、screenshots、demo/local 邊界說明、CI 狀態彼此一致。
+3. 作品集 closeout 檢查：確認 README、live demo、demo/local 邊界說明、CI 狀態彼此一致。
 
 ## Deferred / Explicit Approval Required
 
@@ -252,3 +250,19 @@ Noto Serif TC 設 `preload: false`（CJK 檔大），已實測確認 CJK 分片�
 **未處理**：`TrailerPlayer` 的 YouTube 縮圖仍是固定 `hqdefault`（480px）。
 YouTube 的 `maxresdefault` / `sddefault` **不保證每支影片都存在**，
 srcset 挑到不存在的檔案不會退回、會直接壞圖。寧可稍微糊也不要壞圖。
+
+---
+
+## 2026-08-23 階段 5：移除截圖（已完成）
+
+三輪改版後，`docs/screenshots/` 的 4 張圖沒有一張還準（版面、配色、字體全換了），
+而且現在全站有四種版面，補拍等於要拍八張。使用者判斷這是自用專案，不需要維護
+對外的截圖，直接移除。
+
+**刪除**：`docs/screenshots/` 全部 4 個 PNG（合計約 8.2 MB）
+**README**：移除整個 `## Screenshots` 區塊
+
+舊圖仍在 git 歷史裡（commit `3249b1a` 之後），要回復用 `git show` 取即可。
+
+> 若日後要重新對外，README 的作品集敘事（標題、live demo、設計決策段落）
+> 都還在，只缺截圖區——補拍後把區塊加回去就好。

@@ -172,28 +172,6 @@ npm run build      # production build
 
 ---
 
-## Screenshots
-
-### Desktop
-
-| Home | Browse |
-|---|---|
-| ![Treehole home desktop](docs/screenshots/home-desktop.png) | ![Treehole browse desktop](docs/screenshots/browse-desktop.png) |
-
-| Search | |
-|---|---|
-| ![Treehole search desktop](docs/screenshots/search-desktop.png) | |
-
-### Mobile
-
-| Home |
-|---|
-| ![Treehole home mobile](docs/screenshots/home-mobile.png) |
-
-> Detail-page screenshots are being re-shot after the current design pass.
-
----
-
 ## Future Improvements
 
 - Expand integration tests around the demo/local DB boundary
