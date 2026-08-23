@@ -164,6 +164,7 @@ These tests cover the utility layer. UI behavior and API integrations are not co
 npm run test       # run once
 npm run test:watch # watch mode
 npm run typecheck  # tsc --noEmit
+npm run lint       # eslint
 npm run build      # production build
 ```
 

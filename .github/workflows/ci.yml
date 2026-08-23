@@ -29,6 +29,12 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      # lint 放在 typecheck 之後、test 之前。加這一步是因為 eslint 10 的
+      # dependabot PR 拿到綠燈，但本地跑 lint 會直接崩潰——CI 沒跑 lint，
+      # 所以那個綠燈是假的。
+      - name: Lint
+        run: npm run lint
+
       - name: Test
         run: npm run test
 
