@@ -372,3 +372,59 @@ experimental，且要同時升 Next，兩個變動疊加。）
 dev 模式 8 條路由實測 200，無 server error。
 
 **PR #8（TS 7）未合併**，理由如上。等 Next 穩定支援 TS 7 再說。
+
+---
+
+## 2026-08-23 階段 9：清理 dependabot 積壓的相依更新（已完成）
+
+**沒有直接合併那些 PR**——它們的 CI 是跑在舊 main 上（Node 20 + actions v4 + TS 5），
+綠燈不保證在新環境成立。改為逐一在本地升級並各自驗證。事後證明這是對的，
+其中一個在新環境會直接崩潰。
+
+| 套件 | 之前 | 之後 | 備註 |
+|---|---|---|---|
+| `next` | 16.2.6 | **16.3.2** | 安全修補，見下 |
+| `eslint-config-next` | 16.2.6 | 16.3.2 | 與 next 綁定 |
+| `@types/node` | ^20 | **^24.13.3** | 對齊 CI 的 Node 24，不採 dependabot 提的 26 |
+| `react` / `react-dom` | 19.2.4 | **19.2.8** | |
+| `@types/react` | 19.2.15 | 19.2.18 | |
+| `@types/react-dom` | 19.2.3 | 19.2.4 | |
+| `eslint` | 9.39.4 | **9.39.5** | 停在 9.x，見下 |
+
+### npm audit：6 個 high → 0
+
+跑 `npm audit` 才發現這批更新其實是安全修補：
+
+1. **PostCSS 路徑穿越**（GHSA-r28c-9q8g-f849）——next 16.2.6 內含 postcss 8.4.31，
+   16.3.2 換成 8.5.23
+2. **sharp <0.35.0** 繼承 libvips 的 CVE-2026-33327 / 33328 / 35590 / 35591
+   ——升級後實裝 0.35.3
+3. **js-yaml**（CVE-2026-59870）——來自 `eslint → @eslint/eslintrc → js-yaml`。
+   eslint 修補版 9.39.5 把 eslintrc 帶到 3.3.6、js-yaml 帶到 4.3.1 就解決了，
+   不需要跳 major
+
+### eslint 10 不可行（已實測，不是推測）
+
+裝了 10.9.0 之後 `npm run lint` **直接崩潰**：
+
+```
+TypeError: Error while loading rule 'react/display-name':
+contextOrFilename.getFilename is not a function
+  at .../eslint-config-next/node_modules/eslint-plugin-react/lib/util/version.js
+```
+
+`eslint-plugin-react` 呼叫 `context.getFilename()`，eslint 10 已移除該 API。
+而 `eslint-plugin-react` **7.37.5 已經是最新版**，peer 宣告
+`eslint: ^3 || … || ^9.7`——沒支援 eslint 10，也沒有可以 override 的較新版本。
+等 eslint-plugin-react 跟上再說。
+
+### 還原精確釘版
+
+`npm install` 會把 `next` / `react` / `react-dom` / `eslint-config-next` 從精確
+釘版改成 caret。那是專案原本刻意的慣例（Vercel demo 要可重現），已手動還原。
+
+### 驗證
+
+typecheck / lint / 50 tests / `DEMO_MODE=1` build 全過；`npm audit` 0 vulnerabilities；
+dev 模式 15 條路由實測正確、無 server error。lint 另用探針檔實測規則確實會觸發，
+不是靜默跳過。
