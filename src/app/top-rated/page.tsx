@@ -27,7 +27,6 @@ export default async function TopRatedPage() {
     <section className="page-shell space-y-10">
       <PageHeader
         title={dict.pages.topRated}
-        subtitle={dict.pages.topRatedSubtitle}
       />
       <InfiniteMovieGrid
         endpoint="/api/top-rated"

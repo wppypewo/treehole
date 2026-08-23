@@ -59,12 +59,20 @@ export default function Navbar({
         </div>
 
         <div className="hidden sm:block">
-          <LanguageSwitcher current={locale} labels={langLabels} />
+          <LanguageSwitcher
+            current={locale}
+            labels={langLabels}
+            groupLabel={dict.language.label}
+          />
         </div>
 
         {/* Mobile: language + hamburger */}
         <div className="flex flex-1 items-center justify-end gap-3 sm:hidden">
-          <LanguageSwitcher current={locale} labels={langLabels} />
+          <LanguageSwitcher
+            current={locale}
+            labels={langLabels}
+            groupLabel={dict.language.label}
+          />
           <button
             type="button"
             aria-label={menuOpen ? dict.nav.closeMenu : dict.nav.openMenu}

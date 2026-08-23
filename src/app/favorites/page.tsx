@@ -16,9 +16,7 @@ export default async function FavoritesPage() {
   return (
     <section className="page-shell space-y-10">
       <PageHeader
-        eyebrow={dict.library.favoritesEyebrow}
         title={dict.library.favoritesTitle}
-        subtitle={dict.library.favoritesSubtitle}
       />
       <LibraryGrid
         items={items}

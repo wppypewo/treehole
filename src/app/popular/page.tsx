@@ -27,7 +27,6 @@ export default async function PopularPage() {
     <section className="page-shell space-y-10">
       <PageHeader
         title={dict.pages.popular}
-        subtitle={dict.pages.popularSubtitle}
       />
       <InfiniteMovieGrid
         endpoint="/api/popular"

@@ -27,7 +27,6 @@ export default async function HighestGrossingPage() {
     <section className="page-shell space-y-10">
       <PageHeader
         title={dict.pages.highestGrossing}
-        subtitle={dict.pages.highestGrossingSubtitle}
       />
       <InfiniteMovieGrid
         endpoint="/api/highest-grossing"

@@ -9,9 +9,12 @@ import { setLocale } from "@/i18n/actions";
 export default function LanguageSwitcher({
   current,
   labels,
+  groupLabel,
 }: {
   current: Locale;
   labels: Record<Locale, string>;
+  /** 螢幕閱讀器用的群組名稱。沒有它，兩顆按鈕會是兩個沒有上下文的孤兒。 */
+  groupLabel: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -25,7 +28,12 @@ export default function LanguageSwitcher({
   }
 
   return (
-    <div className="flex items-center gap-1" aria-busy={isPending}>
+    <div
+      role="group"
+      aria-label={groupLabel}
+      className="flex items-center gap-1"
+      aria-busy={isPending}
+    >
       {locales.map((locale) => {
         const active = locale === current;
         return (

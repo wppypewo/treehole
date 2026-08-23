@@ -20,9 +20,7 @@ export default async function RecommendationsPage() {
     return (
       <section className="page-shell space-y-10">
         <PageHeader
-          eyebrow={dict.pages.recommendationsEyebrow}
           title={dict.pages.recommendations}
-          subtitle={dict.pages.recommendationsSubtitle}
         />
         <div className="py-24">
           <div className="mx-auto max-w-md text-center">
@@ -53,9 +51,7 @@ export default async function RecommendationsPage() {
   return (
     <section className="page-shell space-y-10">
       <PageHeader
-        eyebrow={dict.pages.recommendationsEyebrow}
         title={dict.pages.recommendations}
-        subtitle={dict.pages.recommendationsSubtitle}
       />
       <InfiniteMovieGrid
         endpoint="/api/recommendations"

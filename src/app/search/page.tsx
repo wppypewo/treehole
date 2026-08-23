@@ -38,11 +38,9 @@ export default async function SearchPage({
     return (
       <section className="page-shell">
         <header className="animate-rise max-w-2xl border-b border-hairline pb-8">
-          <p className="eyebrow mb-3">{dict.search.eyebrow}</p>
           <h1 className="t-film text-[2.125rem] text-paper sm:text-[3rem]">
             {dict.search.title}
           </h1>
-          <p className="mt-3 text-sm text-paper-dim">{dict.search.subtitle}</p>
         </header>
 
         <div className="mt-8 max-w-2xl">

@@ -16,9 +16,7 @@ export default async function WatchlistPage() {
   return (
     <section className="page-shell space-y-10">
       <PageHeader
-        eyebrow={dict.library.watchlistEyebrow}
         title={dict.library.watchlistTitle}
-        subtitle={dict.library.watchlistSubtitle}
       />
       <LibraryGrid
         items={items}

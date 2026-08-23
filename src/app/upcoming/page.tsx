@@ -30,7 +30,6 @@ export default async function UpcomingPage() {
     <section className="page-shell space-y-10">
       <PageHeader
         title={dict.pages.upcoming}
-        subtitle={dict.pages.upcomingSubtitle}
         meta={dict.common.filmCount.replace("{n}", String(list.length))}
       />
       {/* 不是海報牆：未上映的片重點在「哪一天」，所以用 16:9 劇照配日期，

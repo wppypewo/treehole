@@ -16,9 +16,7 @@ export default async function WatchedPage() {
   return (
     <section className="page-shell space-y-10">
       <PageHeader
-        eyebrow={dict.library.watchedEyebrow}
         title={dict.library.watchedTitle}
-        subtitle={dict.library.watchedSubtitle}
       />
       <LibraryGrid
         items={items}

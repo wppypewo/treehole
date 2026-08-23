@@ -39,9 +39,7 @@ export default async function BrowsePage() {
   return (
     <section className="page-shell space-y-8">
       <PageHeader
-        eyebrow={dict.browse.eyebrow}
         title={dict.browse.title}
-        subtitle={dict.browse.subtitle}
       />
       <BrowseClient
         genres={genres}
