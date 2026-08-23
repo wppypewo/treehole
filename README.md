@@ -77,7 +77,7 @@ Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) 
 
 | Layer | Choice |
 |---|---|
-| Framework | Next.js 16.2.6 (App Router, Turbopack) |
+| Framework | Next.js 16.3.2 (App Router, Turbopack) |
 | UI | React 19, TypeScript 6 |
 | Type | Bodoni Moda + Noto Serif TC (display), Geist (interface), via `next/font` |
 | Styling | Tailwind CSS v4, design tokens in `globals.css` |

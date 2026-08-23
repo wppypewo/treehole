@@ -18,12 +18,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 | 層 | 選擇 |
 |---|---|
-| 框架 | Next.js 16.2.6（port 3100） |
+| 框架 | Next.js 16.3.2（port 3100） |
 | React | 19.2.4 |
 | 樣式 | Tailwind v4（@tailwindcss/postcss） |
 | 本機資料庫 | better-sqlite3 ^12.10.0（local 版專用） |
-| 型別 | TypeScript ^5 |
-| Lint | ESLint ^9（eslint-config-next 16.2.6） |
+| 型別 | TypeScript ^6 |
+| Lint | ESLint ^9（eslint-config-next 16.3.2） |
 | 動畫 | GSAP ^3.15 + ScrollTrigger（scroll 敘事）、Lenis ^1.3（捲動節奏）、Motion ^12.40（元件級，如 popLayout） |
 | 字體 | Bodoni Moda + Noto Serif TC（標題）、Geist（介面），皆走 `next/font` |
 
