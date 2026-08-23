@@ -11,12 +11,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # actions 固定在 major 移動標籤：修補版自動跟進，破壞性變更不會偷偷生效。
+      # v4 建在 Node 20 上，runner 已強制改跑 Node 24 並發出 deprecation 警告。
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          # Node 20 已於 2026-04-30 結束支援，24 是現行 LTS（到 2028-04-30）。
+          # better-sqlite3 12.10 宣告支援到 26.x，這個版本在範圍內。
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies

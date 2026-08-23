@@ -4,3 +4,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+
+  # 沒有這一段，GitHub Actions 的版本只會愈放愈舊——checkout/setup-node
+  # 停在 v4 到被官方標為 deprecated 才被發現，就是因為沒人在看。
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
