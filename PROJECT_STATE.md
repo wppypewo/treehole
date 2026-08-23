@@ -334,3 +334,41 @@ eyebrow + 標題 + 副標，其中兩層是多餘的。
 那不是標題，而且空狀態本來就需要一句話告訴使用者下一步做什麼。
 首頁的 eyebrow「今晚這部」也保留，它標示的是「這部片是被挑出來的」，
 有實際作用。
+
+---
+
+## 2026-08-23 階段 8：TypeScript 升到 6.0.3（已完成）
+
+起因是 dependabot 的 `typescript 5.9.3 → 7.0.2` PR（#8）CI 掛掉。
+
+**查證出來的根因**：TypeScript 7 是 Go 改寫的原生版，**不再提供 JS 編譯器 API**。
+
+| 版本 | 根進入點 | `lib/typescript.js` |
+|---|---|---|
+| 5.9.3 | `./lib/typescript.js` | 有 |
+| 6.0.3 | `./lib/typescript.js` | 有 |
+| 7.0.2 | `./lib/version.cjs`（只有版本號） | **沒有** |
+
+Next 16.2.6 的 `verify-typescript-setup` 是用 `existsSync('typescript/lib/typescript.js')`
+做檢查，不是能力探測，所以 TS 7 一律被判定為「沒安裝」。
+
+**為什麼 `Type check` 過但 `Build` 掛**：`npm run typecheck` 跑的是 `bin/tsc`
+執行檔（TS 7 還有），`next build` 要的是 JS 模組形式的 API（TS 7 沒有）。
+兩條不同路徑，不是矛盾。log 裡的 `Segmentation fault`（exit 139）發生在
+build worker 已經 `exited with code: 1` **之後**，是 Next 錯誤處理的問題，
+不是 TS 7 造成的當機。
+
+**選 TS 6 的依據**：Next 16.3.2 的原始碼把 typescript 檢查拆成 API 與 CLI 兩個，
+API 那個明寫 `install: 'typescript@^6.0.0'`——官方支援的 API 線是 6，不是 7。
+（16.3.x 另有 `experimental.useTypeScriptCli` 可走 CLI 路徑吃 TS 7，但那是
+experimental，且要同時升 Next，兩個變動疊加。）
+
+**相容性事前查證**：`@typescript-eslint` 8.60.0 宣告 `typescript: >=4.8.4 <6.1.0`，
+6.0.3 在範圍內；`eslint-config-next` 要 `>=3.3.1`；`next` 未宣告 typescript peer。
+
+**實測**：typecheck / lint / 50 tests / `DEMO_MODE=1 build` 全過。
+建置 log 出現 `Running TypeScript ...` 且成功——正是 TS 7 掛掉的那一步。
+`next.config.ts` 沒有 `ignoreBuildErrors`，所以檢查確實有跑。
+dev 模式 8 條路由實測 200，無 server error。
+
+**PR #8（TS 7）未合併**，理由如上。等 Next 穩定支援 TS 7 再說。
