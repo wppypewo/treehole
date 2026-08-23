@@ -9,12 +9,12 @@
 * Repo path: `D:\ClaudeCode\projects\movie-app`
 * Repo type: Next.js 16 全端 Web App（git repo，有 GitHub remote）
 * Primary purpose: Treehole——TMDB 電影導覽 + 私人片庫（本機 SQLite；Vercel 為 demo），同時作為作品集
-* Current status: **Design phase（2026-08-23 由使用者明確開啟）**——BT 下載功能已整批移除，正進行全站風格重做
+* Current status: 全站改版與相依維護皆已完成（階段 1–11），已推送至 origin/main，CI 綠燈
 
 ## Git Status
 
 * Branch: `main`
-* Latest commit: `3249b1a 加入 Treehole production screenshots`
+* Latest commit: 見 `git log`（本檔的階段紀錄已滾到階段 11）
 * Working tree: clean（`git status --short` 無輸出）
 * Remote: `origin` → `https://github.com/zhuang060329-bit/treehole-movie-app.git`（依備忘為 private）
 * Sync status: 與 `origin/main` 同步（`## main...origin/main`，無 ahead / behind）
@@ -30,15 +30,15 @@
 
 ## Tech Stack
 
-* Framework: Next.js 16.2.6（App Router、Turbopack，port 3100）+ React 19 + TypeScript
+* Framework: Next.js 16.3.2（App Router、Turbopack，port 3100）+ React 19.2.8 + TypeScript 6
 * Data source: TMDB API（v3 key / v4 token，全部 server-side）
-* Local database: better-sqlite3（**僅 local 模式**；demo 模式以 `db.demo.ts` stub 取代）
+* Local database: better-sqlite3 13（**僅 local 模式**；demo 模式以 `db.demo.ts` stub 取代）
 * Demo / production mode: 單一 `DEMO_MODE` env 切換（Vercel=demo、本機=local）；TMDB key 為 server-side
 * Styling: Tailwind CSS v4（`@tailwindcss/postcss`）
 * Testing: Vitest（`vitest.config.ts`）
-* Deployment: Vercel（demo）；本機為 Node 22+ LAN server（bind `0.0.0.0`）。CI 建置在 Node 24
+* Deployment: Vercel（demo）；本機為 Node 24+ LAN server（bind `0.0.0.0`）。CI 建置在 Node 24
 
-> 動畫套件現況（2026-08-23 更新）：`gsap` ^3.15、`lenis` ^1.3、`motion` ^12.40 皆已安裝並使用中。分工見 AGENTS.md。
+> 動畫套件現況（2026-08-23 更新）：`gsap` ^3.15、`lenis` ^1.3、`motion` ^13.1 皆已安裝並使用中。分工見 AGENTS.md。
 
 ## Available Commands
 
