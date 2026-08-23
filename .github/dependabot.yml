@@ -5,6 +5,30 @@ updates:
     schedule:
       interval: weekly
 
+    # 以下三條是「已經評估過、目前確定不能升」的項目。
+    # 每一條都寫清楚解除條件——ignore 最大的風險是變成沒人記得為什麼存在的
+    # 永久封印，所以這裡不寫「暫時關閉」，只寫什麼情況下該拿掉。
+    ignore:
+      # TypeScript 7 是 Go 改寫的原生版，不再提供 JS 編譯器 API
+      # （根進入點從 lib/typescript.js 換成 lib/version.cjs）。
+      # Next 的建置期型別檢查靠那個 API，所以 next build 會失敗。
+      # 解除條件：Next 穩定支援 TS 7，或改用 experimental.useTypeScriptCli。
+      - dependency-name: 'typescript'
+        versions: ['7.x']
+
+      # eslint 10 移除了 context.getFilename()，而 eslint-plugin-react
+      # （eslint-config-next 內含）還在用它，會讓 lint 直接崩潰。
+      # eslint-plugin-react 7.37.5 已是最新版，peer 只宣告到 ^9.7。
+      # 解除條件：eslint-plugin-react 發布支援 eslint 10 的版本。
+      - dependency-name: 'eslint'
+        versions: ['10.x']
+
+      # @types/node 刻意跟著 CI 建置用的 Node 版本走，不追最新。
+      # 型別若比執行環境新，會讓實際上不存在的 API 通過檢查。
+      # 解除條件：CI 的 node-version 升上去時，這裡一起手動升。
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
+
   # 沒有這一段，GitHub Actions 的版本只會愈放愈舊——checkout/setup-node
   # 停在 v4 到被官方標為 deprecated 才被發現，就是因為沒人在看。
   - package-ecosystem: github-actions
