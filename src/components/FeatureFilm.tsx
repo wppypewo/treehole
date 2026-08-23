@@ -1,6 +1,6 @@
 import Link from "next/link";
 import ParallaxImage from "./ParallaxImage";
-import { tmdbImage } from "@/lib/images";
+import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 
 export interface FeatureItem {
   id: number;
@@ -29,6 +29,7 @@ export default function FeatureFilm({
   viewLabel: string;
 }) {
   const backdrop = tmdbImage(item.backdrop_path, "w1280");
+  const backdropSrcSet = tmdbSrcSet(item.backdrop_path, "backdrop");
   const year = item.release_date ? item.release_date.slice(0, 4) : null;
 
   return (
@@ -37,7 +38,14 @@ export default function FeatureFilm({
     // 而手機的文字量（eyebrow＋片名＋年份＋兩行簡介＋按鈕）本來就吃掉半個畫面。
     <section className="relative w-full">
       <div className="relative h-[44dvh] max-h-[420px] min-h-[240px] w-full overflow-hidden bg-ink-raised sm:h-[74dvh] sm:max-h-[780px] sm:min-h-[440px]">
-        {backdrop && <ParallaxImage src={backdrop} priority />}
+        {backdrop && (
+          <ParallaxImage
+            src={backdrop}
+            srcSet={backdropSrcSet}
+            sizes={IMAGE_SIZES.fullBleed}
+            priority
+          />
+        )}
         <div aria-hidden className="scrim-bottom pointer-events-none absolute inset-0" />
       </div>
 

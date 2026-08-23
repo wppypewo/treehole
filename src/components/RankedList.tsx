@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { tmdbImage } from "@/lib/images";
+import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import type { MovieSummary } from "@/lib/tmdb";
 
 /**
@@ -65,6 +65,8 @@ export default function RankedList({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={thumb}
+                      srcSet={tmdbSrcSet(movie.poster_path, "poster")}
+                      sizes={IMAGE_SIZES.rankThumb}
                       alt=""
                       aria-hidden="true"
                       loading="lazy"

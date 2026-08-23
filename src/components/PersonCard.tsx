@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { tmdbImage } from "@/lib/images";
+import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 
 // 人物頭像卡（演員／導演）。hover 回饋與 MovieCard 一致：不放大，只浮現片夾框。
 export default function PersonCard({
@@ -22,6 +22,8 @@ export default function PersonCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={img}
+            srcSet={tmdbSrcSet(profilePath, "profile")}
+            sizes={IMAGE_SIZES.personThumb}
             alt={name}
             loading="lazy"
             className="h-full w-full object-cover"

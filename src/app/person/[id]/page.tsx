@@ -4,7 +4,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { getPerson, getPersonMovieCredits } from "@/lib/tmdb";
 import type { MovieSummary } from "@/lib/tmdb";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
-import { tmdbImage } from "@/lib/images";
+import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import ErrorNotice from "@/components/ErrorNotice";
 import MovieGrid from "@/components/MovieGrid";
 
@@ -58,6 +58,8 @@ export default async function PersonPage({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={photo}
+                srcSet={tmdbSrcSet(person.profile_path, "profile")}
+                sizes={IMAGE_SIZES.personPhoto}
                 alt={person.name}
                 loading="eager"
                 className="h-full w-full object-cover"

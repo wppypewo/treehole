@@ -15,9 +15,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
  */
 export default function ParallaxImage({
   src,
+  srcSet,
+  sizes,
   priority = false,
 }: {
   src: string;
+  srcSet?: string;
+  sizes?: string;
   priority?: boolean;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -52,6 +56,8 @@ export default function ParallaxImage({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
+          srcSet={srcSet}
+          sizes={sizes}
           alt=""
           aria-hidden="true"
           fetchPriority={priority ? "high" : "auto"}

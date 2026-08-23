@@ -6,6 +6,7 @@ import UpcomingCard, { upcomingDateFormatter } from "./UpcomingCard";
 import { POSTER_GRID } from "./MovieGrid";
 import type { MovieSummary } from "@/lib/tmdb";
 import type { Locale } from "@/i18n/config";
+import { IMAGE_SIZES } from "@/lib/images";
 
 interface Labels {
   loading: string;
@@ -104,7 +105,12 @@ export default function InfiniteMovieGrid({
       {variant === "dated" && fmt ? (
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
           {movies.map((movie) => (
-            <UpcomingCard key={movie.id} movie={movie} fmt={fmt} />
+            <UpcomingCard
+              key={movie.id}
+              movie={movie}
+              fmt={fmt}
+              sizes={IMAGE_SIZES.upcomingGrid}
+            />
           ))}
         </div>
       ) : (

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
-import { tmdbImage } from "@/lib/images";
+import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import type { SavedMovie } from "@/lib/db";
 
 interface Labels {
@@ -146,6 +146,8 @@ export default function LibraryGrid({
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={poster}
+                          srcSet={tmdbSrcSet(movie.poster_path, "poster")}
+                          sizes={IMAGE_SIZES.posterGrid}
                           alt={movie.title}
                           loading="lazy"
                           className="h-full w-full object-cover"

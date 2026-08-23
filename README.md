@@ -59,6 +59,8 @@ Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) 
 
 **Reveals are driven by scroll position, not events.** The ranked index reveals with CSS `animation-timeline: view()`. An IntersectionObserver reveal can be skipped entirely by one fast flick, leaving content stuck at zero opacity; a scroll-driven animation lands at the correct progress no matter how you got there, and the default state is visible.
 
+**Images are served at the size the device actually needs.** Every TMDB image carries a `srcset` of the widths TMDB really serves (verified: `w999` returns 400) plus a hand-written `sizes` string per layout slot, collected in one place so they cannot drift from the grid silently. On a 375px 2x phone the opening backdrop drops from `w1280` (212 KB) to `w780` (85 KB); on a 1280px 2x desktop a grid poster moves from a hard-coded `w342` to `w500`, which is a sharpness fix rather than a saving.
+
 **Each page type gets its own layout.** Ten pages once shared one six-column poster wall, which made them indistinguishable. Now the ranked pages number their entries, the upcoming page leads with release dates on 16:9 stills, search makes the query itself the masthead, and only the pages with no inherent order stay a plain wall.
 
 **Text is never placed over an image on small screens.** On mobile the backdrop is a band and the title sits below it on solid ink. Overlaying titles on stills means readability depends on how bright that particular still happens to be.
@@ -149,13 +151,13 @@ The dev and production servers bind to `0.0.0.0`, so other devices on the same n
 
 ## Testing
 
-43 tests across 5 files, covering utility functions:
+50 tests across 5 files, covering utility functions:
 
 | File | Coverage |
 |---|---|
 | `tmdb-utils.test.ts` | `pickTrailer` — trailer selection logic |
 | `tmdb-error.test.ts` | `tmdbErrorMessage`, `isV4Token` — API error classification and key format validation |
-| `images.test.ts` | `tmdbImage` — TMDB image URL construction |
+| `images.test.ts` | `tmdbImage`, `tmdbSrcSet`, `IMAGE_SIZES` — image URL construction, srcset candidates, and sizes-string invariants |
 | `genres.test.ts` | `genreOptions` — locale-aware genre list construction |
 | `i18n-config.test.ts` | `normalizeLocale`, `tmdbLanguage`, `htmlLang` — locale mapping helpers |
 

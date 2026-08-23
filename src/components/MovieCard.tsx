@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { tmdbImage } from "@/lib/images";
+import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import type { MovieSummary } from "@/lib/tmdb";
 
 /**
@@ -21,12 +21,16 @@ export default function MovieCard({
   movie,
   size = "sm",
   rank,
+  sizes = IMAGE_SIZES.posterGrid,
 }: {
   movie: MovieSummary;
   size?: "sm" | "lg";
   rank?: number;
+  /** 這張卡在版面上實際佔多寬。橫列與格線差很多，所以由呼叫端指定。 */
+  sizes?: string;
 }) {
   const poster = tmdbImage(movie.poster_path, size === "lg" ? "w500" : "w342");
+  const posterSrcSet = tmdbSrcSet(movie.poster_path, "poster");
   const year = movie.release_date ? movie.release_date.slice(0, 4) : null;
   const rating = movie.vote_average > 0 ? movie.vote_average.toFixed(1) : null;
 
@@ -47,6 +51,8 @@ export default function MovieCard({
           <img
             ref={imgRef}
             src={poster}
+            srcSet={posterSrcSet}
+            sizes={sizes}
             alt={movie.title}
             loading="lazy"
             onLoad={() => setLoaded(true)}

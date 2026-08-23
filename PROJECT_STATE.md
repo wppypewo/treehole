@@ -24,7 +24,7 @@
 * Production / deployment: Vercel demo（README 載明 `https://treehole-movie-app.vercel.app`，以 `DEMO_MODE=1` 運作、不連真實 DB）；本 repo **無 `vercel.json`**（部署設定在 Vercel 端，未進 repo），另有 `.vercelignore`。AGENTS.md：不動 Vercel 部署設定，除非明確指示
 * README / portfolio status: 已是作品集狀態（Treehole 標題、live demo、features、demo/local 對照表、設計決策、tech stack、architecture、testing、screenshots、future）
 * CI status: 有 GitHub Actions `.github/workflows/ci.yml`，push / PR 到 main 觸發 `typecheck → test → build`（build 帶 `DEMO_MODE=1`）；另有 `.github/dependabot.yml`
-* Test status: Vitest；43 tests / 5 files（utility 層），2026-08-23 實測通過。lint 已清到 0 error 0 warning
+* Test status: Vitest；50 tests / 5 files（utility 層），2026-08-23 實測通過。lint 已清到 0 error 0 warning
 * Demo mode status: 由 `DEMO_MODE=1` 切換。`next.config.ts` 的 turbopack `resolveAlias` 在 demo 時把 `@/lib/db` 指向 `src/lib/db.demo.ts`（stub：讀回空、寫入 no-op）；UI 寫入動作仍顯示但呈 disabled 並誠實說明，不假裝儲存
 * Known limitations: 缺 demo/local DB 邊界的整合測試（README future）；測試僅涵蓋 utility 層，UI 與 API 整合未覆蓋
 
@@ -218,3 +218,37 @@ Noto Serif TC 設 `preload: false`（CJK 檔大），已實測確認 CJK 分片�
 
 **環境注意**：**dev server 執行中不要 `rm -rf .next`**，會讓 Turbopack
 找不到 manifest 而整站 500。要清快取先 stop server。
+
+---
+
+## 2026-08-23 階段 4：圖片 srcset（已完成）
+
+原本每個 `<img>` 都寫死一個尺寸，不管裝置是什麼。
+
+**先查證再動手**（實際請求 TMDB，不憑記憶）：
+- TMDB **只服務固定的幾個寬度**，`w999` 回 **400**，不是任意值都行
+- `configuration` 的 `profile_sizes` 只列 w45 / w185 / h632 / original，
+  但 `w342`、`w500` 對人物照實測回 200——CDN 接受的是所有類別寬度的聯集
+- backdrop 實測：**w1280 = 212KB、w780 = 85KB、w300 = 17KB**
+
+**做法**：`tmdbSrcSet(path, kind)` 依素材類別產生候選寬度；
+`IMAGE_SIZES` 集中放各版面槽位的 sizes 字串。
+
+| kind | 候選寬度 | 為什麼停在這 |
+|---|---|---|
+| poster | 185 / 342 / 500 | 最大顯示槽約 260px，3x 螢幕下 w500 仍有 1.9 倍密度，w780 只是變大 |
+| backdrop | 300 / 780 / 1280 | 出血劇照，桌機需要 1280 |
+| profile | 185 / 342 | 最大顯示槽 220px，w342 在 2x 剛好夠 |
+
+**實測效果**（瀏覽器實際挑的檔案）：
+- 375px @2x 首屏劇照：w1280 → **w780**（212KB → 85KB，-60%）
+- 1280px @2x 格線海報：w342 → **w500**（原本 0.75 倍密度，是糊的；這是畫質修正不是省流量）
+- 小縮圖（編號榜 48px、演員卡 112px）：正確落在 w185
+
+**測試**：43 → 50。新增的測試不只比對字串，還鎖住兩個會靜默壞掉的性質——
+候選寬度必須都在 TMDB 實際服務的清單內，且每個 sizes 的最後一項不能帶媒體條件
+（否則不符合條件時瀏覽器退回 100vw 挑最大的檔案）。
+
+**未處理**：`TrailerPlayer` 的 YouTube 縮圖仍是固定 `hqdefault`（480px）。
+YouTube 的 `maxresdefault` / `sddefault` **不保證每支影片都存在**，
+srcset 挑到不存在的檔案不會退回、會直接壞圖。寧可稍微糊也不要壞圖。

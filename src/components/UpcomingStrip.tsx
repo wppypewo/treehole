@@ -2,6 +2,7 @@ import Link from "next/link";
 import UpcomingCard, { upcomingDateFormatter } from "./UpcomingCard";
 import type { MovieSummary } from "@/lib/tmdb";
 import type { Locale } from "@/i18n/config";
+import { IMAGE_SIZES } from "@/lib/images";
 
 // 首頁的即將上映橫列。卡片本身與 /upcoming 整頁共用 UpcomingCard，
 // 兩邊只差在排列方式（橫捲 vs 格線）。
@@ -41,7 +42,11 @@ export default function UpcomingStrip({
             key={movie.id}
             className="w-[72vw] max-w-[420px] shrink-0 sm:w-[340px]"
           >
-            <UpcomingCard movie={movie} fmt={fmt} />
+            <UpcomingCard
+              movie={movie}
+              fmt={fmt}
+              sizes={IMAGE_SIZES.upcomingRail}
+            />
           </div>
         ))}
         <div aria-hidden className="rail-gutter" />

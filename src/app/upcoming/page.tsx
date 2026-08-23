@@ -3,6 +3,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { getUpcoming } from "@/lib/tmdb";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import UpcomingCard, { upcomingDateFormatter } from "@/components/UpcomingCard";
+import { IMAGE_SIZES } from "@/lib/images";
 import ErrorNotice from "@/components/ErrorNotice";
 import PageHeader from "@/components/PageHeader";
 
@@ -41,7 +42,12 @@ export default async function UpcomingPage() {
       ) : (
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((m) => (
-            <UpcomingCard key={m.id} movie={m} fmt={fmt} />
+            <UpcomingCard
+              key={m.id}
+              movie={m}
+              fmt={fmt}
+              sizes={IMAGE_SIZES.upcomingGrid}
+            />
           ))}
         </div>
       )}

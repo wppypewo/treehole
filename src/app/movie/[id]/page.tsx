@@ -9,7 +9,7 @@ import {
 } from "@/lib/tmdb";
 import type { MovieSummary, MovieCredits } from "@/lib/tmdb";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
-import { tmdbImage } from "@/lib/images";
+import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import { isFavorite, isInWatchlist, isWatched, getRating } from "@/lib/db";
 import ErrorNotice from "@/components/ErrorNotice";
 import MovieActions from "@/components/MovieActions";
@@ -73,6 +73,7 @@ export default async function MoviePage({
   const backdrop = movie.backdrop_path
     ? tmdbImage(movie.backdrop_path, "w1280")
     : null;
+  const backdropSrcSet = tmdbSrcSet(movie.backdrop_path, "backdrop");
   const year = movie.release_date ? movie.release_date.slice(0, 4) : "—";
   const rating = movie.vote_average > 0 ? movie.vote_average.toFixed(1) : "—";
   const showOriginal =
@@ -88,7 +89,12 @@ export default async function MoviePage({
       <header className="relative w-full">
         {backdrop && (
           <div className="relative h-[40dvh] max-h-[400px] min-h-[220px] w-full overflow-hidden bg-ink-raised sm:h-[62dvh] sm:max-h-[680px] sm:min-h-[380px]">
-            <ParallaxImage src={backdrop} priority />
+            <ParallaxImage
+              src={backdrop}
+              srcSet={backdropSrcSet}
+              sizes={IMAGE_SIZES.fullBleed}
+              priority
+            />
             <div
               aria-hidden
               className="scrim-bottom pointer-events-none absolute inset-0"
@@ -156,6 +162,8 @@ export default async function MoviePage({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={poster}
+                  srcSet={tmdbSrcSet(movie.poster_path, "poster")}
+                  sizes={IMAGE_SIZES.detailPoster}
                   alt={movie.title}
                   className="h-full w-full object-cover"
                 />

@@ -4,6 +4,7 @@ import { useRef } from "react";
 import Link from "next/link";
 import MovieCard from "./MovieCard";
 import type { MovieSummary } from "@/lib/tmdb";
+import { IMAGE_SIZES } from "@/lib/images";
 
 /**
  * 橫向策展列。
@@ -91,7 +92,13 @@ export default function MovieRow({
         <div aria-hidden className="rail-gutter" />
         {movies.map((m) => (
           <div key={m.id} className={`${cardWidth} shrink-0`}>
-            <MovieCard movie={m} size={size} />
+            <MovieCard
+              movie={m}
+              size={size}
+              sizes={
+                size === "lg" ? IMAGE_SIZES.railLarge : IMAGE_SIZES.railSmall
+              }
+            />
           </div>
         ))}
         <div aria-hidden className="rail-gutter" />

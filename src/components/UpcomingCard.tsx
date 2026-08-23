@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { tmdbImage } from "@/lib/images";
+import { tmdbImage, tmdbSrcSet } from "@/lib/images";
 import type { MovieSummary } from "@/lib/tmdb";
 import type { Locale } from "@/i18n/config";
 
@@ -20,11 +20,15 @@ export function upcomingDateFormatter(locale: Locale) {
 export default function UpcomingCard({
   movie,
   fmt,
+  sizes,
 }: {
   movie: MovieSummary;
   fmt: Intl.DateTimeFormat;
+  /** 橫列與整頁格線的寬度差很多，由呼叫端指定 */
+  sizes: string;
 }) {
   const still = tmdbImage(movie.backdrop_path, "w780");
+  const stillSrcSet = tmdbSrcSet(movie.backdrop_path, "backdrop");
   const date = movie.release_date ? new Date(movie.release_date) : null;
 
   return (
@@ -34,6 +38,8 @@ export default function UpcomingCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={still}
+            srcSet={stillSrcSet}
+            sizes={sizes}
             alt={movie.title}
             loading="lazy"
             className="h-full w-full object-cover transition-opacity duration-300 group-hover/up:opacity-85"
