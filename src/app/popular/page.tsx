@@ -24,7 +24,7 @@ export default async function PopularPage() {
   }
 
   return (
-    <section className="page-shell space-y-8">
+    <section className="page-shell space-y-10">
       <PageHeader
         title={dict.pages.popular}
         subtitle={dict.pages.popularSubtitle}
@@ -34,6 +34,7 @@ export default async function PopularPage() {
         initialMovies={data?.results ?? []}
         initialHasMore={data ? data.page < data.total_pages : false}
         maxPages={20}
+        variant="grid"
         labels={{
           loading: dict.common.loading,
           noMore: dict.common.noMore,

@@ -4,6 +4,7 @@ import { genreOptions } from "@/lib/genres";
 import { discoverMovies } from "@/lib/tmdb";
 import type { MovieSummary } from "@/lib/tmdb";
 import BrowseClient from "@/components/BrowseClient";
+import PageHeader from "@/components/PageHeader";
 
 export default async function BrowsePage() {
   const locale = await getLocale();
@@ -37,13 +38,11 @@ export default async function BrowsePage() {
 
   return (
     <section className="page-shell space-y-8">
-      <header className="animate-rise">
-        <p className="eyebrow mb-2.5">{dict.browse.eyebrow}</p>
-        <h1 className="text-3xl font-semibold tracking-tight text-paper">
-          {dict.browse.title}
-        </h1>
-        <p className="mt-2 text-sm text-paper-dim">{dict.browse.subtitle}</p>
-      </header>
+      <PageHeader
+        eyebrow={dict.browse.eyebrow}
+        title={dict.browse.title}
+        subtitle={dict.browse.subtitle}
+      />
       <BrowseClient
         genres={genres}
         years={years}

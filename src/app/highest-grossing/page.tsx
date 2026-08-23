@@ -24,7 +24,7 @@ export default async function HighestGrossingPage() {
   }
 
   return (
-    <section className="page-shell space-y-8">
+    <section className="page-shell space-y-10">
       <PageHeader
         title={dict.pages.highestGrossing}
         subtitle={dict.pages.highestGrossingSubtitle}
@@ -34,6 +34,7 @@ export default async function HighestGrossingPage() {
         initialMovies={data?.results ?? []}
         initialHasMore={data ? data.page < data.total_pages : false}
         maxPages={20}
+        variant="ranked"
         labels={{
           loading: dict.common.loading,
           noMore: dict.common.noMore,

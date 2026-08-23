@@ -14,7 +14,7 @@ export default async function WatchedPage() {
   const isDemo = process.env.DEMO_MODE === "1";
 
   return (
-    <section className="page-shell space-y-8">
+    <section className="page-shell space-y-10">
       <PageHeader
         eyebrow={dict.library.watchedEyebrow}
         title={dict.library.watchedTitle}
@@ -35,6 +35,7 @@ export default async function WatchedPage() {
           ratingPlaceholder: dict.library.ratingPlaceholder,
           demoEmpty: dict.demo.libraryEmpty,
           browse: dict.demo.keepBrowsing,
+          count: dict.common.filmCount,
         }}
       />
     </section>

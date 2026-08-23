@@ -13,18 +13,22 @@ import type { MovieSummary } from "@/lib/tmdb";
  * 像幻燈片的片夾；片名同時由灰轉白。回饋清楚，但整列是安靜的。
  *
  * 評分不壓在海報上。海報是完整的印刷品，資訊放在它下面。
+ *
+ * rank：榜單頁（評分最高、最賣座）用的名次。名次是那些頁面真正的內容，
+ * 沒有它就只是一面和其他頁一樣的海報牆。
  */
 export default function MovieCard({
   movie,
   size = "sm",
+  rank,
 }: {
   movie: MovieSummary;
   size?: "sm" | "lg";
+  rank?: number;
 }) {
   const poster = tmdbImage(movie.poster_path, size === "lg" ? "w500" : "w342");
   const year = movie.release_date ? movie.release_date.slice(0, 4) : null;
-  const rating =
-    movie.vote_average > 0 ? movie.vote_average.toFixed(1) : null;
+  const rating = movie.vote_average > 0 ? movie.vote_average.toFixed(1) : null;
 
   // 海報載入後才淡入，避免 decode 完成瞬間「跳出」
   const imgRef = useRef<HTMLImageElement>(null);
@@ -63,19 +67,29 @@ export default function MovieCard({
         />
       </div>
 
-      <div className="mt-3">
-        <h3
-          className={`line-clamp-2 text-paper-dim transition-colors duration-300 group-hover/card:text-paper ${
-            size === "lg" ? "text-[0.9375rem]" : "text-[0.8125rem]"
-          }`}
-        >
-          {movie.title}
-        </h3>
-        {(year || rating) && (
-          <p className="t-meta mt-1 text-paper-faint">
-            {[year, rating].filter(Boolean).join(" · ")}
-          </p>
+      <div className={`mt-3 ${rank !== undefined ? "flex gap-3" : ""}`}>
+        {rank !== undefined && (
+          <span
+            aria-hidden
+            className="t-film w-7 shrink-0 text-2xl leading-none text-paper-dim transition-colors duration-300 group-hover/card:text-curtain-ink"
+          >
+            {rank}
+          </span>
         )}
+        <div className="min-w-0">
+          <h3
+            className={`line-clamp-2 text-paper-dim transition-colors duration-300 group-hover/card:text-paper ${
+              size === "lg" ? "text-[0.9375rem]" : "text-[0.8125rem]"
+            }`}
+          >
+            {movie.title}
+          </h3>
+          {(year || rating) && (
+            <p className="t-meta mt-1 text-paper-faint">
+              {[year, rating].filter(Boolean).join(" · ")}
+            </p>
+          )}
+        </div>
       </div>
     </Link>
   );

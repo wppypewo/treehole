@@ -1,13 +1,21 @@
 import MovieCard from "./MovieCard";
 import type { MovieSummary } from "@/lib/tmdb";
 
-// 海報牆：響應式格狀排列；無資料時顯示空狀態文字
+// 全站共用的海報牆格線。欄數刻意比一般影音站少一到兩欄——
+// 海報大一點、行距鬆一點，符合「慢慢挑」而不是「一次塞滿」。
+export const POSTER_GRID =
+  "grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5";
+
 export default function MovieGrid({
   movies,
   emptyText,
+  ranked = false,
+  startIndex = 1,
 }: {
   movies: MovieSummary[];
   emptyText: string;
+  ranked?: boolean;
+  startIndex?: number;
 }) {
   if (movies.length === 0) {
     return (
@@ -18,9 +26,13 @@ export default function MovieGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-      {movies.map((movie) => (
-        <MovieCard key={movie.id} movie={movie} />
+    <div className={POSTER_GRID}>
+      {movies.map((movie, i) => (
+        <MovieCard
+          key={movie.id}
+          movie={movie}
+          rank={ranked ? startIndex + i : undefined}
+        />
       ))}
     </div>
   );

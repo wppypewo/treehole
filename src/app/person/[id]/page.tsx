@@ -40,19 +40,20 @@ export default async function PersonPage({
   const photo = tmdbImage(person.profile_path, "w342");
 
   return (
-    <article className="page-shell space-y-10">
-      {/* 返回首頁：與 movie detail 無 backdrop 狀態同樣的返回連結樣式 */}
+    <article className="page-shell">
       <Link
         href="/"
-        className="inline-flex items-center gap-1 text-sm text-paper-faint transition-colors hover:text-paper"
+        className="tap-safe gap-2 text-[0.75rem] tracking-[0.08em] text-paper-dim transition-colors hover:text-paper"
       >
-        ← {dict.movie.back}
+        <span aria-hidden>←</span>
+        {dict.movie.back}
       </Link>
 
-      {/* 人物首屏：照片 + 姓名 + 簡介並排 */}
-      <div className="animate-rise flex flex-col gap-6 sm:flex-row sm:items-start">
-        <div className="mx-auto w-44 shrink-0 sm:mx-0 sm:w-52">
-          <div className="aspect-[2/3] overflow-hidden bg-ink-raised ring-1 ring-hairline">
+      {/* 人物首屏：照片與姓名並置。照片欄固定寬，與詳情頁的海報欄同一個尺度，
+          讓兩種「人／片」的頁面在視覺上是同一個系統。 */}
+      <div className="animate-rise mt-8 grid gap-8 md:grid-cols-[minmax(0,220px)_minmax(0,1fr)] md:gap-16">
+        <div className="w-32 md:w-full">
+          <div className="aspect-[2/3] overflow-hidden bg-ink-raised">
             {photo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -62,27 +63,38 @@ export default async function PersonPage({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-3xl text-paper-faint">
+              <div className="t-film flex h-full w-full items-center justify-center text-5xl text-paper-faint">
                 {person.name.slice(0, 1)}
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex-1 space-y-3">
-          <h1 className="text-3xl font-semibold tracking-tight text-paper">
+        <div>
+          <h1 className="t-film text-[2.125rem] text-paper sm:text-[3rem]">
             {person.name}
           </h1>
-          <p className="line-clamp-[12] text-sm leading-relaxed whitespace-pre-line text-paper-dim">
-            {person.biography || dict.person.noBio}
-          </p>
+          <div className="mt-6 border-t border-hairline pt-6">
+            <p className="t-prose line-clamp-[14] whitespace-pre-line">
+              {person.biography || dict.person.noBio}
+            </p>
+          </div>
         </div>
       </div>
 
       {/* 作品列表 */}
-      <section className="space-y-4">
-        <h2 className="eyebrow">{dict.person.filmography}</h2>
-        <MovieGrid movies={films} emptyText={dict.common.empty} />
+      <section className="mt-20">
+        <div className="flex items-baseline justify-between gap-6 border-b border-hairline pb-5">
+          <h2 className="t-section text-paper">{dict.person.filmography}</h2>
+          {films.length > 0 && (
+            <p className="t-meta shrink-0 text-paper-faint">
+              {dict.common.filmCount.replace("{n}", String(films.length))}
+            </p>
+          )}
+        </div>
+        <div className="mt-10">
+          <MovieGrid movies={films} emptyText={dict.common.empty} />
+        </div>
       </section>
     </article>
   );

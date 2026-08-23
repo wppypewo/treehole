@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import MovieCard from "./MovieCard";
+import UpcomingCard, { upcomingDateFormatter } from "./UpcomingCard";
+import { POSTER_GRID } from "./MovieGrid";
 import type { MovieSummary } from "@/lib/tmdb";
+import type { Locale } from "@/i18n/config";
 
 interface Labels {
   loading: string;
@@ -12,20 +15,32 @@ interface Labels {
   empty: string;
 }
 
-// 無限捲動電影牆：首屏由伺服器帶入第 1 頁，捲到接近底部時向分頁 API 取下一頁。
-// 金鑰留在伺服器，瀏覽器只呼叫自家的 /api 端點。
+/**
+ * 無限捲動電影牆：首屏由伺服器帶入第 1 頁，捲到接近底部時向分頁 API 取下一頁。
+ * 金鑰留在伺服器，瀏覽器只呼叫自家的 /api 端點。
+ *
+ * variant 決定這一頁長什麼樣。四個清單頁如果都用同一種海報牆，
+ * 使用者根本分不出自己在哪一頁：
+ * - "grid"   熱門。沒有排序意義，就是一面牆
+ * - "ranked" 評分最高／最賣座。名次才是這兩頁的內容，所以標出來
+ * - "dated"  即將上映。日期才是重點，改用 16:9 劇照
+ */
 export default function InfiniteMovieGrid({
   endpoint,
   initialMovies,
   initialHasMore,
   maxPages = 20,
   labels,
+  variant = "grid",
+  locale = "zh-TW",
 }: {
   endpoint: string;
   initialMovies: MovieSummary[];
   initialHasMore: boolean;
   maxPages?: number;
   labels: Labels;
+  variant?: "grid" | "ranked" | "dated";
+  locale?: Locale;
 }) {
   const [movies, setMovies] = useState<MovieSummary[]>(initialMovies);
   const [page, setPage] = useState(1);
@@ -76,30 +91,42 @@ export default function InfiniteMovieGrid({
 
   if (movies.length === 0) {
     return (
-      <p className="py-16 text-center text-sm text-paper-faint">{labels.empty}</p>
+      <p className="border-t border-hairline py-20 text-center text-sm text-paper-faint">
+        {labels.empty}
+      </p>
     );
   }
 
+  const fmt = variant === "dated" ? upcomingDateFormatter(locale) : null;
+
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-        {movies.map((movie) => (
-          <MovieCard key={movie.id} movie={movie} />
-        ))}
-      </div>
+    <div>
+      {variant === "dated" && fmt ? (
+        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+          {movies.map((movie) => (
+            <UpcomingCard key={movie.id} movie={movie} fmt={fmt} />
+          ))}
+        </div>
+      ) : (
+        <div className={POSTER_GRID}>
+          {movies.map((movie, i) => (
+            <MovieCard
+              key={movie.id}
+              movie={movie}
+              rank={variant === "ranked" ? i + 1 : undefined}
+            />
+          ))}
+        </div>
+      )}
 
       {/* 捲動哨兵：進入視窗就載入下一頁 */}
       <div ref={sentinelRef} className="h-1" />
 
-      <div className="py-4 text-center text-sm text-paper-faint">
+      <div className="mt-14 border-t border-hairline pt-8 text-center text-sm text-paper-faint">
         {error ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <p className="text-paper-dim">{error}</p>
-            <button
-              type="button"
-              onClick={loadMore}
-              className="border border-hairline px-4 py-1.5 text-paper-dim transition-colors hover:border-paper-dim hover:text-paper"
-            >
+            <button type="button" onClick={loadMore} className="btn-line">
               {labels.retry}
             </button>
           </div>

@@ -8,15 +8,20 @@ export default async function NotFound() {
   const dict = getDictionary(locale);
 
   return (
-    <div className="page-shell space-y-4 py-32 text-center">
-      <p className="text-4xl font-bold text-paper">404</p>
-      <p className="text-sm text-paper-dim">{dict.errors.notFound}</p>
-      <Link
-        href="/"
-        className="inline-block border border-paper-dim px-4 py-2 text-sm text-paper transition-colors hover:bg-white/10"
-      >
-        {dict.appTitle}
-      </Link>
+    <div className="page-shell">
+      {/* 數字用襯線大字，與片名同一個字體系統——404 在這裡是一個標題，
+          不是一個錯誤代碼徽章 */}
+      <div className="max-w-lg border-b border-hairline py-24">
+        <p className="t-film text-[5rem] leading-none text-paper-faint sm:text-[7rem]">
+          404
+        </p>
+        <p className="mt-6 text-[0.9375rem] text-paper-dim">
+          {dict.errors.notFound}
+        </p>
+        <Link href="/" className="btn-line mt-8">
+          {dict.appTitle}
+        </Link>
+      </div>
     </div>
   );
 }

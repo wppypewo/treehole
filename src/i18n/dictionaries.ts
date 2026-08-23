@@ -162,6 +162,7 @@ export interface Dictionary {
     viewDetails: string;
     prev: string;
     next: string;
+    filmCount: string;
   };
   errors: {
     missingKey: string;
@@ -341,6 +342,7 @@ const zhTW: Dictionary = {
     viewDetails: "查看詳情",
     prev: "上一批",
     next: "下一批",
+    filmCount: "{n} 部",
   },
   errors: {
     missingKey: "尚未設定 TMDB 金鑰，請在 .env 填入 TMDB_API_KEY 後重新整理。",
@@ -522,6 +524,7 @@ const en: Dictionary = {
     viewDetails: "View details",
     prev: "Previous",
     next: "Next",
+    filmCount: "{n} films",
   },
   errors: {
     missingKey:

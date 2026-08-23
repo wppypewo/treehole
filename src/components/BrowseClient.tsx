@@ -179,95 +179,101 @@ export default function BrowseClient({
     return () => observer.disconnect();
   }, [loadMore, done, error, loading]);
 
-  // 統一深色 select 外觀（定義於 globals.css）
-  const selectCls = "select-dark";
-
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        <select
-          value={genre}
-          onChange={(e) => {
-            setGenre(e.target.value);
-            applyFilters(e.target.value, year, sort, minRating);
-          }}
-          aria-label={labels.genre}
-          className={selectCls}
-        >
-          <option value="">{labels.genrePlaceholder}</option>
-          {genres.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.name}
-            </option>
-          ))}
-        </select>
-        <select
-          value={year}
-          onChange={(e) => {
-            setYear(e.target.value);
-            applyFilters(genre, e.target.value, sort, minRating);
-          }}
-          aria-label={labels.year}
-          className={selectCls}
-        >
-          <option value="">{labels.yearPlaceholder}</option>
-          {years.map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
-        </select>
-        <select
-          value={minRating}
-          onChange={(e) => {
-            setMinRating(e.target.value);
-            applyFilters(genre, year, sort, e.target.value);
-          }}
-          aria-label={labels.minRating}
-          className={selectCls}
-        >
-          <option value="">{labels.ratingPlaceholder}</option>
-          {RATINGS.map((r) => (
-            <option key={r} value={r}>
-              {r}+
-            </option>
-          ))}
-        </select>
-        <select
-          value={sort}
-          onChange={(e) => {
-            setSort(e.target.value);
-            applyFilters(genre, year, e.target.value, minRating);
-          }}
-          aria-label={labels.sort}
-          className={selectCls}
-        >
-          {sorts.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* 目前條件摘要 */}
-      <div className="flex items-baseline gap-3">
-        <p className="text-sm text-paper-dim">{summaryText}</p>
-        {!isDefaultFilters && (
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="text-xs text-paper-faint transition-colors hover:text-paper"
+    <div>
+      {/* 篩選列黏在導覽列下方。這一頁的內容可以很長，捲到第 300 部片時
+          還要捲回頂端才能換條件是折磨。sticky 的高度剛好接在 h-16 的 nav 之下。 */}
+      <div className="sticky top-16 z-20 -mx-5 border-b border-hairline bg-ink py-4 sm:-mx-8">
+        {/* 手機上四個 select 換行會讓黏住的這條佔掉四分之一個螢幕，
+            所以改成單排橫捲；桌機空間夠，維持換行排列。 */}
+        <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto px-5 sm:flex-wrap sm:overflow-visible sm:px-8">
+          <select
+            value={genre}
+            onChange={(e) => {
+              setGenre(e.target.value);
+              applyFilters(e.target.value, year, sort, minRating);
+            }}
+            aria-label={labels.genre}
+            className="select-dark shrink-0"
           >
-            {labels.clearFilters}
-          </button>
-        )}
-      </div>
+            <option value="">{labels.genrePlaceholder}</option>
+            {genres.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={year}
+            onChange={(e) => {
+              setYear(e.target.value);
+              applyFilters(genre, e.target.value, sort, minRating);
+            }}
+            aria-label={labels.year}
+            className="select-dark shrink-0"
+          >
+            <option value="">{labels.yearPlaceholder}</option>
+            {years.map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
+          <select
+            value={minRating}
+            onChange={(e) => {
+              setMinRating(e.target.value);
+              applyFilters(genre, year, sort, e.target.value);
+            }}
+            aria-label={labels.minRating}
+            className="select-dark shrink-0"
+          >
+            <option value="">{labels.ratingPlaceholder}</option>
+            {RATINGS.map((r) => (
+              <option key={r} value={r}>
+                {r}+
+              </option>
+            ))}
+          </select>
+          <select
+            value={sort}
+            onChange={(e) => {
+              setSort(e.target.value);
+              applyFilters(genre, year, e.target.value, minRating);
+            }}
+            aria-label={labels.sort}
+            className="select-dark shrink-0"
+          >
+            {sorts.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+
+          {!isDefaultFilters && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="tap-safe ml-1 shrink-0 text-[0.75rem] tracking-[0.06em] text-paper-faint transition-colors hover:text-curtain-ink"
+            >
+              {labels.clearFilters}
+            </button>
+          )}
+        </div>
+
+        {/* 條件摘要寫成一句話，不是一排 chip。使用者需要知道自己在看什麼，
+            而不是再讀一次剛剛選過的選項。 */}
+        <p
+          aria-live="polite"
+          className="t-meta mt-3 px-5 text-paper-faint sm:px-8"
+        >
+          {summaryText}
+        </p>
       </div>
 
       {results.length > 0 && (
-        <div className="animate-rise grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {results.map((m) => (
             <MovieCard key={m.id} movie={m} />
           ))}
@@ -276,15 +282,11 @@ export default function BrowseClient({
 
       <div ref={sentinelRef} className="h-1" />
 
-      <div className="py-4 text-center text-sm text-paper-faint">
+      <div className="mt-14 border-t border-hairline pt-8 text-center text-sm text-paper-faint">
         {error ? (
-          <div className="space-y-2">
+          <div className="space-y-4">
             <p className="text-paper-dim">{error}</p>
-            <button
-              type="button"
-              onClick={loadMore}
-              className="border border-hairline px-4 py-1.5 text-paper-dim transition-colors hover:border-paper-dim hover:text-paper"
-            >
+            <button type="button" onClick={loadMore} className="btn-line">
               {labels.retry}
             </button>
           </div>

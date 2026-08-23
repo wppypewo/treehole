@@ -24,7 +24,7 @@ export default async function TopRatedPage() {
   }
 
   return (
-    <section className="page-shell space-y-8">
+    <section className="page-shell space-y-10">
       <PageHeader
         title={dict.pages.topRated}
         subtitle={dict.pages.topRatedSubtitle}
@@ -34,6 +34,7 @@ export default async function TopRatedPage() {
         initialMovies={data?.results ?? []}
         initialHasMore={data ? data.page < data.total_pages : false}
         maxPages={20}
+        variant="ranked"
         labels={{
           loading: dict.common.loading,
           noMore: dict.common.noMore,

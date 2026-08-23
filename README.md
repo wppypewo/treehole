@@ -59,6 +59,8 @@ Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) 
 
 **Reveals are driven by scroll position, not events.** The ranked index reveals with CSS `animation-timeline: view()`. An IntersectionObserver reveal can be skipped entirely by one fast flick, leaving content stuck at zero opacity; a scroll-driven animation lands at the correct progress no matter how you got there, and the default state is visible.
 
+**Each page type gets its own layout.** Ten pages once shared one six-column poster wall, which made them indistinguishable. Now the ranked pages number their entries, the upcoming page leads with release dates on 16:9 stills, search makes the query itself the masthead, and only the pages with no inherent order stay a plain wall.
+
 **Text is never placed over an image on small screens.** On mobile the backdrop is a band and the title sits below it on solid ink. Overlaying titles on stills means readability depends on how bright that particular still happens to be.
 
 **Demo mode does not fake persistence.** If an action is not available, it says so. The alternative — letting users click "Add to favorites" and having it silently disappear — would give a misleading picture of the product.

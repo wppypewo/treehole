@@ -33,16 +33,16 @@ export default function Error({
   const t = text[locale];
 
   return (
-    <div className="page-shell space-y-4 py-32 text-center">
-      <p className="text-lg font-semibold text-paper">{t.title}</p>
-      <p className="text-sm text-paper-dim">{t.sub}</p>
-      <button
-        type="button"
-        onClick={reset}
-        className="border border-paper-dim px-4 py-2 text-sm text-paper transition-colors hover:bg-white/10"
-      >
-        {t.retry}
-      </button>
+    <div className="page-shell">
+      <div className="max-w-lg border-b border-hairline py-24">
+        <p className="t-film text-[2rem] text-paper sm:text-[2.5rem]">
+          {t.title}
+        </p>
+        <p className="mt-4 text-[0.9375rem] text-paper-dim">{t.sub}</p>
+        <button type="button" onClick={reset} className="btn-line mt-8">
+          {t.retry}
+        </button>
+      </div>
     </div>
   );
 }

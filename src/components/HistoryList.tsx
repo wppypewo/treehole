@@ -86,40 +86,39 @@ export default function HistoryList({
 
   if (list.length === 0) {
     return (
-      <p className="py-16 text-center text-sm text-paper-faint">
+      <p className="border-t border-hairline py-16 text-sm text-paper-faint">
         {emptyText}
       </p>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
+    <div>
+      {/* 紀錄改成 hairline 清單，不是一堆 pill。
+          pill 適合「可多選的標籤」，但這裡每一列是一次獨立的搜尋，
+          而且有時間戳——那是清單的形狀，不是標籤的形狀。 */}
+      <div className="flex justify-end border-b border-hairline pb-3">
         <button
           type="button"
           disabled={busy}
           onClick={clearAll}
-          className="text-xs text-paper-faint transition-colors hover:text-paper-dim disabled:opacity-50"
+          className="tap-safe text-[0.6875rem] tracking-[0.06em] text-paper-faint transition-colors hover:text-curtain-ink disabled:opacity-50"
         >
           {clearLabel}
         </button>
       </div>
-      <ul className="flex flex-wrap gap-2">
+      <ul>
         {list.map((entry, i) => (
-          <li
-            key={entry.query}
-            className="animate-rise"
-            style={{ animationDelay: `${i * 25}ms` }}
-          >
+          <li key={entry.query} className="border-b border-hairline">
             <Link
               href={`/search?q=${encodeURIComponent(entry.query)}`}
-              className="flex min-h-[40px] items-center gap-2 bg-white/[0.04] px-3 py-2 text-sm transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-white/[0.08] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+              className="group/hist flex items-baseline justify-between gap-4 py-4"
             >
-              <span className="max-w-[200px] truncate font-medium text-paper sm:max-w-xs">
+              <span className="truncate text-[0.9375rem] text-paper-dim transition-colors group-hover/hist:text-paper">
                 {entry.query}
               </span>
               {relTimes[i] && (
-                <span className="shrink-0 text-xs text-paper-faint">
+                <span className="t-meta shrink-0 text-paper-faint">
                   {relTimes[i]}
                 </span>
               )}
