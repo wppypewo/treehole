@@ -85,7 +85,7 @@ Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) 
 | Local DB | better-sqlite3 (local mode only) |
 | Movie data | TMDB API (v3 / v4 token) |
 | Tests | Vitest |
-| Deployment | Vercel (demo), Node 22+ LAN server (local) |
+| Deployment | Vercel (demo), Node 24+ LAN server (local) |
 
 ---
 
@@ -116,7 +116,7 @@ Browser
 
 ### Prerequisites
 
-- Node.js 22 LTS or later (Node 20 reached end-of-life on 2026-04-30; CI builds on 24)
+- Node.js 24 LTS or later (Node 20 reached end-of-life on 2026-04-30; CI builds on 24, and `@types/node` is pinned to that line)
 - A [TMDB API key](https://www.themoviedb.org/settings/api) (v3 key or v4 read access token)
 
 ### Installation
