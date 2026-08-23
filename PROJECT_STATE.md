@@ -428,3 +428,54 @@ contextOrFilename.getFilename is not a function
 typecheck / lint / 50 tests / `DEMO_MODE=1` build 全過；`npm audit` 0 vulnerabilities；
 dev 模式 15 條路由實測正確、無 server error。lint 另用探針檔實測規則確實會觸發，
 不是靜默跳過。
+
+---
+
+## 2026-08-23 階段 10：CI 加 lint、清完剩餘相依（已完成）
+
+**CI 加上 lint 步驟**。加的理由是實例而不是原則：eslint 10 的 dependabot PR
+拿到綠燈，但本地跑 lint 會直接崩潰——CI 只跑 typecheck / test / build，
+沒跑 lint，那個綠燈是假的。現在順序是 `typecheck → lint → test → build`。
+
+**四個相依更新**：
+
+| 套件 | → | 驗證方式 |
+|---|---|---|
+| `tailwindcss` | 4.3.3 | patch，標準驗證 |
+| `vitest` | 4.1.11 | patch，標準驗證 |
+| `better-sqlite3` | **13.0.3** | 見下 |
+| `motion` | **13.1.1** | 見下 |
+| `@types/better-sqlite3` | 7.6.13 → 9.6.0 | 隨 better-sqlite3 |
+
+### better-sqlite3 13：只跑 build 不算驗證
+
+13.0.0 改用 N-API，prebuilt binary 直接隨套件發布。`engines: node >=22`，
+CI 的 24 符合。新增 `db.explain()` 與 `preparedStatement.toString()`，
+沒有移除既有 API。
+
+**關鍵**：`npm run build` 帶 `DEMO_MODE=1`，會把 `@/lib/db` 換成 stub，
+**根本沒碰到真的 SQLite**。所以另外跑 local 模式實測：
+POST 寫入 → 直接從 DB 讀回確認 → DELETE → 確認殘留 0。
+動手前已備份 `data/movies.sqlite`。
+
+### motion 13：唯一驗得出來的方式是真的刪一張卡
+
+`LibraryGrid` 用 `AnimatePresence` + `mode="popLayout"` 做移除動畫，
+typecheck 過不代表動畫還在。實際在瀏覽器點「拿掉」：卡片消失、
+計數 2 部 → 1 部、剩下的卡片平順遞補，DB 同步刪除。
+
+### 測試污染與復原（記錄下來以免重演）
+
+瀏覽器測試過程中誤觸了詳情頁的「收藏」與「標記已看過」，把
+`蜘蛛人：重生日`（969681）寫進真實片庫。已透過 API 移除，資料庫回到
+與備份完全一致的 4 / 0 / 4 / 0。
+
+**教訓**：在 local 模式（非 DEMO_MODE）用瀏覽器測試會動到真實資料。
+下次要嘛先備份、要嘛改用 `DEMO_MODE=1 npm run dev`。
+
+### dependabot ignore 規則已驗證生效
+
+不是靠 YAML 語法推論——dependabot 重跑後自己把 PR 關掉，而且標題顯示
+基準已重算（`#8 from 6.0.3 to 7.0.2`、`#6 from 24.13.3 to 26.2.0`）。
+
+`npm audit`：0 vulnerabilities。
