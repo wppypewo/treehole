@@ -131,7 +131,6 @@ export interface Dictionary {
     watchlistAdded: string;
     watched: string;
     watchedDone: string;
-    download: string;
     comingSoon: string;
   };
   demo: {
@@ -169,33 +168,6 @@ export interface Dictionary {
     http: string;
     notFound: string;
     generic: string;
-  };
-  download: {
-    title: string;
-    searching: string;
-    noResults: string;
-    add: string;
-    adding: string;
-    added: string;
-    addFailed: string;
-    close: string;
-    sort: string;
-    sortSeeders: string;
-    sortResolution: string;
-    sortSize: string;
-    colSize: string;
-    colSeeders: string;
-    colResolution: string;
-    colIndexer: string;
-    errUnreachable: string;
-    errMissingConfig: string;
-    errGeneric: string;
-    errCacheMiss: string;
-    errQbAuth: string;
-    errQbUnreachable: string;
-    errTimeout: string;
-    errDemoMode: string;
-    retry: string;
   };
 }
 
@@ -334,7 +306,6 @@ const zhTW: Dictionary = {
     watchlistAdded: "想看 ✓",
     watched: "標記已看過",
     watchedDone: "已看過 ✓",
-    download: "下載",
     comingSoon: "後續階段啟用",
   },
   demo: {
@@ -374,33 +345,6 @@ const zhTW: Dictionary = {
     http: "TMDB 服務回應異常，請稍後重試。",
     notFound: "找不到這部電影。",
     generic: "載入失敗，請稍後重試。",
-  },
-  download: {
-    title: "選擇種子下載",
-    searching: "搜尋種子中…",
-    noResults: "找不到可用的種子。",
-    add: "加入下載",
-    adding: "加入中…",
-    added: "已加入 ✓",
-    addFailed: "加入失敗",
-    close: "關閉",
-    sort: "排序",
-    sortSeeders: "依 Seeders",
-    sortResolution: "依解析度",
-    sortSize: "依檔案大小",
-    colSize: "大小",
-    colSeeders: "Seeders",
-    colResolution: "解析度",
-    colIndexer: "來源",
-    errUnreachable: "無法連線到 Prowlarr，請確認服務是否已啟動（port 9696）。",
-    errMissingConfig: "尚未設定 Prowlarr，請在 .env 填入 PROWLARR_API_KEY。",
-    errGeneric: "種子搜尋失敗，請稍後重試。",
-    errCacheMiss: "這批搜尋結果已過期，請關閉後重新開啟下載。",
-    errQbAuth: "qBittorrent 登入失敗，請確認 .env 的帳號密碼。",
-    errQbUnreachable: "無法連線到 qBittorrent，請確認服務是否已啟動（port 8080）。",
-    errTimeout: "搜尋逾時，可能是種子站台一時較慢，請重試。",
-    errDemoMode: "下載功能僅限本機版。",
-    retry: "重試",
   },
 };
 
@@ -539,7 +483,6 @@ const en: Dictionary = {
     watchlistAdded: "In watchlist ✓",
     watched: "Mark watched",
     watchedDone: "Watched ✓",
-    download: "Download",
     comingSoon: "Coming in a later stage",
   },
   demo: {
@@ -582,34 +525,6 @@ const en: Dictionary = {
     http: "TMDB returned an unexpected response. Please retry later.",
     notFound: "Movie not found.",
     generic: "Failed to load. Please retry later.",
-  },
-  download: {
-    title: "Choose a torrent",
-    searching: "Searching torrents…",
-    noResults: "No torrents found.",
-    add: "Add",
-    adding: "Adding…",
-    added: "Added ✓",
-    addFailed: "Add failed",
-    close: "Close",
-    sort: "Sort",
-    sortSeeders: "By seeders",
-    sortResolution: "By resolution",
-    sortSize: "By size",
-    colSize: "Size",
-    colSeeders: "Seeders",
-    colResolution: "Resolution",
-    colIndexer: "Source",
-    errUnreachable: "Cannot reach Prowlarr. Make sure it is running (port 9696).",
-    errMissingConfig: "Prowlarr is not configured. Add PROWLARR_API_KEY to .env.",
-    errGeneric: "Torrent search failed. Please retry later.",
-    errCacheMiss: "These search results expired. Close and reopen the download dialog.",
-    errQbAuth: "qBittorrent login failed. Check the username/password in .env.",
-    errQbUnreachable:
-      "Cannot reach qBittorrent. Make sure it is running (port 8080).",
-    errTimeout: "Search timed out (the indexer may be slow). Please retry.",
-    errDemoMode: "Download is only available in the local version.",
-    retry: "Retry",
   },
 };
 

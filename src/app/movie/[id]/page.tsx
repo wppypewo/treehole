@@ -14,7 +14,6 @@ import { isFavorite, isInWatchlist, isWatched, getRating } from "@/lib/db";
 import ErrorNotice from "@/components/ErrorNotice";
 import MovieActions from "@/components/MovieActions";
 import MovieGrid from "@/components/MovieGrid";
-import DownloadButton from "@/components/DownloadButton";
 import TrailerPlayer from "@/components/TrailerPlayer";
 import PersonCard from "@/components/PersonCard";
 import RatingEditor from "@/components/RatingEditor";
@@ -77,15 +76,6 @@ export default async function MoviePage({
   const rating = movie.vote_average > 0 ? movie.vote_average.toFixed(1) : "—";
   const showOriginal =
     movie.original_title && movie.original_title !== movie.title;
-  // 種子搜尋以原文片名為主（檔名多用原文），帶上年份提升命中率
-  const searchYear = movie.release_date ? movie.release_date.slice(0, 4) : "";
-  const downloadQuery = [
-    movie.original_title || movie.title,
-    searchYear,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
   // demo 模式下收藏／評分等寫入功能不可用，僅作 UI 文案與停用狀態用途
   const isDemo = process.env.DEMO_MODE === "1";
 
@@ -213,7 +203,7 @@ export default async function MoviePage({
           </div>
         )}
 
-        {/* 收藏 / 已看過：寫入本機 SQLite。下載：查 Prowlarr → 加入 qBittorrent */}
+        {/* 收藏 / 想看 / 已看過：寫入本機 SQLite */}
         <div className="flex flex-wrap items-center gap-2">
           <MovieActions
             movie={{
@@ -234,11 +224,6 @@ export default async function MoviePage({
               watched: dict.actions.watched,
               watchedDone: dict.actions.watchedDone,
             }}
-          />
-          <DownloadButton
-            query={downloadQuery}
-            buttonLabel={dict.actions.download}
-            t={dict.download}
           />
         </div>
 

@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Treehole",
   description:
-    "瀏覽 TMDB 電影、收藏、標記已看過，並透過 Prowlarr 與 qBittorrent 一鍵下載。",
+    "電影導覽站。瀏覽 TMDB 片單、收藏想看的、記下看過的。",
 };
 
 export default async function RootLayout({

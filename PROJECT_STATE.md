@@ -8,8 +8,8 @@
 
 * Repo path: `D:\ClaudeCode\projects\movie-app`
 * Repo type: Next.js 16 全端 Web App（git repo，有 GitHub remote）
-* Primary purpose: Treehole——TMDB 電影探索 + 私人片庫（本機 SQLite + 可選 Prowlarr/qBittorrent；Vercel 為 demo），同時作為作品集
-* Current status: Maintenance（主線已穩定；以收尾 / 文件與作品集表述為主，不開新功能）
+* Primary purpose: Treehole——TMDB 電影導覽 + 私人片庫（本機 SQLite；Vercel 為 demo），同時作為作品集
+* Current status: **Design phase（2026-08-23 由使用者明確開啟）**——BT 下載功能已整批移除，正進行全站風格重做
 
 ## Git Status
 
@@ -24,7 +24,7 @@
 * Production / deployment: Vercel demo（README 載明 `https://treehole-movie-app.vercel.app`，以 `DEMO_MODE=1` 運作、不連真實 DB）；本 repo **無 `vercel.json`**（部署設定在 Vercel 端，未進 repo），另有 `.vercelignore`。AGENTS.md：不動 Vercel 部署設定，除非明確指示
 * README / portfolio status: 已是作品集狀態（Treehole 標題、live demo、features、demo/local 對照表、設計決策、tech stack、architecture、testing、screenshots、future）
 * CI status: 有 GitHub Actions `.github/workflows/ci.yml`，push / PR 到 main 觸發 `typecheck → test → build`（build 帶 `DEMO_MODE=1`）；另有 `.github/dependabot.yml`
-* Test status: Vitest；README 載明 58 tests / 6 files（utility 層）；本次未執行測試，未驗證即時數字
+* Test status: Vitest；43 tests / 5 files（utility 層），2026-08-23 實測通過
 * Demo mode status: 由 `DEMO_MODE=1` 切換。`next.config.ts` 的 turbopack `resolveAlias` 在 demo 時把 `@/lib/db` 指向 `src/lib/db.demo.ts`（stub：讀回空、寫入 no-op）；UI 寫入動作仍顯示但呈 disabled 並誠實說明，不假裝儲存
 * Known limitations: 缺 demo/local DB 邊界的整合測試（README future）；測試僅涵蓋 utility 層，UI 與 API 整合未覆蓋
 
@@ -33,7 +33,7 @@
 * Framework: Next.js 16.2.6（App Router、Turbopack，port 3100）+ React 19 + TypeScript
 * Data source: TMDB API（v3 key / v4 token，全部 server-side）
 * Local database: better-sqlite3（**僅 local 模式**；demo 模式以 `db.demo.ts` stub 取代）
-* Demo / production mode: 單一 `DEMO_MODE` env 切換（Vercel=demo、本機=local）；keys（TMDB / Prowlarr / qBittorrent）皆 server-side
+* Demo / production mode: 單一 `DEMO_MODE` env 切換（Vercel=demo、本機=local）；TMDB key 為 server-side
 * Styling: Tailwind CSS v4（`@tailwindcss/postcss`）
 * Testing: Vitest（`vitest.config.ts`）
 * Deployment: Vercel（demo）；本機為 Node 20+ LAN server（bind `0.0.0.0`）
@@ -84,16 +84,13 @@
   * 這是**新功能 / 大改動**（AGENTS.md「UI 優化方向：已確認方向，尚未授權執行」；需安裝 GSAP/Lenis，屬新 package）。
   * 不屬於目前 Maintenance 階段。
   * 只有使用者明確開啟 design / feature phase 時才可做。
-* **本機 Prowlarr indexer 設定文件化、case study writeup**（README future）：屬擴充，非收尾必要，待明確指示。
 
 ## Forbidden Scope
 
 * Do not expose or print secrets.
 * Do not modify env files（`.env` / `.env.example`）。
 * Do not change demo/local DB boundary（`DEMO_MODE` 判斷、`db.demo.ts` stub、`next.config.ts` alias）unless explicitly requested.
-* Do not broaden into a full streaming platform（不把 Prowlarr / qBittorrent 帶到 Vercel）。
 * Do not replace the current README structure unless explicitly requested.
-* Do not perform broad UI redesign unless a new design phase is explicitly opened.
 * Do not install new packages unless explicitly confirmed（AGENTS.md）。
 * Do not push without explicit instruction.
 
@@ -121,3 +118,23 @@ Next assistant / Claude Code session should first read:
 Then it should only execute Current Phase or Next 3 Allowed Tasks.
 Do not reopen completed phases.
 Do not broaden scope.
+
+---
+
+## 2026-08-23 階段 1：移除 BT 下載功能（已完成）
+
+使用者明確指示把 Treehole 收斂為純電影導覽站，並開啟新的 design phase。
+
+**刪除**：`src/lib/prowlarr.ts`、`src/lib/qbittorrent.ts`、`src/app/api/torrents/`（2 個 route）、
+`src/components/DownloadButton.tsx`、`src/__tests__/prowlarr-utils.test.ts`、
+`docs/screenshots/detail-{desktop,mobile}.png`
+
+**修改**：詳情頁移除掛載與 `downloadQuery`；`dictionaries.ts` 移除 `download` 區塊與 `actions.download`
+（620 → 535 行）；`layout.tsx` metadata；`.env` / `.env.example` 移除 `PROWLARR_*` `QBITTORRENT_*`
+（使用者明確授權解除 env 禁令）；README / AGENTS.md 改寫為純導覽敘事。
+
+**未動**：SQLite 片庫（收藏／想看／已看過／評分／搜尋紀錄）、`DEMO_MODE` 判斷邏輯、
+`db.demo.ts` stub、`next.config.ts` alias、Vercel 部署設定。
+
+**已確認的設計方向（階段 2）**：MUBI 式編輯策展、換字體（含中文字型）、給一個強調色、
+授權安裝 GSAP + Lenis、拿掉首頁自動輪播 hero、先做首頁 + 詳情頁定調、雙語維持。

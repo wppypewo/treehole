@@ -10,7 +10,7 @@ Treehole is built around a specific kind of moment: you have an evening, you wan
 
 The product has two layers. The first is a TMDB-powered discovery surface: a hero carousel, curated rows, browse by genre/year/rating, full-text search with recent search memory. The second is a private library: favorites, a watchlist, and a watched log that accumulates over time. Both layers share a consistent cinematic aesthetic — dark, poster-forward, restrained.
 
-The app can run locally with a SQLite library and optional Prowlarr + qBittorrent integration. A Vercel demo is available for browsing and discovery; library persistence is intentionally disabled there rather than faked.
+The app runs locally with a SQLite library. A Vercel demo is available for browsing and discovery; library persistence is intentionally disabled there rather than faked.
 
 **Live demo:** https://treehole-movie-app.vercel.app
 
@@ -26,7 +26,6 @@ The app can run locally with a SQLite library and optional Prowlarr + qBittorren
 - **Library — Favorites / Watchlist / Watched** — sortable and filterable per-list views; cards have a hover-gated remove action (always visible on touch, hidden until hover on fine-pointer devices)
 - **Personal ratings** — per-film score (1–10) and short note, stored locally
 - **Personalized "For You" row** — appears on home once seeds exist in the library
-- **Local media workflow** — optional Prowlarr + qBittorrent integration can be configured for local use; credentials stay server-side
 - **i18n** — Traditional Chinese and English; language stored in cookie, no URL prefix needed
 - **Demo-safe disabled states** — in demo mode, write actions (library, rating) are disabled with honest explanations rather than pretending to save
 
@@ -41,7 +40,6 @@ The app can run locally with a SQLite library and optional Prowlarr + qBittorren
 | Personal ratings | Disabled — shown with explanation | Available (SQLite) |
 | Search history | Disabled | Available (SQLite) |
 | Personalized recommendations | Disabled | Available once library has seeds |
-| Local media workflow (Prowlarr + qBittorrent) | Disabled | Available when configured |
 
 Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) that returns empty results for reads and no-ops for writes. Actions remain visible but show their disabled state — the goal is an accurate preview of local-mode UI without fake persistence.
 
@@ -76,7 +74,6 @@ Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) 
 | Animation | motion (framer-motion v12) |
 | Local DB | better-sqlite3 (local mode only) |
 | Movie data | TMDB API (v3 / v4 token) |
-| Download integration | Prowlarr + qBittorrent (local mode only) |
 | Tests | Vitest |
 | Deployment | Vercel (demo), Node 20+ LAN server (local) |
 
@@ -88,18 +85,17 @@ Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) 
 Browser
   └─ Next.js App Router (port 3100)
        ├─ Server components — TMDB data fetching, library reads
-       ├─ Client components — interactivity (browse filters, hero carousel,
-       │   library actions, download dialog, rating editor)
-       ├─ Route handlers (/api/*) — library writes, media search proxy
+       ├─ Client components — interactivity (browse filters, hero,
+       │   library actions, rating editor)
+       ├─ Route handlers (/api/*) — library writes
        ├─ TMDB layer (src/lib/tmdb.ts) — all API calls server-side only
        ├─ DB layer (src/lib/db.ts / db.demo.ts) — swapped by DEMO_MODE
-       ├─ Prowlarr / qBittorrent layer — keys stay server-side
        └─ i18n (src/i18n/) — dictionary per locale, no URL prefix
 ```
 
 **Key architectural choices:**
 
-- All TMDB API keys and Prowlarr/qBittorrent credentials are accessed server-side only. Route handlers proxy requests so the browser never touches external APIs directly.
+- The TMDB API key is accessed server-side only. Route handlers proxy requests so the browser never touches external APIs directly.
 - The DB layer has two implementations: `db.ts` (real SQLite via better-sqlite3) and `db.demo.ts` (stubs). The switch is a single `DEMO_MODE` env var.
 - i18n uses flat dictionaries (`dictionaries.ts`) with identical structure for zh-TW and en. Locale is stored in a cookie; the layout reads it on every request.
 - No external auth, no cloud sync, no third-party account system. The data model is deliberately local-first.
@@ -112,8 +108,6 @@ Browser
 
 - Node.js 20 LTS or later
 - A [TMDB API key](https://www.themoviedb.org/settings/api) (v3 key or v4 read access token)
-- *(Optional, for download)* Prowlarr running on `localhost:9696`
-- *(Optional, for download)* qBittorrent with Web UI enabled on `localhost:8080`
 
 ### Installation
 
@@ -124,7 +118,7 @@ cd treehole-movie-app
 npm install
 
 cp .env.example .env
-# fill in TMDB_API_KEY (required); Prowlarr and qBittorrent keys are optional
+# fill in TMDB_API_KEY (required)
 
 npm run dev
 ```
@@ -137,11 +131,6 @@ Open `http://localhost:3100`.
 |---|---|---|
 | `TMDB_API_KEY` | Yes | TMDB v3 api_key or v4 read access token |
 | `DEMO_MODE` | — | Set to `1` to disable all writes (Vercel uses this) |
-| `PROWLARR_URL` | No | Default: `http://localhost:9696` |
-| `PROWLARR_API_KEY` | No | Prowlarr → Settings → General |
-| `QBITTORRENT_URL` | No | Default: `http://localhost:8080` |
-| `QBITTORRENT_USERNAME` | No | qBittorrent Web UI credentials |
-| `QBITTORRENT_PASSWORD` | No | qBittorrent Web UI credentials |
 
 The dev and production servers bind to `0.0.0.0`, so other devices on the same network can reach the app at `http://<your-machine-ip>:3100`.
 
@@ -149,14 +138,13 @@ The dev and production servers bind to `0.0.0.0`, so other devices on the same n
 
 ## Testing
 
-58 tests across 6 files, covering utility functions:
+43 tests across 5 files, covering utility functions:
 
 | File | Coverage |
 |---|---|
 | `tmdb-utils.test.ts` | `pickTrailer` — trailer selection logic |
 | `tmdb-error.test.ts` | `tmdbErrorMessage`, `isV4Token` — API error classification and key format validation |
 | `images.test.ts` | `tmdbImage` — TMDB image URL construction |
-| `prowlarr-utils.test.ts` | `parseResolution`, `resolutionRank` — torrent resolution parsing and ranking |
 | `genres.test.ts` | `genreOptions` — locale-aware genre list construction |
 | `i18n-config.test.ts` | `normalizeLocale`, `tmdbLanguage`, `htmlLang` — locale mapping helpers |
 
@@ -175,24 +163,25 @@ npm run build      # production build
 
 ### Desktop
 
-| Home | Detail |
+| Home | Browse |
 |---|---|
-| ![Treehole home desktop](docs/screenshots/home-desktop.png) | ![Treehole movie detail desktop](docs/screenshots/detail-desktop.png) |
+| ![Treehole home desktop](docs/screenshots/home-desktop.png) | ![Treehole browse desktop](docs/screenshots/browse-desktop.png) |
 
-| Browse | Search |
+| Search | |
 |---|---|
-| ![Treehole browse desktop](docs/screenshots/browse-desktop.png) | ![Treehole search desktop](docs/screenshots/search-desktop.png) |
+| ![Treehole search desktop](docs/screenshots/search-desktop.png) | |
 
 ### Mobile
 
-| Home | Detail |
-|---|---|
-| ![Treehole home mobile](docs/screenshots/home-mobile.png) | ![Treehole movie detail mobile](docs/screenshots/detail-mobile.png) |
+| Home |
+|---|
+| ![Treehole home mobile](docs/screenshots/home-mobile.png) |
+
+> Detail-page screenshots are being re-shot after the current design pass.
 
 ---
 
 ## Future Improvements
 
 - Expand integration tests around the demo/local DB boundary
-- Document the local Prowlarr indexer setup in more detail
 - Optional: add a case study writeup for portfolio context

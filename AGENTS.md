@@ -11,7 +11,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## 目前狀態（接手前必讀）
 
 - **Vercel Demo**：已部署成功，使用 `DEMO_MODE=1`，不連真實資料庫
-- **Local 版**：SQLite（better-sqlite3）+ Prowlarr + qBittorrent 整合，`DEMO_MODE` 未設
+- **Local 版**：SQLite（better-sqlite3）個人片庫，`DEMO_MODE` 未設
 - **主線已穩定**：除非收到明確 bug 回報，不重開部署主線；不動 Vercel 部署設定
 
 ## 技術棧
@@ -30,7 +30,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 - 禁止修改 `.env`
 - 禁止修改 `DEMO_MODE` 判斷邏輯或 db stub
-- 禁止把 Prowlarr / qBittorrent 整合帶到 Vercel（Vercel 版永遠是 `DEMO_MODE=1`）
 - 禁止破壞 local SQLite 功能
 - 禁止改動 Vercel 部署設定，除非我明確指示
 - 禁止安裝新 package，除非我明確確認
