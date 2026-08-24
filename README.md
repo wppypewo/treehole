@@ -166,6 +166,43 @@ npm run test:watch # watch mode
 npm run typecheck  # tsc --noEmit
 npm run lint       # eslint
 npm run build      # production build
+npm run backup     # snapshot the local library (see below)
+```
+
+---
+
+## Backing up the local library
+
+`data/movies.sqlite` holds favorites, watchlist, watched, ratings and search
+history. It is deliberately gitignored -- personal data does not belong in the
+repository -- which means it is the only copy of data that accumulates over
+years and cannot be rebuilt.
+
+```bash
+npm run backup
+```
+
+Writes `data/movies.sqlite.<timestamp>.bak`, then verifies it: opens the result,
+runs `integrity_check`, and compares the row count of every user table against
+the source. A backup that fails verification is deleted and the command exits
+non-zero, because a corrupt backup is worse than no backup -- it makes you
+believe you are covered.
+
+Two details worth knowing:
+
+- **Never copy the database with `cp`.** It runs in WAL mode, so recent writes
+  live in `movies.sqlite-wal`, not the main file. A plain copy can silently
+  produce a backup that is weeks out of date. The script uses SQLite's own
+  `backup()`, which checkpoints the WAL into the destination.
+- **Backups are never overwritten or pruned.** Filenames carry seconds and a
+  counter, so running the command twice in the same second still produces two
+  files. Old backups are yours to delete.
+
+To restore, stop the dev server and replace the database:
+
+```bash
+rm data/movies.sqlite data/movies.sqlite-wal data/movies.sqlite-shm
+cp data/movies.sqlite.<timestamp>.bak data/movies.sqlite
 ```
 
 ---

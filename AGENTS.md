@@ -27,6 +27,18 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | 動畫 | GSAP ^3.15 + ScrollTrigger（scroll 敘事）、Lenis ^1.3（捲動節奏）、Motion ^13.1（元件級，如 popLayout） |
 | 字體 | Bodoni Moda + Noto Serif TC（標題）、Geist（介面），皆走 `next/font` |
 
+## 片庫資料
+
+`data/movies.sqlite` 是使用者唯一一份個人資料（收藏／想看／已看過／評分／
+搜尋紀錄），被 gitignore 排除在版控外。動到資料層之前先跑 `npm run backup`。
+
+**不要用 `cp` 備份**——資料庫跑 WAL 模式，近期資料在 `-wal` 檔裡，
+直接複製主檔會得到一份過期但看起來正常的備份。用 `npm run backup`，
+它走 SQLite 的 `backup()` 並會驗證結果。
+
+在 local 模式（未設 `DEMO_MODE`）用瀏覽器測試會寫進真實資料庫。
+要嘛先備份，要嘛改用 `DEMO_MODE=1 npm run dev`。
+
 ## 技術邊界（禁止跨越）
 
 - 禁止修改 `.env`
