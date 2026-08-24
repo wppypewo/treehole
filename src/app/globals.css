@@ -140,6 +140,9 @@ body {
   gap: 0.5rem;
   border: 1px solid var(--hairline-strong);
   padding: 0.625rem 1.125rem;
+  /* 直接鎖 44px，不靠 padding 加總去湊——那會隨字體度量浮動，
+     實測用 padding 湊出來是 43.5px，差半個像素就跨不過觸控下限。 */
+  min-height: 44px;
   font-size: 0.8125rem;
   letter-spacing: 0.04em;
   color: var(--paper);
@@ -247,6 +250,18 @@ body {
   min-height: 44px;
   padding-block: 0.75rem;
   margin-block: -0.75rem;
+}
+
+/* 夾在文字行裡的連結（例如 metadata 行的導演名）。
+   不能用 .tap-safe——inline-flex 加 min-height 會把那一行的基線推歪。
+   改用偽元素往外擴點擊區，版面完全不動。 */
+.tap-inline {
+  position: relative;
+}
+.tap-inline::after {
+  content: "";
+  position: absolute;
+  inset: -0.875rem -0.375rem;
 }
 
 /* 橫向捲動用：隱藏捲軸但保留可捲動 */

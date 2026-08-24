@@ -151,7 +151,7 @@ export default async function MoviePage({
                   {dict.movie.director}
                   <Link
                     href={`/person/${credits.director.id}`}
-                    className="text-paper transition-colors hover:text-curtain-ink"
+                    className="tap-inline text-paper transition-colors hover:text-curtain-ink"
                   >
                     {credits.director.name}
                   </Link>

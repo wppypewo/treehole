@@ -602,3 +602,44 @@ gitignore 排除，但也因此沒有任何副本。程式碼有 git 保護，�
 
 README 補了備份與還原的說明；AGENTS.md 加了「片庫資料」一節，
 寫明動資料層前先備份、不要用 `cp`、以及 local 模式測試會寫真資料庫。
+
+---
+
+## 2026-08-24 階段 14：正式版全面檢查（已完成）
+
+### 使用者回報「收藏和想看點不了」——是我留下的建置產物
+
+`.env` 沒有設 `DEMO_MODE`、程式碼也沒問題，但 `.next` 是我最後一次驗證時用
+`DEMO_MODE=1 npm run build` 建的。`next.config.ts` 的 turbopack `resolveAlias`
+在**建置時**把 `@/lib/db` 換成 `db.demo.ts`，stub 就被烤進產物裡。
+之後跑 `npm run start` 拿到的就是 demo 版：按鈕 disabled、附一句
+「這個 demo 不會保存」。
+
+已清掉重建。**這是個會再犯的陷阱**——`npm run start` 不會告訴你這份 `.next`
+是哪種模式建的，畫面上唯一線索是那句 demo 提示，很容易誤判成壞掉。
+驗證完 demo 建置後務必重建。
+
+### 檢查中新發現的兩個觸控目標問題
+
+1. **`.btn-line` 只有 43.5px**。原本靠 padding 加總去湊 44，但那會隨字體
+   度量浮動——實測差半個像素。改成直接鎖 `min-height: 44px`，不依賴字型。
+2. **詳情頁的導演連結只有 55×17px**。它是夾在 metadata 文字行裡的行內連結，
+   先前補觸控目標時漏掉。不能套 `.tap-safe`（`inline-flex` + `min-height`
+   會把那一行的基線推歪），新增 `.tap-inline` 用偽元素往外擴 14px，
+   版面完全不動。已用 `elementFromPoint` 驗證上下各 10px 都能點中。
+
+### 其餘檢查結果
+
+18 條路由（含 `/movie/abc`、`/person/0`、`/no-such` 等邊界）全部正確；
+每頁恰好一個 `h1`；375px 無橫向溢出；行動版無小於 44px 的觸控目標；
+兩種建置模式都能過；detector 0 findings；`npm audit` 0 vulnerabilities。
+
+端到端實測寫入：在詳情頁點「想看」→ 確認 SQLite 有這筆 → 再點一次取消
+→ 確認已清除。
+
+### 測試污染已清理
+
+路由檢查打了 `/search?q=dune` 與 `/search?q=zzzznotexist`，搜尋頁依設計會
+記錄。加上先前的「不存在的片名測試」，共三筆是我留下的。因為
+`/api/history` 只支援「全部清除」、沒有單筆刪除，改為先 `npm run backup`
+再直接從資料庫精準刪那三筆。使用者原有的四筆完整保留。
