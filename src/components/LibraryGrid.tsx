@@ -15,7 +15,6 @@ interface Labels {
   sortRating: string;
   minRating: string;
   ratingPlaceholder: string;
-  demoEmpty: string;
   browse: string;
   count: string;
 }
@@ -35,12 +34,10 @@ export default function LibraryGrid({
   items,
   kind,
   labels,
-  isDemo = false,
 }: {
   items: SavedMovie[];
   kind: "favorites" | "watched" | "watchlist";
   labels: Labels;
-  isDemo?: boolean;
 }) {
   const [list, setList] = useState(items);
   const [removing, setRemoving] = useState<number | null>(null);
@@ -66,14 +63,13 @@ export default function LibraryGrid({
     shown = [...shown].sort((a, b) => b.vote_average - a.vote_average);
   }
 
-  // 空狀態：demo 與真的空片庫講的是不同的事，不能共用同一句話。
-  // 這裡不畫上框線——刊頭底下已經有一條，再畫一條會變成兩條並排。
+  // 空狀態：這裡不畫上框線——刊頭底下已經有一條，再畫一條會變成兩條並排。
   if (list.length === 0) {
     return (
       <div className="py-24">
         <div className="mx-auto max-w-md text-center">
           <p className="text-[0.9375rem] leading-relaxed text-paper-dim">
-            {isDemo ? labels.demoEmpty : labels.empty}
+            {labels.empty}
           </p>
           <Link href="/browse" className="btn-line mt-8">
             {labels.browse}

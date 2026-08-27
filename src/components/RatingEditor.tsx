@@ -13,21 +13,17 @@ interface Labels {
   clear: string;
 }
 
-// 個人評分（1–10）與短評，寫入本機 SQLite。
+// 個人評分（1–10）與短評，寫入雲端片庫。
 export default function RatingEditor({
   movie,
   initialScore,
   initialNote,
   labels,
-  isDemo = false,
-  demoNote,
 }: {
   movie: SavedMovie;
   initialScore: number | null;
   initialNote: string;
   labels: Labels;
-  isDemo?: boolean;
-  demoNote?: string;
 }) {
   const [score, setScore] = useState<number | null>(initialScore);
   const [note, setNote] = useState(initialNote);
@@ -35,8 +31,7 @@ export default function RatingEditor({
   const [saved, setSaved] = useState(false);
 
   async function save() {
-    // demo 模式不寫入，避免顯示無法保存的「已儲存」假回饋
-    if (isDemo || !score || saving) return;
+    if (!score || saving) return;
     setSaving(true);
     setSaved(false);
     try {
@@ -52,7 +47,7 @@ export default function RatingEditor({
   }
 
   async function clearRating() {
-    if (isDemo || saving) return;
+    if (saving) return;
     setSaving(true);
     try {
       await fetch(`/api/ratings?tmdb_id=${movie.tmdb_id}`, {
@@ -81,7 +76,6 @@ export default function RatingEditor({
               <button
                 key={n}
                 type="button"
-                disabled={isDemo}
                 aria-pressed={score === n}
                 onClick={() => {
                   setScore(n);
@@ -110,7 +104,6 @@ export default function RatingEditor({
         <textarea
           id="rating-note"
           value={note}
-          disabled={isDemo}
           onChange={(e) => {
             setNote(e.target.value);
             setSaved(false);
@@ -125,12 +118,12 @@ export default function RatingEditor({
         <button
           type="button"
           onClick={save}
-          disabled={isDemo || !score || saving}
+          disabled={!score || saving}
           className="btn-line"
         >
           {saved ? labels.saved : labels.save}
         </button>
-        {!isDemo && score !== null && (
+        {score !== null && (
           <button
             type="button"
             onClick={clearRating}
@@ -141,10 +134,6 @@ export default function RatingEditor({
           </button>
         )}
       </div>
-
-      {isDemo && demoNote && (
-        <p className="mt-4 text-xs text-paper-faint">{demoNote}</p>
-      )}
     </section>
   );
 }

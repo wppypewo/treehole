@@ -82,4 +82,6 @@ export const IMAGE_SIZES = {
   personThumb: "112px",
   // 編號榜的小海報
   rankThumb: "48px",
+  // 搜尋頁空狀態的片庫入口：max-w-2xl 內 3 / 6 欄
+  libraryPicks: "(min-width: 640px) 102px, 30vw",
 } as const;

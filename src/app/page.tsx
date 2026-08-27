@@ -14,7 +14,7 @@ import RankedList from "@/components/RankedList";
 import UpcomingStrip from "@/components/UpcomingStrip";
 import ErrorNotice from "@/components/ErrorNotice";
 
-// 首頁含「為你推薦」需讀本機 SQLite，故每次請求即時渲染
+// 首頁含「為你推薦」需讀雲端片庫，故每次請求即時渲染
 export const dynamic = "force-dynamic";
 
 export default async function Home() {

@@ -6,10 +6,10 @@
 
 ## Repo Identity
 
-* Repo path: `D:\ClaudeCode\projects\movie-app`
+* Repo path: `~/ClaudeCode/projects/movie-app`（2026-07-30 由 Windows 遷至 Mac）
 * Repo type: Next.js 16 全端 Web App（git repo，有 GitHub remote）
-* Primary purpose: Treehole——TMDB 電影導覽 + 私人片庫（本機 SQLite；Vercel 為 demo），同時作為作品集
-* Current status: 全站改版與相依維護皆已完成（階段 1–11），已推送至 origin/main，CI 綠燈
+* Primary purpose: Treehole——TMDB 電影導覽 + 私人片庫。**2026-08-27 起線上版即正式版**（Vercel + Neon Postgres，全站鎖給擁有者一人）
+* Current status: 階段 1–15 完成。階段 15（雲端化 + 擁有者鎖）已本機驗證完畢，**尚未 commit / push**
 
 ## Git Status
 
@@ -21,22 +21,22 @@
 
 ## Product Status
 
-* Production / deployment: Vercel demo（README 載明 `https://treehole-movie-app.vercel.app`，以 `DEMO_MODE=1` 運作、不連真實 DB）；本 repo **無 `vercel.json`**（部署設定在 Vercel 端，未進 repo），另有 `.vercelignore`。AGENTS.md：不動 Vercel 部署設定，除非明確指示
-* README status: Treehole 標題、live demo、features、demo/local 對照表、設計決策、tech stack、architecture、testing、future。**2026-08-23 移除截圖區**（見階段 5）
-* CI status: 有 GitHub Actions `.github/workflows/ci.yml`，push / PR 到 main 觸發 `typecheck → lint → test → build`（build 帶 `DEMO_MODE=1`）。actions 為 `@v7`、Node 24。`.github/dependabot.yml` 同時監看 npm 與 github-actions
-* Test status: Vitest；50 tests / 5 files（utility 層），2026-08-23 實測通過。lint 已清到 0 error 0 warning
-* Demo mode status: 由 `DEMO_MODE=1` 切換。`next.config.ts` 的 turbopack `resolveAlias` 在 demo 時把 `@/lib/db` 指向 `src/lib/db.demo.ts`（stub：讀回空、寫入 no-op）；UI 寫入動作仍顯示但呈 disabled 並誠實說明，不假裝儲存
-* Known limitations: 缺 demo/local DB 邊界的整合測試（README future）；測試僅涵蓋 utility 層，UI 與 API 整合未覆蓋
+* Production / deployment: Vercel + Neon Postgres（`https://treehole-movie-app.vercel.app`，真實讀寫，通行碼保護）；本 repo **無 `vercel.json`**（部署設定在 Vercel 端，未進 repo），另有 `.vercelignore`。AGENTS.md：不動 Vercel 部署設定，除非明確指示
+* README status: Treehole 標題、部署連結（載明需通行碼）、features、Access 一節、設計決策、tech stack、architecture、testing、資料位置、future。**2026-08-23 移除截圖區**（階段 5）；**2026-08-27 移除 demo/local 對照表與備份說明**（階段 15）
+* CI status: 有 GitHub Actions `.github/workflows/ci.yml`，push / PR 到 main 觸發 `typecheck → lint → test → build`。**build 不再帶 `DEMO_MODE=1`**，也不需要 `DATABASE_URL`——DB client 是 lazy 的，建置期不連線。actions 為 `@v7`、Node 24。`.github/dependabot.yml` 同時監看 npm 與 github-actions
+* Test status: Vitest；**63 tests / 6 files**（utility 層 + 擁有者鎖 session token），2026-08-27 實測通過。lint 已清到 0 error 0 warning
+* Access control: `src/proxy.ts` 是唯一授權檢查點，擋在所有頁面與 route handler 之前。通行碼換 HMAC 簽章 cookie（`src/lib/owner-session.ts`）。`OWNER_PASSCODE` / `OWNER_SECRET` 缺任一則全站鎖死（fail closed）。**demo 模式已於階段 15 整套移除**
+* Known limitations: route handler 與 proxy 無整合測試（目前靠手動驗證）；DB 層無自動化測試（以真實 Neon 手動驗過）；通行碼無 rate limit，僅固定延遲——serverless 無可靠共享狀態
 
 ## Tech Stack
 
 * Framework: Next.js 16.3.2（App Router、Turbopack，port 3100）+ React 19.2.8 + TypeScript 6
 * Data source: TMDB API（v3 key / v4 token，全部 server-side）
-* Local database: better-sqlite3 13（**僅 local 模式**；demo 模式以 `db.demo.ts` stub 取代）
-* Demo / production mode: 單一 `DEMO_MODE` env 切換（Vercel=demo、本機=local）；TMDB key 為 server-side
+* Database: Neon Postgres，`@neondatabase/serverless` ^1.1.0（HTTP driver，非 TCP pool）
+* Access control: 自建擁有者鎖（`src/proxy.ts` + `src/lib/owner-session.ts`，Web Crypto HMAC-SHA256）；TMDB key 為 server-side
 * Styling: Tailwind CSS v4（`@tailwindcss/postcss`）
 * Testing: Vitest（`vitest.config.ts`）
-* Deployment: Vercel（demo）；本機為 Node 24+ LAN server（bind `0.0.0.0`）。CI 建置在 Node 24
+* Deployment: Vercel。本機開發連同一個 Neon DB（bind `0.0.0.0`）。CI 建置在 Node 24
 
 > 動畫套件現況（2026-08-23 更新）：`gsap` ^3.15、`lenis` ^1.3、`motion` ^13.1 皆已安裝並使用中。分工見 AGENTS.md。
 
@@ -47,32 +47,33 @@
 * Typecheck: `npm run typecheck`（`tsc --noEmit`）
 * Test: `npm run test`（`vitest run`）；watch：`npm run test:watch`
 * Build: `npm run build`（`next build`）
-* Dev: `npm run dev`（`next dev -H 0.0.0.0 -p 3100`）；Windows：`啟動Treehole.bat`
+* Dev: `npm run dev`（`next dev -H 0.0.0.0 -p 3100`）
 * Other: `npm run start`（`next start -H 0.0.0.0 -p 3100`）
 
 ## Completed Work
 
 > 僅依 README、commits、實際檔案整理，未腦補。
 
-* Vercel demo：已部署，`DEMO_MODE=1` 運作（README 載明 live demo）。
-* Demo mode：寫入動作 disabled + 誠實空狀態，不假裝持久化（commit `92a8b3d 修正 demo 模式 action 與空狀態語意`）。
-* better-sqlite3 / `db.demo.ts` alias：已實作，`next.config.ts` 依 `DEMO_MODE` 切換 `@/lib/db` → `db.demo.ts`。
-* GitHub Actions：`ci.yml`（typecheck→test→build，build 帶 DEMO_MODE=1）+ `dependabot.yml` 已建立。
+* ~~Vercel demo：已部署，`DEMO_MODE=1` 運作~~ **階段 15 推翻**：改為真實讀寫的正式版。
+* ~~Demo mode：寫入動作 disabled + 誠實空狀態~~（commit `92a8b3d`）**階段 15 移除**。
+* ~~better-sqlite3 / `db.demo.ts` alias~~ **階段 15 移除**，改為 Neon Postgres。
+* GitHub Actions：`ci.yml`（typecheck→lint→test→build）+ `dependabot.yml` 已建立。
+* 雲端化 + 擁有者鎖：階段 15，見下方紀錄。
 * UI cinematic pass：一系列互動 / 質感 commit（`5bf0af0 優化電影卡片與詳情頁互動質感`、`14a18b6`、`6f423dd`、`f15db11`、`22623a1` 等）。
 * demo mode action / empty-state semantics：見上 `92a8b3d`。
 * final README correction：近 4 個 commit 整理作品集 README（`9bd48ad`、`d5adfd1`、`2643879`）與文案語義（`c5053f4`、`1cac0cb`）。
 
 ## Current Phase
 
-* Phase: 生產後收尾 + 作品集狀態穩定化（主線凍結，文件 / 表述為主）
-* Goal: 維持 demo 穩定與 CI 通過，README 對外完整一致；不重開部署主線、不引入新功能。
-* Success criteria: working tree clean、CI 綠燈、demo 可瀏覽、README 與實際技術棧一致（含動畫套件描述）。
+* Phase: 雲端化收尾（階段 15 段 4：文件更新 + commit）
+* Goal: 讓線上版成為唯一的正式版——資料存得住、只有擁有者進得去、文件與實際一致。
+* Success criteria: typecheck / lint / test / build 全綠、文件無 demo 殘留、線上部署後片庫讀寫與通行碼實測通過。
 
 ## Next 3 Allowed Tasks
 
-1. ~~修正 AGENTS.md 動畫套件描述落差~~（已完成 2026-06-15：AGENTS.md 改為「Motion 已安裝並使用中；GSAP/Lenis 未安裝」，與 README 一致）。
-2. demo/local DB 邊界整合測試「可行性盤點」：先列缺口與測試方案，不直接大改（對應 README future 第一項）。
-3. 作品集 closeout 檢查：確認 README、live demo、demo/local 邊界說明、CI 狀態彼此一致。
+1. 部署後線上實測：通行碼可進、片庫四種操作可寫入 Neon、重新整理後仍在。
+2. Neon 資料庫密碼 reset（明文曾出現在對話紀錄中）。
+3. route handler / proxy 的整合測試可行性盤點——先列缺口與方案，不直接大改。
 
 ## Deferred / Explicit Approval Required
 
@@ -85,7 +86,8 @@
 
 * Do not expose or print secrets.
 * Do not modify env files（`.env` / `.env.example`）。
-* Do not change demo/local DB boundary（`DEMO_MODE` 判斷、`db.demo.ts` stub、`next.config.ts` alias）unless explicitly requested.
+* Do not move authorization out of `src/proxy.ts`, and do not make the lock fail open.
+* Do not commit `DATABASE_URL`, `OWNER_PASSCODE` or `OWNER_SECRET` values into the repo or into documentation.
 * Do not replace the current README structure unless explicitly requested.
 * Do not install new packages unless explicitly confirmed（AGENTS.md）。
 * Do not push without explicit instruction.
@@ -97,7 +99,7 @@
 * Typecheck: `npm run typecheck`
 * Test: `npm run test`
 * Build: `npm run build`
-* （CI 順序：typecheck → test → build，build 帶 `DEMO_MODE=1`）
+* （CI 順序：typecheck → lint → test → build，無需 `DATABASE_URL`）
 
 ## Handoff Prompt
 
@@ -644,6 +646,124 @@ README 補了備份與還原的說明；AGENTS.md 加了「片庫資料」一節
 
 ---
 
+## 2026-08-27 階段 15：線上版轉正式版（雲端片庫 + 擁有者鎖）
+
+使用者定調：**「這才是我真正的目標 我把線上版本當作是正式版」**。
+線上站必須真的存得住收藏／想看／已看過／評分，本機版作廢。
+
+### 開工前確認的六項決定
+
+| | 決定 |
+|---|---|
+| A1 | 全站鎖給擁有者一人 |
+| B | 本機版完全作廢 |
+| C | 本機那 12 筆**不遷移** |
+| D | 只用免費方案 |
+| E | 搜尋紀錄不上雲，功能直接刪掉 |
+| F | README 敘事可以改寫 |
+
+使用者另外批准了四項越界（覆蓋 AGENTS.md 的既有禁令）：安裝
+`@neondatabase/serverless`、整套移除 `DEMO_MODE`、刪除搜尋紀錄功能、
+調整部署設定。**明確不要的：雲端轉本機的備份指令。**
+
+### 段 1–2：刪功能、換資料層
+
+**刪除**：`src/lib/db.demo.ts`、`scripts/backup-db.mjs`（整個 `scripts/`）、
+`src/app/api/history/route.ts`、`src/components/HistoryList.tsx`。
+
+**新增**：`src/components/LibraryPicks.tsx`——搜尋頁空狀態原本靠搜尋紀錄撐著，
+拿掉之後不能留一片空白，改成從自己的片庫抽片。
+
+`src/lib/db.ts` 整份改寫成 Neon。`next.config.ts` 的 turbopack `resolveAlias`
+與 CI 的 `DEMO_MODE=1` 一併移除。`grep` 驗過 `src/`、`next.config.ts`、
+`.github/` 對 `isDemo|demoEmpty|demoNote|DEMO_MODE|dict.demo` 零殘留。
+
+**詳情頁順手修掉一個效能問題**：四個片庫狀態原本是四次循序查詢，本機 SQLite
+時代無所謂，換成 Neon 的 HTTP driver 就是四趟往返。改成一次 `Promise.all`。
+
+### `ReturnType<typeof neon>` 是個陷阱
+
+寫完出現 7 個 typecheck error，都是同一個原因。看
+`@neondatabase/serverless/index.d.ts:575` 才發現 `ReturnType<typeof neon>` 會把
+`ArrayMode` 與 `FullResults` 兩個泛型參數放寬成 `boolean`，查詢結果型別因此變成
+三個分支的聯集，`.length` 都取不到。
+
+解法是明寫 `NeonQueryFunction<false, false>`，不要用 `ReturnType` 推。
+
+### 段 3：擁有者鎖——原訂方案在中途作廢
+
+原本要用 Vercel Authentication。使用者實際去看 UI 後回報
+**「All Deployments 要花錢 我不想花錢」**——保護範圍要涵蓋 production 網域就得
+選 All Deployments，而那在 Hobby 方案要付費。我在 Vercel 文件裡找不到明確的
+方案門檻敘述，也就沒有拿「文件沒寫」去反駁使用者看到的實際畫面。
+
+改為自建：一組通行碼換一張 HMAC 簽章 cookie。沒有帳號、沒有資料表、沒有第三方
+服務、沒有新套件。
+
+**新增檔案**：
+
+| 檔案 | 職責 |
+|---|---|
+| `src/lib/owner-session.ts` | 簽發 / 驗證 token、通行碼比對 |
+| `src/proxy.ts` | 唯一攔截點 |
+| `src/app/api/unlock/route.ts` | 驗通行碼、發 cookie |
+| `src/app/unlock/page.tsx` | 解鎖頁 |
+| `src/components/UnlockForm.tsx` | 輸入框 |
+
+**Next 16 把 `middleware.ts` 改名為 `proxy.ts`**，舊名已 deprecated。動手前依
+AGENTS.md 讀了 `node_modules/next/dist/docs/` 的 proxy 指南，否則會寫出一個檔名
+正確、但整份不會被載入的死檔。`NextResponse.rewrite` 的 `request.headers` 初始化
+選項在文件正文只示範了 `.next()`，是去翻 `response.d.ts:20` 才確認 `rewrite`
+也吃得下。
+
+**幾個刻意的設計**：
+
+- 頁面用 **rewrite 不用 redirect**——網址列保持原樣，解鎖後就停在原本要去的那頁
+- `/api/*` 回 **401 JSON 不回 HTML**——丟解鎖頁的 HTML 給 `fetch()` 只會讓前端
+  拿到一坨解析不了的東西
+- 用 **Web Crypto 不用 `node:crypto`**——proxy 與 route handler 共用同一份實作
+- matcher 排除 `_next/static`——漏掉的話解鎖頁自己的 CSS/JS 先壞
+- 兩個環境變數缺任一就**全站鎖死**，不設預設值
+
+**授權只在 proxy 這一層**。`src/lib/db.ts` 與 route handler 完全沒有授權檢查，
+這是有意的取捨：規則放在一個檔案裡，比散在 16 個函式裡可靠。代價是
+`src/proxy.ts` 的 matcher 改錯就等於默默拿掉授權，改之前要想清楚。
+
+### 本機實測（不是跑完 build 就算數）
+
+階段 14 的教訓是「只跑 build 不算驗證」，這次直接起 server 打真實 HTTP。
+
+鎖的部分，10 項全過：未解鎖的頁面回解鎖頁且網址不變；四個寫入 API 全部
+401；錯誤通行碼不發 cookie；正確通行碼發出 `HttpOnly; Secure; SameSite=lax`
+的 180 天 cookie；竄改簽章、把到期時間往後改、過期 token 三種偽造全部擋下；
+兩個環境變數都不設時整站鎖死且 `/api/unlock` 回 503；鎖住狀態下 CSS / JS /
+woff2 / favicon 全部 200。
+
+另補 13 個單元測試（`src/__tests__/owner-session.test.ts`），涵蓋偽造簽章、
+延長到期、格式錯誤、fail-closed 設定。
+
+Neon 的部分，接上使用者開通的真實資料庫跑：schema 自動建立成功（冷啟動連線 +
+建表 1689 ms），四張表欄位確認，四種操作各跑一輪寫入／讀取／刪除共 9 項全過，
+含評分 upsert 覆蓋而非重複插入。最後三層串起來——鎖著時 401、解鎖後 `POST`
+真的寫進 Neon、`/favorites` 頁讀得回來。**驗證資料已全部清除，四張表回到 0 筆。**
+
+### 一個把順序顧慮解掉的發現
+
+原本告訴使用者「要先設通行碼再開資料庫，否則中間有空窗」。實測第 10 項證明
+這個顧慮不成立：鎖是 fail-closed 的，兩個變數沒設時**連 API 都是 401**。
+所以只設了 Neon 就先部署也不會外洩，最壞情況是擁有者自己進不去。
+
+### 遺留風險（誠實記錄）
+
+- **通行碼是唯一防線**。serverless 沒有可靠的共享狀態做 rate limit，
+  `/api/unlock` 只有固定 400 ms 延遲。真正的防線是通行碼長度。
+- **Neon 密碼曾以明文貼進對話**。建議 reset。
+- **本機沒有 `.env` 檔**（不是空的，是不存在）。`.env` 在禁止修改範圍內，
+  沒有代為建立。
+- route handler 與 proxy 仍無整合測試。
+
+---
+
 ## 已評估後決定不做（勿再提出）
 
 這些都經過評估與討論，使用者已明確表示不做。**下一個 session 不要把它們
@@ -664,8 +784,22 @@ README 補了備份與還原的說明；AGENTS.md 加了「片庫資料」一節
 使用者說過「反正是自己用」，但那是針對截圖。README 的標題、live demo 連結、
 Product & Design Decisions 幾段仍保留，決定不動。
 
+### 雲端轉本機的備份指令
+
+階段 15 提過，使用者明確回「第 6 點不要做」。舊的 `npm run backup` 存在的理由是
+`data/movies.sqlite` 是世上唯一一份；資料搬到 Neon 之後那個前提不成立了。
+備援範圍以 Neon 方案提供的為準。不要再提。
+
+### Vercel Authentication 當作擁有者鎖
+
+階段 15 的原訂方案。使用者實際看過 UI 後回報保護範圍要選 All Deployments 才擋得住
+production 網域，而那要付費。已改為自建的 `src/proxy.ts`，不要再回頭提這條。
+
 ### `npm run start` 不加模式提示
 
 曾提議在啟動時印出「本機版 / Demo 版」，因為 `.next` 會靜默帶著建置模式
 （階段 14 就是這樣讓使用者以為功能壞掉）。提了兩次，未採納，不再提。
 應對方式改為紀律：**驗證完 `DEMO_MODE=1` 的建置後，記得重建回本機版**。
+
+> 2026-08-27 補記：階段 15 移除 `DEMO_MODE` 後，這個陷阱的成因已不存在——
+> 建置產物不再有模式之分。這一條保留作為紀錄。

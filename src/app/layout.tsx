@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Geist, Bodoni_Moda, Noto_Serif_TC } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -6,6 +7,7 @@ import SmoothScroll from "@/components/SmoothScroll";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { htmlLang } from "@/i18n/config";
+import { LOCK_HEADER } from "@/lib/owner-session";
 
 // 介面與內文：撐資訊層，不搶戲
 const geistSans = Geist({
@@ -43,6 +45,10 @@ export default async function RootLayout({
   const locale = await getLocale();
   const dict = getDictionary(locale);
 
+  // proxy 把未解鎖的請求改寫到 /unlock 時會帶上這個 header。
+  // 鎖著的時候不畫導覽列——那些連結一個都點不進去，擺著只是誤導。
+  const locked = (await headers()).get(LOCK_HEADER) === "1";
+
   return (
     <html
       lang={htmlLang(locale)}
@@ -50,7 +56,7 @@ export default async function RootLayout({
     >
       <body className="flex min-h-full flex-col bg-ink text-paper">
         <SmoothScroll />
-        <Navbar locale={locale} dict={dict} />
+        {!locked && <Navbar locale={locale} dict={dict} />}
         <main className="flex-1">{children}</main>
       </body>
     </html>

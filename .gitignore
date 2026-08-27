@@ -41,13 +41,13 @@ movie-app-tree.txt
 # 保留範本，供他人複製
 !.env.example
 
-# SQLite 資料檔（better-sqlite3，階段 3 使用）
+# 舊的本機 SQLite 片庫（階段 3–14 使用，階段 15 已由 Neon Postgres 取代）。
+# 機制雖然作廢，這些規則要留著——`data/` 裡還躺著使用者的個人資料，
+# 刪掉規則等於讓下一次 `git add .` 把它們送進版控。
 /data/*.sqlite
 /data/*.sqlite-journal
 /data/*.sqlite-wal
 /data/*.sqlite-shm
-# 手動備份。注意：資料庫跑 WAL 模式，直接 cp 主檔會漏掉還在 WAL 裡的資料，
-# 要用 better-sqlite3 的 db.backup() 產生。
 /data/*.bak
 /data/*.bak-wal
 /data/*.bak-shm

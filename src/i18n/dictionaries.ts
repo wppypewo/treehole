@@ -40,14 +40,6 @@ export interface Dictionary {
     watchlistTitle: string;
     watchedTitle: string;
   };
-  history: {
-    empty: string;
-    clearShort: string;
-    justNow: string;
-    earlierToday: string;
-    yesterday: string;
-    daysAgo: string;
-  };
   recommendations: { related: string; relatedEmpty: string; forYouEmpty: string };
   movie: {
     noOverview: string;
@@ -100,13 +92,6 @@ export interface Dictionary {
     watched: string;
     watchedDone: string;
   };
-  demo: {
-    actionNote: string;
-    ratingNote: string;
-    libraryEmpty: string;
-    recommendationsEmpty: string;
-    keepBrowsing: string;
-  };
   home: {
     eyebrow: string;
     rows: {
@@ -128,6 +113,15 @@ export interface Dictionary {
     prev: string;
     next: string;
     filmCount: string;
+    browse: string;
+  };
+  unlock: {
+    title: string;
+    hint: string;
+    passcode: string;
+    submit: string;
+    wrong: string;
+    notConfigured: string;
   };
   errors: {
     missingKey: string;
@@ -178,14 +172,6 @@ const zhTW: Dictionary = {
     favoritesTitle: "收藏",
     watchlistTitle: "想看",
     watchedTitle: "已看過",
-  },
-  history: {
-    empty: "還沒找過任何電影。輸入片名，從這裡開始。",
-    clearShort: "清除",
-    justNow: "剛剛",
-    earlierToday: "今晚稍早",
-    yesterday: "昨天",
-    daysAgo: "{n} 天前",
   },
   recommendations: {
     related: "相關推薦",
@@ -244,15 +230,6 @@ const zhTW: Dictionary = {
     watched: "標記已看過",
     watchedDone: "已看過 ✓",
   },
-  demo: {
-    actionNote: "收藏、想看、已看過是本機版功能，這個 demo 不會保存。",
-    ratingNote: "個人評分是本機版功能，這個 demo 不會保存。",
-    libraryEmpty:
-      "收藏、想看、已看過會儲存在本機版。這個線上 demo 只展示 TMDB 內容，不保存個人清單。",
-    recommendationsEmpty:
-      "個人化推薦會依你在本機版收藏與標記已看過的電影產生。這個線上 demo 不保存個人資料，先去看看其他電影吧。",
-    keepBrowsing: "瀏覽電影",
-  },
   home: {
     eyebrow: "今晚這部",
     rows: {
@@ -274,6 +251,16 @@ const zhTW: Dictionary = {
     prev: "上一批",
     next: "下一批",
     filmCount: "{n} 部",
+    browse: "瀏覽電影",
+  },
+  unlock: {
+    title: "這個站是私人的",
+    hint: "片庫只有一個人在用。輸入通行碼繼續。",
+    passcode: "通行碼",
+    submit: "進入",
+    wrong: "通行碼不對。",
+    notConfigured:
+      "站台還沒設定通行碼，現在沒有人進得來。請設定 OWNER_PASSCODE 與 OWNER_SECRET 兩個環境變數。",
   },
   errors: {
     missingKey: "尚未設定 TMDB 金鑰，請在 .env 填入 TMDB_API_KEY 後重新整理。",
@@ -324,14 +311,6 @@ const en: Dictionary = {
     favoritesTitle: "Favorites",
     watchlistTitle: "Watchlist",
     watchedTitle: "Watched",
-  },
-  history: {
-    empty: "No searches yet. Type a title to begin.",
-    clearShort: "Clear",
-    justNow: "Just now",
-    earlierToday: "Earlier today",
-    yesterday: "Yesterday",
-    daysAgo: "{n} days ago",
   },
   recommendations: {
     related: "You might also like",
@@ -390,17 +369,6 @@ const en: Dictionary = {
     watched: "Mark watched",
     watchedDone: "Watched ✓",
   },
-  demo: {
-    actionNote:
-      "Favorites, watchlist and watched are local-version features. This demo won't save them.",
-    ratingNote:
-      "Personal ratings are a local-version feature. This demo won't save them.",
-    libraryEmpty:
-      "Favorites, watchlist and watched are stored in the local version. This online demo only showcases TMDB content and doesn't keep personal lists.",
-    recommendationsEmpty:
-      "Personalized picks come from the movies you favorite and mark as watched in the local version. This online demo doesn't store personal data — browse some movies instead.",
-    keepBrowsing: "Browse movies",
-  },
   home: {
     eyebrow: "Tonight",
     rows: {
@@ -422,6 +390,16 @@ const en: Dictionary = {
     prev: "Previous",
     next: "Next",
     filmCount: "{n} films",
+    browse: "Browse movies",
+  },
+  unlock: {
+    title: "This site is private",
+    hint: "This library belongs to one person. Enter the passcode to continue.",
+    passcode: "Passcode",
+    submit: "Enter",
+    wrong: "Wrong passcode.",
+    notConfigured:
+      "No passcode is configured, so nobody can get in. Set the OWNER_PASSCODE and OWNER_SECRET environment variables.",
   },
   errors: {
     missingKey:

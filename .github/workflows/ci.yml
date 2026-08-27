@@ -19,7 +19,6 @@ jobs:
         uses: actions/setup-node@v7
         with:
           # Node 20 已於 2026-04-30 結束支援，24 是現行 LTS（到 2028-04-30）。
-          # better-sqlite3 12.10 宣告支援到 26.x，這個版本在範圍內。
           node-version: '24'
           cache: 'npm'
 
@@ -42,4 +41,3 @@ jobs:
         run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: 1
-          DEMO_MODE: 1

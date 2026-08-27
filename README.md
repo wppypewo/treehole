@@ -8,11 +8,11 @@ A cinematic movie discovery and private film library experience.
 
 Treehole is built around a specific kind of moment: you have an evening, you want to watch something, and you need a space that helps you find it — not just search a database.
 
-The product has two layers. The first is a TMDB-powered discovery surface: one featured film per visit, curated rows, an editorial ranked index, browse by genre/year/rating, and full-text search with recent search memory. The second is a private library: favorites, a watchlist, and a watched log that accumulates over time. Both layers share one visual language: dark, poster-forward, sharp-cornered, editorial.
+The product has two layers. The first is a TMDB-powered discovery surface: one featured film per visit, curated rows, an editorial ranked index, browse by genre/year/rating, and full-text search. The second is a private library: favorites, a watchlist, a watched log, and personal ratings that accumulate over time. Both layers share one visual language: dark, poster-forward, sharp-cornered, editorial.
 
-The app runs locally with a SQLite library. A Vercel demo is available for browsing and discovery; library persistence is intentionally disabled there rather than faked.
+The deployed app is the product. It runs on Vercel against a Neon Postgres library and is locked to a single owner behind a passcode — there is no sign-up, no second account, and no public browsing mode. The URL below will ask you for a passcode and go no further without one.
 
-**Live demo:** https://treehole-movie-app.vercel.app
+**Deployed at:** https://treehole-movie-app.vercel.app (passcode required)
 
 ---
 
@@ -21,27 +21,41 @@ The app runs locally with a SQLite library. A Vercel demo is available for brows
 - **Editorial home entry** — one featured film per visit (no auto-rotating carousel), then curated rows at two card scales, a numbered ranked index, and a date-led upcoming strip
 - **Library-seeded recommendations** — uses watched and favorited films as seeds, then pulls related TMDB titles and deduplicates them into a "For You" row
 - **Browse** — filter by genre, decade, minimum rating, and sort order; condition summary updates in real time
-- **Search** — full-text TMDB search with recent search history (stored in SQLite, accessible without typing)
+- **Search** — full-text TMDB search; an empty query shows films drawn from your own library rather than a blank page
 - **Movie detail page** — backdrop, poster, metadata, director link, cast strip, trailer embed, overview, personal rating editor
 - **Library — Favorites / Watchlist / Watched** — sortable and filterable per-list views; cards have a hover-gated remove action (always visible on touch, hidden until hover on fine-pointer devices)
-- **Personal ratings** — per-film score (1–10) and short note, stored locally
+- **Personal ratings** — per-film score (1–10) and short note
 - **Personalized "For You" row** — appears on home once seeds exist in the library
 - **i18n** — Traditional Chinese and English; language stored in cookie, no URL prefix needed
-- **Demo-safe disabled states** — in demo mode, write actions (library, rating) are disabled with honest explanations rather than pretending to save
+- **Owner lock** — one passcode gates the entire site, pages and API alike; without it the app is closed rather than read-only
 
 ---
 
-## Demo Mode vs Local Mode
+## Access
 
-| Area | Vercel Demo | Local Mode |
-|---|---|---|
-| TMDB discovery (home, browse, search, detail) | Yes | Yes |
-| Favorites / Watchlist / Watched persistence | Disabled — shown with explanation | Available (SQLite) |
-| Personal ratings | Disabled — shown with explanation | Available (SQLite) |
-| Search history | Disabled | Available (SQLite) |
-| Personalized recommendations | Disabled | Available once library has seeds |
+The site has one user. Rather than build accounts, roles and a password reset
+flow for a population of one, access is a single passcode.
 
-Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) that returns empty results for reads and no-ops for writes. Actions remain visible but show their disabled state — the goal is an accurate preview of local-mode UI without fake persistence.
+| | |
+|---|---|
+| Gate | `src/proxy.ts`, which runs before every page and every route handler |
+| Locked page request | Rewritten to `/unlock`; the address bar keeps the URL you asked for, so unlocking lands you where you were going |
+| Locked API request | `401 {"error":"locked"}` — JSON, not an HTML page a `fetch()` cannot parse |
+| Session | An HMAC-SHA256 signed cookie, `HttpOnly` + `Secure` + `SameSite=lax`, valid 180 days |
+| Missing configuration | Everything is locked, including the owner |
+
+That last row is deliberate. If `OWNER_PASSCODE` or `OWNER_SECRET` is unset the
+site closes rather than opens; a deployment that forgets the variables is
+recoverable, a deployment that defaults to open is not.
+
+The passcode is the only defense. Serverless functions have no shared state to
+rate-limit against, so `/api/unlock` adds a fixed delay and nothing more — use a
+long passphrase, not a four-digit PIN. Changing `OWNER_SECRET` invalidates every
+existing session immediately.
+
+Nothing below the proxy checks authorization. The database layer and the route
+handlers assume the request already got past the lock, which keeps the rule in
+one file instead of scattered across sixteen functions.
 
 ---
 
@@ -65,7 +79,7 @@ Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) 
 
 **Text is never placed over an image on small screens.** On mobile the backdrop is a band and the title sits below it on solid ink. Overlaying titles on stills means readability depends on how bright that particular still happens to be.
 
-**Demo mode does not fake persistence.** If an action is not available, it says so. The alternative — letting users click "Add to favorites" and having it silently disappear — would give a misleading picture of the product.
+**A closed door beats a fake one.** An earlier version deployed publicly with every write disabled, so visitors saw buttons that explained why they did nothing. That was honest but it was not the product — a film library you cannot add to is a catalogue. The site is now simply locked. The one screen a stranger can reach says the library belongs to one person, which is true, and asks for a passcode.
 
 **Page headers say the page's name and nothing else.** An earlier pass gave every page a three-part header: a small uppercase label, a title, and a sentence underneath. The label just repeated the nav item the user had clicked, and the sentence never changed what anyone could do. Both are gone. Titles are now the plain name of the destination, and the only two remaining small labels do real work: `Tonight` marks the editorial pick on the home page, and `Search results` tells you the large serif word is your query rather than a film title.
 
@@ -81,11 +95,11 @@ Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) 
 | UI | React 19, TypeScript 6 |
 | Type | Bodoni Moda + Noto Serif TC (display), Geist (interface), via `next/font` |
 | Styling | Tailwind CSS v4, design tokens in `globals.css` |
-| Animation | GSAP + ScrollTrigger (scroll), Lenis (scroll rhythm), motion v12 (component-level) |
-| Local DB | better-sqlite3 (local mode only) |
+| Animation | GSAP + ScrollTrigger (scroll), Lenis (scroll rhythm), motion (component-level) |
+| Database | Neon Postgres via `@neondatabase/serverless` |
 | Movie data | TMDB API (v3 / v4 token) |
 | Tests | Vitest |
-| Deployment | Vercel (demo), Node 24+ LAN server (local) |
+| Deployment | Vercel |
 
 ---
 
@@ -93,22 +107,24 @@ Demo mode is set via `DEMO_MODE=1`. The DB layer swaps to a stub (`db.demo.ts`) 
 
 ```
 Browser
-  └─ Next.js App Router (port 3100)
-       ├─ Server components — TMDB data fetching, library reads
-       ├─ Client components — interactivity (browse filters, hero,
-       │   library actions, rating editor)
-       ├─ Route handlers (/api/*) — library writes
-       ├─ TMDB layer (src/lib/tmdb.ts) — all API calls server-side only
-       ├─ DB layer (src/lib/db.ts / db.demo.ts) — swapped by DEMO_MODE
-       └─ i18n (src/i18n/) — dictionary per locale, no URL prefix
+  └─ Proxy (src/proxy.ts) — owner lock; nothing below runs until it passes
+       └─ Next.js App Router (port 3100)
+            ├─ Server components — TMDB data fetching, library reads
+            ├─ Client components — interactivity (browse filters, hero,
+            │   library actions, rating editor)
+            ├─ Route handlers (/api/*) — library writes, /api/unlock
+            ├─ TMDB layer (src/lib/tmdb.ts) — all API calls server-side only
+            ├─ DB layer (src/lib/db.ts) — Neon Postgres
+            └─ i18n (src/i18n/) — dictionary per locale, no URL prefix
 ```
 
 **Key architectural choices:**
 
 - The TMDB API key is accessed server-side only. Route handlers proxy requests so the browser never touches external APIs directly.
-- The DB layer has two implementations: `db.ts` (real SQLite via better-sqlite3) and `db.demo.ts` (stubs). The switch is a single `DEMO_MODE` env var.
+- The DB layer creates its schema on first query (`CREATE TABLE IF NOT EXISTS`, batched into one round trip) and caches the promise, so there is no migration step to run and no build-time database dependency — the production build succeeds with `DATABASE_URL` unset.
+- Authorization lives in `src/proxy.ts` and nowhere else. Route handlers validate their inputs but never ask who is calling.
 - i18n uses flat dictionaries (`dictionaries.ts`) with identical structure for zh-TW and en. Locale is stored in a cookie; the layout reads it on every request.
-- No external auth, no cloud sync, no third-party account system. The data model is deliberately local-first.
+- No third-party account system, no OAuth provider, no user table. One passcode, one signed cookie.
 
 ---
 
@@ -128,19 +144,35 @@ cd treehole-movie-app
 npm install
 
 cp .env.example .env
-# fill in TMDB_API_KEY (required)
+# fill in TMDB_API_KEY, DATABASE_URL, OWNER_PASSCODE and OWNER_SECRET
 
 npm run dev
 ```
 
-Open `http://localhost:3100`.
+Open `http://localhost:3100`. The passcode screen comes first — local and
+deployed behave identically, because there is no local mode any more.
+
+Local development points at the same Neon database as production unless you
+create a second Neon branch and use its connection string. There is no separate
+seeded dataset: anything you click while developing is real library data.
 
 ### Environment Variables
 
 | Variable | Required | Description |
 |---|---|---|
 | `TMDB_API_KEY` | Yes | TMDB v3 api_key or v4 read access token |
-| `DEMO_MODE` | — | Set to `1` to disable all writes (Vercel uses this) |
+| `DATABASE_URL` | Yes | Neon Postgres connection string. Injected automatically by the Vercel–Neon integration under exactly this name |
+| `OWNER_PASSCODE` | Yes | The passcode. Long — it is the only thing between the internet and your library |
+| `OWNER_SECRET` | Yes | Random string used to sign the session cookie. Never typed by a human |
+
+Generate `OWNER_SECRET` with:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+```
+
+Omitting either owner variable locks the site rather than opening it. The build
+does not need `DATABASE_URL`; the runtime does.
 
 The dev and production servers bind to `0.0.0.0`, so other devices on the same network can reach the app at `http://<your-machine-ip>:3100`.
 
@@ -148,7 +180,7 @@ The dev and production servers bind to `0.0.0.0`, so other devices on the same n
 
 ## Testing
 
-50 tests across 5 files, covering utility functions:
+63 tests across 6 files, covering utility functions and the owner lock:
 
 | File | Coverage |
 |---|---|
@@ -157,8 +189,9 @@ The dev and production servers bind to `0.0.0.0`, so other devices on the same n
 | `images.test.ts` | `tmdbImage`, `tmdbSrcSet`, `IMAGE_SIZES` — image URL construction, srcset candidates, and sizes-string invariants |
 | `genres.test.ts` | `genreOptions` — locale-aware genre list construction |
 | `i18n-config.test.ts` | `normalizeLocale`, `tmdbLanguage`, `htmlLang` — locale mapping helpers |
+| `owner-session.test.ts` | `issueToken`, `verifyToken`, `passcodeMatches`, `ownerConfig` — forged signatures, extended expiry, expired and malformed tokens, fail-closed configuration |
 
-These tests cover the utility layer. UI behavior and API integrations are not covered by the current test suite.
+These cover the utility layer and the session-token logic. UI behavior, TMDB integration and the database layer are not covered by the suite — the database was verified by hand against a real Neon instance instead.
 
 ```bash
 npm run test       # run once
@@ -166,48 +199,28 @@ npm run test:watch # watch mode
 npm run typecheck  # tsc --noEmit
 npm run lint       # eslint
 npm run build      # production build
-npm run backup     # snapshot the local library (see below)
 ```
 
 ---
 
-## Backing up the local library
+## Where the data lives
 
-`data/movies.sqlite` holds favorites, watchlist, watched, ratings and search
-history. It is deliberately gitignored -- personal data does not belong in the
-repository -- which means it is the only copy of data that accumulates over
-years and cannot be rebuilt.
+Favorites, watchlist, watched and ratings sit in four Neon Postgres tables,
+keyed on `tmdb_id`. There is no user column, because there is no second user.
 
-```bash
-npm run backup
-```
+There is no backup command in this repository. An earlier version kept the
+library in a local SQLite file, which was the only copy in existence and so
+needed one; the hosted database does not have that problem in the same shape,
+and a cloud-to-local dump was considered and deliberately not built. Whatever
+retention and restore Neon provides on the current plan is the whole of the
+backup story — check it in the Neon console rather than assuming it.
 
-Writes `data/movies.sqlite.<timestamp>.bak`, then verifies it: opens the result,
-runs `integrity_check`, and compares the row count of every user table against
-the source. A backup that fails verification is deleted and the command exits
-non-zero, because a corrupt backup is worse than no backup -- it makes you
-believe you are covered.
-
-Two details worth knowing:
-
-- **Never copy the database with `cp`.** It runs in WAL mode, so recent writes
-  live in `movies.sqlite-wal`, not the main file. A plain copy can silently
-  produce a backup that is weeks out of date. The script uses SQLite's own
-  `backup()`, which checkpoints the WAL into the destination.
-- **Backups are never overwritten or pruned.** Filenames carry seconds and a
-  counter, so running the command twice in the same second still produces two
-  files. Old backups are yours to delete.
-
-To restore, stop the dev server and replace the database:
-
-```bash
-rm data/movies.sqlite data/movies.sqlite-wal data/movies.sqlite-shm
-cp data/movies.sqlite.<timestamp>.bak data/movies.sqlite
-```
+The twelve rows from the old local SQLite library were not migrated. That was a
+decision, not an oversight.
 
 ---
 
 ## Future Improvements
 
-- Expand integration tests around the demo/local DB boundary
+- Integration tests for the route handlers and the proxy, which are currently verified by hand
 - Optional: add a case study writeup for portfolio context

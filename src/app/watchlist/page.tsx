@@ -4,14 +4,13 @@ import { listWatchlist } from "@/lib/db";
 import LibraryGrid from "@/components/LibraryGrid";
 import PageHeader from "@/components/PageHeader";
 
-// 讀取本機 SQLite，需於每次請求即時取得最新資料
+// 讀取雲端片庫，需於每次請求即時取得最新資料
 export const dynamic = "force-dynamic";
 
 export default async function WatchlistPage() {
   const locale = await getLocale();
   const dict = getDictionary(locale);
-  const items = listWatchlist();
-  const isDemo = process.env.DEMO_MODE === "1";
+  const items = await listWatchlist();
 
   return (
     <section className="page-shell space-y-10">
@@ -21,7 +20,6 @@ export default async function WatchlistPage() {
       <LibraryGrid
         items={items}
         kind="watchlist"
-        isDemo={isDemo}
         labels={{
           remove: dict.library.remove,
           empty: dict.library.emptyWatchlist,
@@ -31,8 +29,7 @@ export default async function WatchlistPage() {
           sortRating: dict.library.sortRating,
           minRating: dict.browse.minRating,
           ratingPlaceholder: dict.library.ratingPlaceholder,
-          demoEmpty: dict.demo.libraryEmpty,
-          browse: dict.demo.keepBrowsing,
+          browse: dict.common.browse,
           count: dict.common.filmCount,
         }}
       />

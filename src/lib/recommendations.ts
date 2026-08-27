@@ -12,10 +12,12 @@ const PAGE_SIZE = 20; // 對外分頁每頁筆數
 const AGG_TTL = 10 * 60 * 1000; // 彙整結果快取時間
 
 // 目前所有種子的 tmdb_id（收藏 + 已看過，去重）
-function seedIds(): number[] {
-  return [
-    ...new Set([...listFavorites(), ...listWatched()].map((m) => m.tmdb_id)),
-  ];
+async function seedIds(): Promise<number[]> {
+  const [favorites, watched] = await Promise.all([
+    listFavorites(),
+    listWatched(),
+  ]);
+  return [...new Set([...favorites, ...watched].map((m) => m.tmdb_id))];
 }
 
 // 種子集合 + 語系作為快取鍵：收藏一變動，鍵就變、快取自然失效
@@ -74,7 +76,7 @@ async function buildAggregate(
 async function getAggregate(
   locale: Locale,
 ): Promise<{ hasSeeds: boolean; movies: MovieSummary[] }> {
-  const ids = seedIds();
+  const ids = await seedIds();
   const key = seedKey(locale, ids);
   const cached = globalForRec.__recAgg;
   if (cached && cached.key === key && Date.now() - cached.at < AGG_TTL) {

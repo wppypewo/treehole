@@ -10,8 +10,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## 目前狀態（接手前必讀）
 
-- **Vercel Demo**：已部署成功，使用 `DEMO_MODE=1`，不連真實資料庫
-- **Local 版**：SQLite（better-sqlite3）個人片庫，`DEMO_MODE` 未設
+- **線上版就是正式版**（2026-08-27 起）。Vercel + Neon Postgres，收藏／想看／
+  已看過／評分都真的存得住。不再有 demo 模式。
+- **本機版已作廢**。SQLite、`DEMO_MODE`、`db.demo.ts`、`npm run backup`、
+  搜尋紀錄功能全部移除。本機開發連的是同一個 Neon 資料庫。
+- **全站鎖給一個人用**。`src/proxy.ts` 擋在所有頁面與 route handler 之前。
 - **主線已穩定**：除非收到明確 bug 回報，不重開部署主線；不動 Vercel 部署設定
 
 ## 技術棧
@@ -19,9 +22,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | 層 | 選擇 |
 |---|---|
 | 框架 | Next.js 16.3.2（port 3100） |
-| React | 19.2.4 |
+| React | 19.2.8 |
 | 樣式 | Tailwind v4（@tailwindcss/postcss） |
-| 本機資料庫 | better-sqlite3 ^13.0.3（local 版專用） |
+| 資料庫 | Neon Postgres，走 `@neondatabase/serverless` ^1.1.0（HTTP driver） |
+| 存取控制 | 自建擁有者鎖：`src/proxy.ts` + `src/lib/owner-session.ts`（Web Crypto HMAC） |
 | 型別 | TypeScript ^6 |
 | Lint | ESLint ^9（eslint-config-next 16.3.2） |
 | 動畫 | GSAP ^3.15 + ScrollTrigger（scroll 敘事）、Lenis ^1.3（捲動節奏）、Motion ^13.1（元件級，如 popLayout） |
@@ -29,21 +33,42 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## 片庫資料
 
-`data/movies.sqlite` 是使用者唯一一份個人資料（收藏／想看／已看過／評分／
-搜尋紀錄），被 gitignore 排除在版控外。動到資料層之前先跑 `npm run backup`。
+收藏／想看／已看過／評分存在 Neon Postgres 的四張表（`favorites`、`watchlist`、
+`watched`、`ratings`），主鍵都是 `tmdb_id`。沒有 user 欄位，因為只有一個人用。
 
-**不要用 `cp` 備份**——資料庫跑 WAL 模式，近期資料在 `-wal` 檔裡，
-直接複製主檔會得到一份過期但看起來正常的備份。用 `npm run backup`，
-它走 SQLite 的 `backup()` 並會驗證結果。
+Schema 由 `src/lib/db.ts` 的 `createSchema()` 在**第一次查詢時**自動建立，四道
+`CREATE TABLE IF NOT EXISTS` 包在一次 `sql.transaction()` 裡送出。沒有 migration
+指令要跑。建表的 promise 存在 module scope，失敗時會重設成 `null`，不會把一次
+連線失敗快取成永久失敗。
 
-在 local 模式（未設 `DEMO_MODE`）用瀏覽器測試會寫進真實資料庫。
-要嘛先備份，要嘛改用 `DEMO_MODE=1 npm run dev`。
+**本機開發連的是 production 資料庫**（除非你另外開一個 Neon branch 換掉
+`DATABASE_URL`）。在瀏覽器上點的每一下都是真資料，沒有 seed 資料集可以躲。
+
+**這個 repo 沒有備份指令。** 雲端轉本機的備份已評估過並決定不做。備援範圍以
+Neon 方案提供的為準，去 Neon console 看，不要假設。
+
+舊的 `data/movies.sqlite` 那 12 筆沒有遷移，這是決定不是疏漏。
+
+## 擁有者鎖
+
+`src/proxy.ts`（Next 16 把 `middleware.ts` 改名為 `proxy.ts`，舊名已 deprecated）
+是**唯一**的授權檢查點。資料層與 route handler 一律假設請求已經過關。
+
+- 未解鎖的頁面請求 → rewrite 到 `/unlock`，網址列保持原樣
+- 未解鎖的 `/api/*` → `401 {"error":"locked"}` JSON，不是 HTML
+- `OWNER_PASSCODE` / `OWNER_SECRET` 任一沒設 → **整站鎖死，連擁有者也進不去**。
+  這是刻意的，設定漏掉時關門比預設開門安全
+- matcher 必須排除 `_next/static` 等靜態資產，否則解鎖頁自己的 CSS/JS 也會被鎖
+
+改 matcher 前想清楚：Server Function 是打到自己路由的 POST，把某個路徑排除掉
+就等於把那條路徑的授權拿掉，而且不會有任何錯誤訊息。
 
 ## 技術邊界（禁止跨越）
 
 - 禁止修改 `.env`
-- 禁止修改 `DEMO_MODE` 判斷邏輯或 db stub
-- 禁止破壞 local SQLite 功能
+- 禁止把授權檢查從 `src/proxy.ts` 搬走或分散到各個 route handler
+- 禁止讓鎖變成 fail-open（設定缺漏時放行）
+- 禁止把 `DATABASE_URL` 或通行碼寫進程式碼、文件或 commit
 - 禁止改動 Vercel 部署設定，除非我明確指示
 - 禁止安裝新 package，除非我明確確認
 

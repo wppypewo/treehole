@@ -21,7 +21,7 @@ import PersonCard from "@/components/PersonCard";
 import RatingEditor from "@/components/RatingEditor";
 import ParallaxImage from "@/components/ParallaxImage";
 
-// 需讀取本機 SQLite 判斷收藏 / 已看過狀態，故每次請求即時渲染
+// 需讀取雲端片庫判斷收藏 / 已看過狀態，故每次請求即時渲染
 export const dynamic = "force-dynamic";
 
 export default async function MoviePage({
@@ -76,7 +76,14 @@ export default async function MoviePage({
     credits = null;
   }
 
-  const myRating = getRating(movie.id);
+  // 四個片庫狀態各是一次獨立查詢，併發送出，不要一個等一個
+  const [myRating, favorited, inWatchlist, watchedAlready] =
+    await Promise.all([
+      getRating(movie.id),
+      isFavorite(movie.id),
+      isInWatchlist(movie.id),
+      isWatched(movie.id),
+    ]);
 
   const poster = tmdbImage(movie.poster_path, "w500");
   const backdrop = movie.backdrop_path
@@ -87,8 +94,6 @@ export default async function MoviePage({
   const rating = movie.vote_average > 0 ? movie.vote_average.toFixed(1) : "—";
   const showOriginal =
     movie.original_title && movie.original_title !== movie.title;
-  // demo 模式下收藏／評分等寫入功能不可用，僅作 UI 文案與停用狀態用途
-  const isDemo = process.env.DEMO_MODE === "1";
 
   return (
     <article className="pb-28">
@@ -216,10 +221,9 @@ export default async function MoviePage({
                   poster_path: movie.poster_path,
                   vote_average: movie.vote_average,
                 }}
-                initialFavorite={isFavorite(movie.id)}
-                initialWatchlist={isInWatchlist(movie.id)}
-                initialWatched={isWatched(movie.id)}
-                isDemo={isDemo}
+                initialFavorite={favorited}
+                initialWatchlist={inWatchlist}
+                initialWatched={watchedAlready}
                 labels={{
                   favorite: dict.actions.favorite,
                   favorited: dict.actions.favorited,
@@ -230,13 +234,6 @@ export default async function MoviePage({
                 }}
               />
             </div>
-
-            {/* demo 模式：誠實說明這些是本機版功能，取代假成功 */}
-            {isDemo && (
-              <p className="mt-3 text-xs text-paper-faint">
-                {dict.demo.actionNote}
-              </p>
-            )}
           </div>
         </div>
       </section>
@@ -253,8 +250,6 @@ export default async function MoviePage({
           initialScore={myRating?.score ?? null}
           initialNote={myRating?.note ?? ""}
           labels={dict.rating}
-          isDemo={isDemo}
-          demoNote={dict.demo.ratingNote}
         />
       </section>
 

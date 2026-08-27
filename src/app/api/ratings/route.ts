@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid-score" }, { status: 400 });
   }
   const note = typeof body.note === "string" ? body.note.slice(0, 1000) : "";
-  upsertRating(
+  await upsertRating(
     {
       tmdb_id: tmdbId,
       title: String(body.title ?? ""),
@@ -34,6 +34,6 @@ export async function DELETE(request: Request) {
   if (!Number.isInteger(tmdbId) || tmdbId <= 0) {
     return NextResponse.json({ error: "invalid-id" }, { status: 400 });
   }
-  removeRating(tmdbId);
+  await removeRating(tmdbId);
   return NextResponse.json({ ok: true });
 }

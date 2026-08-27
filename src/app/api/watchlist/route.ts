@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 
 // GET：取得全部「想看」
 export async function GET() {
-  return NextResponse.json({ items: listWatchlist() });
+  return NextResponse.json({ items: await listWatchlist() });
 }
 
 // POST：加入「想看」（body 帶電影資訊）
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   if (!Number.isInteger(tmdbId) || tmdbId <= 0) {
     return NextResponse.json({ error: "invalid-id" }, { status: 400 });
   }
-  addWatchlist({
+  await addWatchlist({
     tmdb_id: tmdbId,
     title: String(body.title ?? ""),
     poster_path: body.poster_path ?? null,
@@ -30,6 +30,6 @@ export async function DELETE(request: Request) {
   if (!Number.isInteger(tmdbId) || tmdbId <= 0) {
     return NextResponse.json({ error: "invalid-id" }, { status: 400 });
   }
-  removeWatchlist(tmdbId);
+  await removeWatchlist(tmdbId);
   return NextResponse.json({ ok: true });
 }

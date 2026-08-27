@@ -12,7 +12,7 @@ interface Labels {
   watchedDone: string;
 }
 
-// 詳情頁動作列：收藏 / 想看 / 已看過 可切換（呼叫 API 寫入 SQLite）。
+// 詳情頁動作列：收藏 / 想看 / 已看過 可切換（呼叫 API 寫入雲端片庫）。
 // 三顆一律用 .btn-line，開啟時填簾幕紅——這是全站唯一會出現彩色填塊的地方，
 // 因為它代表「這部片進了你的片庫」，是使用者在這頁唯一能留下的痕跡。
 export default function MovieActions({
@@ -21,14 +21,12 @@ export default function MovieActions({
   initialWatchlist,
   initialWatched,
   labels,
-  isDemo = false,
 }: {
   movie: SavedMovie;
   initialFavorite: boolean;
   initialWatchlist: boolean;
   initialWatched: boolean;
   labels: Labels;
-  isDemo?: boolean;
 }) {
   const [fav, setFav] = useState(initialFavorite);
   const [want, setWant] = useState(initialWatchlist);
@@ -40,8 +38,7 @@ export default function MovieActions({
     active: boolean,
     setActive: (v: boolean) => void,
   ) {
-    // demo 模式不寫入：不觸發樂觀更新，避免顯示無法保存的「假成功」
-    if (isDemo || busy) return;
+    if (busy) return;
     setBusy(true);
     try {
       if (active) {
@@ -66,7 +63,7 @@ export default function MovieActions({
     <div className="flex flex-wrap items-center gap-3">
       <button
         type="button"
-        disabled={isDemo || busy}
+        disabled={busy}
         aria-pressed={fav}
         data-on={fav}
         onClick={() => toggle("favorites", fav, setFav)}
@@ -76,7 +73,7 @@ export default function MovieActions({
       </button>
       <button
         type="button"
-        disabled={isDemo || busy}
+        disabled={busy}
         aria-pressed={want}
         data-on={want}
         onClick={() => toggle("watchlist", want, setWant)}
@@ -86,7 +83,7 @@ export default function MovieActions({
       </button>
       <button
         type="button"
-        disabled={isDemo || busy}
+        disabled={busy}
         aria-pressed={seen}
         data-on={seen}
         onClick={() => toggle("watched", seen, setSeen)}

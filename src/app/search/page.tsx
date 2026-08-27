@@ -2,15 +2,12 @@ import Link from "next/link";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { searchMovies } from "@/lib/tmdb";
-import { addHistory, listHistory } from "@/lib/db";
+import { listFavorites, listWatched } from "@/lib/db";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import MovieGrid from "@/components/MovieGrid";
 import ErrorNotice from "@/components/ErrorNotice";
-import HistoryList from "@/components/HistoryList";
 import SearchField from "@/components/SearchField";
-
-// 搜尋紀錄讀取本機 SQLite，需於每次請求即時取得最新資料
-export const dynamic = "force-dynamic";
+import LibraryPicks from "@/components/LibraryPicks";
 
 export default async function SearchPage({
   searchParams,
@@ -25,7 +22,6 @@ export default async function SearchPage({
   let movies;
   let errorMessage;
   if (query) {
-    addHistory(query); // 記錄這次搜尋（相同關鍵字會移到最前面、不重複）
     try {
       movies = (await searchMovies(locale, query)).results;
     } catch (error) {
@@ -35,6 +31,17 @@ export default async function SearchPage({
 
   // ── 尚未輸入關鍵字：搜尋框是這一頁的主體 ──────────────────
   if (!query) {
+    // 空手進來時給一個回到自己片庫的入口。優先收藏，沒有收藏就退到已看過；
+    // 兩者都空代表這個人真的還沒開始用，那就什麼都不放，不假裝有內容。
+    let picks = await listFavorites();
+    let picksTitle = dict.nav.favorites;
+    let picksHref = "/favorites";
+    if (picks.length === 0) {
+      picks = await listWatched();
+      picksTitle = dict.nav.watched;
+      picksHref = "/watched";
+    }
+
     return (
       <section className="page-shell">
         <header className="animate-rise max-w-2xl border-b border-hairline pb-8">
@@ -51,17 +58,12 @@ export default async function SearchPage({
           />
         </div>
 
-        <div className="mt-14 max-w-2xl">
-          <HistoryList
-            items={listHistory()}
-            clearLabel={dict.history.clearShort}
-            emptyText={dict.history.empty}
-            relTimeLabels={{
-              justNow: dict.history.justNow,
-              earlierToday: dict.history.earlierToday,
-              yesterday: dict.history.yesterday,
-              daysAgo: dict.history.daysAgo,
-            }}
+        <div className="mt-16 max-w-2xl">
+          <LibraryPicks
+            items={picks}
+            title={picksTitle}
+            moreHref={picksHref}
+            moreLabel={dict.common.seeAll}
           />
         </div>
       </section>
@@ -105,7 +107,7 @@ export default async function SearchPage({
             {dict.search.noResults}
           </p>
           <Link href="/browse" className="btn-line mt-8">
-            {dict.demo.keepBrowsing}
+            {dict.common.browse}
           </Link>
         </div>
       ) : (

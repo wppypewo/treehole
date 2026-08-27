@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getForYouPage } from "@/lib/recommendations";
@@ -7,34 +6,12 @@ import InfiniteMovieGrid from "@/components/InfiniteMovieGrid";
 import ErrorNotice from "@/components/ErrorNotice";
 import PageHeader from "@/components/PageHeader";
 
-// 需讀取本機 SQLite 取得收藏／已看過作為推薦來源，故每次請求即時渲染
+// 需讀取雲端片庫的收藏／已看過作為推薦來源，故每次請求即時渲染
 export const dynamic = "force-dynamic";
 
 export default async function RecommendationsPage() {
   const locale = await getLocale();
   const dict = getDictionary(locale);
-  const isDemo = process.env.DEMO_MODE === "1";
-
-  // demo 模式下個人化推薦無種子（片庫為本機版功能），改為誠實說明 + 繼續探索出口
-  if (isDemo) {
-    return (
-      <section className="page-shell space-y-10">
-        <PageHeader
-          title={dict.pages.recommendations}
-        />
-        <div className="py-24">
-          <div className="mx-auto max-w-md text-center">
-            <p className="text-[0.9375rem] leading-relaxed text-paper-dim">
-              {dict.demo.recommendationsEmpty}
-            </p>
-            <Link href="/browse" className="btn-line mt-8">
-              {dict.demo.keepBrowsing}
-            </Link>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   let first;
   let errorMessage;
