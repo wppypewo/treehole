@@ -9,7 +9,7 @@
 * Repo path: `~/ClaudeCode/projects/movie-app`（2026-07-30 由 Windows 遷至 Mac）
 * Repo type: Next.js 16 全端 Web App（git repo，有 GitHub remote）
 * Primary purpose: Treehole——TMDB 電影導覽 + 私人片庫。**2026-08-27 起線上版即正式版**（Vercel + Neon Postgres，全站鎖給擁有者一人）
-* Current status: 階段 1–15 完成。階段 15（雲端化 + 擁有者鎖）已本機驗證完畢，**尚未 commit / push**
+* Current status: 階段 1–15 完成並已部署。commit `4b45358` 已推上 `origin/main`（`ls-remote` 實際連線驗證），CI 綠燈，Vercel 正式站已切換為 Neon + 通行碼
 
 ## Git Status
 
@@ -71,7 +71,8 @@
 
 ## Next 3 Allowed Tasks
 
-1. 部署後線上實測：通行碼可進、片庫四種操作可寫入 Neon、重新整理後仍在。
+1. 線上片庫讀寫實測——需由使用者輸入通行碼操作，再回頭查 Neon 確認資料落地。
+   （鎖本身的線上驗證已完成，見階段 15 末段。）
 2. Neon 資料庫密碼 reset（明文曾出現在對話紀錄中）。
 3. route handler / proxy 的整合測試可行性盤點——先列缺口與方案，不直接大改。
 
@@ -752,6 +753,27 @@ Neon 的部分，接上使用者開通的真實資料庫跑：schema 自動建�
 原本告訴使用者「要先設通行碼再開資料庫，否則中間有空窗」。實測第 10 項證明
 這個顧慮不成立：鎖是 fail-closed 的，兩個變數沒設時**連 API 都是 401**。
 所以只設了 Neon 就先部署也不會外洩，最壞情況是擁有者自己進不去。
+
+### 段 4：部署與線上驗證
+
+commit `4b45358` 推上 `origin/main`（推送前後皆以 `git ls-remote` 實際連線確認，
+不看本地 `refs/remotes` 快取）。CI 58 秒綠燈。Vercel 自動部署，第二次輪詢即看到
+新版上線。
+
+線上實測（不需通行碼的部分全部驗完）：
+
+- 首頁與 `/favorites`、`/watchlist`、`/watched`、`/recommendations`、`/movie/550`、
+  `/search` 全部回通行碼牆，網址列保持原樣
+- 四個寫入 API 與 `GET /api/favorites` 全部 `401 {"error":"locked"}`
+- 錯誤通行碼回 `wrong-passcode` 而非 `not-configured`——**這一項同時證明
+  `OWNER_PASSCODE` 與 `OWNER_SECRET` 在 production 確實生效**，不必知道通行碼
+  就能確認環境變數設對了
+- 錯誤通行碼不發 cookie
+- 鎖住狀態下解鎖頁自己的 CSS / JS 皆 200
+- Neon 四張表基準線：全部 0 筆
+
+**未驗**：解鎖後的片庫讀寫。那需要輸入通行碼，屬於使用者自己的憑證，不代為輸入。
+使用者操作後可回頭查 Neon 確認資料落地。
 
 ### 遺留風險（誠實記錄）
 
