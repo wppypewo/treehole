@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Lenis 自己的樣式表，不是可選項。第一條規則 html.lenis{height:auto} 是它
+   對「高度被鎖住就量不到內容變長」這個坑的官方防線；另外兩條給 lenis.stop()
+   與 [data-lenis-prevent] 用。之前沒引入，捲動上限就停在掛載當下的值。 */
+@import "lenis/dist/lenis.css";
+
 /* 固定深色主題：讓所有 dark: 樣式依 .dark class 生效而非跟隨系統，全站維持單一調性。
    Page Theme Lock——沒有任何 section 會翻成淺色。 */
 @custom-variant dark (&:where(.dark, .dark *));

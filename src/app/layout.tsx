@@ -50,11 +50,15 @@ export default async function RootLayout({
   const locked = (await headers()).get(LOCK_HEADER) === "1";
 
   return (
+    // <html> 不能設 height: 100%。Lenis 的捲動上限靠掛在 <html> 上的
+    // ResizeObserver 更新，高度被鎖在視窗高之後，無限捲動追加的內容與
+    // client-side 換頁都不會觸發它——捲到舊上限就停住。實測：文件從 5151px
+    // 長到 10874px，observer 觸發 0 次。所以視窗高度由 body 的 min-h-dvh 負責。
     <html
       lang={htmlLang(locale)}
-      className={`${geistSans.variable} ${bodoni.variable} ${notoSerifTC.variable} dark h-full antialiased`}
+      className={`${geistSans.variable} ${bodoni.variable} ${notoSerifTC.variable} dark antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-ink text-paper">
+      <body className="flex min-h-dvh flex-col bg-ink text-paper">
         <SmoothScroll />
         {!locked && <Navbar locale={locale} dict={dict} />}
         <main className="flex-1">{children}</main>
