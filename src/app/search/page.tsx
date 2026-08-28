@@ -1,13 +1,24 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { searchMovies } from "@/lib/tmdb";
 import { listFavorites, listWatched } from "@/lib/db";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
-import MovieGrid from "@/components/MovieGrid";
+import InfiniteMovieGrid from "@/components/InfiniteMovieGrid";
 import ErrorNotice from "@/components/ErrorNotice";
 import SearchField from "@/components/SearchField";
 import LibraryPicks from "@/components/LibraryPicks";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}): Promise<Metadata> {
+  const dict = getDictionary(await getLocale());
+  const query = ((await searchParams).q ?? "").trim();
+  return { title: query ? `${query} — ${dict.search.title}` : dict.search.title };
+}
 
 export default async function SearchPage({
   searchParams,
@@ -19,11 +30,11 @@ export default async function SearchPage({
   const { q } = await searchParams;
   const query = (q ?? "").trim();
 
-  let movies;
+  let found;
   let errorMessage;
   if (query) {
     try {
-      movies = (await searchMovies(locale, query)).results;
+      found = await searchMovies(locale, query);
     } catch (error) {
       errorMessage = tmdbErrorMessage(error, dict);
     }
@@ -71,13 +82,19 @@ export default async function SearchPage({
   }
 
   // ── 有關鍵字：關鍵字本身就是這一頁的標題 ────────────────────
-  const results = movies ?? [];
+  const results = found?.results ?? [];
+  // 計數報 TMDB 的總筆數而不是這一頁的 20 筆——使用者要知道的是「有多少」，
+  // 不是「現在畫面上有多少」。
+  const total = found?.total_results ?? 0;
 
   return (
     <section className="page-shell">
       {/* 搜尋框退到刊頭之上、縮小，讓結果本身佔主要視覺 */}
       <div className="max-w-xl">
+        {/* 同樣綁 key：defaultValue 是非受控值，換關鍵字時 DOM 不會自己更新，
+            從別處連進來或按上一頁時輸入框會停在舊字 */}
         <SearchField
+          key={query}
           defaultValue={query}
           placeholder={dict.search.placeholder}
           buttonLabel={dict.search.button}
@@ -93,7 +110,7 @@ export default async function SearchPage({
           </h1>
           {!errorMessage && results.length > 0 && (
             <p className="t-meta shrink-0 text-paper-faint">
-              {dict.common.filmCount.replace("{n}", String(results.length))}
+              {dict.common.filmCount.replace("{n}", String(total))}
             </p>
           )}
         </div>
@@ -112,7 +129,24 @@ export default async function SearchPage({
         </div>
       ) : (
         <div className="mt-10">
-          <MovieGrid movies={results} emptyText={dict.search.noResults} />
+          <InfiniteMovieGrid
+            // key 綁著關鍵字：換一個字就是換一份清單，元件必須整個重掛。
+            // 少了它，同一個路由的 soft navigation 會沿用舊 state，
+            // 畫面上就會是新標題配舊搜尋結果。
+            key={query}
+            endpoint={`/api/search?q=${encodeURIComponent(query)}`}
+            initialMovies={results}
+            initialHasMore={found ? found.page < found.total_pages : false}
+            maxPages={20}
+            variant="grid"
+            labels={{
+              loading: dict.common.loading,
+              noMore: dict.common.noMore,
+              loadError: dict.common.loadError,
+              retry: dict.common.retry,
+              empty: dict.search.noResults,
+            }}
+          />
         </div>
       )}
     </section>

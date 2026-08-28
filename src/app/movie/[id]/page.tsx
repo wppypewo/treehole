@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -21,8 +22,32 @@ import PersonCard from "@/components/PersonCard";
 import RatingEditor from "@/components/RatingEditor";
 import ParallaxImage from "@/components/ParallaxImage";
 
-// 需讀取雲端片庫判斷收藏 / 已看過狀態，故每次請求即時渲染
-export const dynamic = "force-dynamic";
+// 這頁本來就是動態的：getLocale() 讀 cookie，片庫狀態每次請求直接查資料庫。
+// 不用 force-dynamic，是因為那個旗標等同 fetchCache = "force-no-store"，
+// 會把詳情／演職員／預告／相似片這幾路 TMDB 在 tmdbFetch 設好的 revalidate 一併作廢。
+// 資料庫查詢不吃 fetch 快取，不需要拿整頁的旗標去換它的即時性。
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const movieId = Number(id);
+  if (!Number.isInteger(movieId) || movieId <= 0) return {};
+  try {
+    const locale = await getLocale();
+    const movie = await getMovieDetails(locale, movieId);
+    const year = movie.release_date?.slice(0, 4);
+    return {
+      title: year ? `${movie.title}（${year}）` : movie.title,
+      description: movie.overview || undefined,
+    };
+  } catch {
+    // 抓不到就讓 layout 的預設標題接手；分頁標題不值得讓整頁掛掉
+    return {};
+  }
+}
 
 export default async function MoviePage({
   params,
@@ -213,7 +238,7 @@ export default async function MoviePage({
               </p>
             )}
 
-            <div className="mt-10 flex flex-wrap items-center gap-3">
+            <div className="mt-10">
               <MovieActions
                 movie={{
                   tmdb_id: movie.id,
@@ -231,6 +256,7 @@ export default async function MoviePage({
                   watchlistAdded: dict.actions.watchlistAdded,
                   watched: dict.actions.watched,
                   watchedDone: dict.actions.watchedDone,
+                  saveError: dict.common.saveError,
                 }}
               />
             </div>
@@ -249,7 +275,11 @@ export default async function MoviePage({
           }}
           initialScore={myRating?.score ?? null}
           initialNote={myRating?.note ?? ""}
-          labels={dict.rating}
+          labels={{
+            ...dict.rating,
+            saveError: dict.common.saveError,
+            removeError: dict.common.removeError,
+          }}
         />
       </section>
 

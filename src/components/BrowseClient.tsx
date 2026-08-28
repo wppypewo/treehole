@@ -80,6 +80,10 @@ export default function BrowseClient({
   const [error, setError] = useState<string | null>(null);
   const seen = useRef<Set<number>>(new Set(initialMovies.map((m) => m.id)));
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  // 每次發出請求就 +1。回應回來時對不上號就整份丟掉——
+  // 四個 select 連續換三次，三個請求同時在飛，誰先回來由網路決定，
+  // 沒有這道閘門的話畫面上會是「最慢的那個條件」的結果。
+  const requestId = useRef(0);
 
   // 目前是否為全預設條件
   const isDefaultFilters = !genre && !year && !minRating && sort === defaultSort;
@@ -107,6 +111,7 @@ export default function BrowseClient({
 
   // 套用新篩選：清空並載入第一頁（由 select 的 onChange 觸發）
   async function applyFilters(g: string, y: string, s: string, r: string) {
+    const id = ++requestId.current;
     seen.current = new Set();
     setResults([]);
     setPage(0);
@@ -115,8 +120,10 @@ export default function BrowseClient({
     setLoading(true);
     try {
       const res = await fetch(buildDiscoverUrl(1, g, y, s, r));
+      if (requestId.current !== id) return;
       if (!res.ok) throw new Error();
       const data = await res.json();
+      if (requestId.current !== id) return;
       const fresh = ((data.results ?? []) as MovieSummary[]).filter((m) => {
         if (seen.current.has(m.id)) return false;
         seen.current.add(m.id);
@@ -126,9 +133,11 @@ export default function BrowseClient({
       setPage(1);
       if (!data.hasMore) setDone(true);
     } catch {
+      if (requestId.current !== id) return;
       setError(labels.loadError);
     } finally {
-      setLoading(false);
+      // 過期的請求不准把 loading 關掉，那盞燈屬於還在飛的那一個
+      if (requestId.current === id) setLoading(false);
     }
   }
 
@@ -143,14 +152,17 @@ export default function BrowseClient({
 
   const loadMore = useCallback(async () => {
     if (loading || done || page === 0) return;
+    const id = ++requestId.current;
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(
         buildDiscoverUrl(page + 1, genre, year, sort, minRating),
       );
+      if (requestId.current !== id) return;
       if (!res.ok) throw new Error();
       const data = await res.json();
+      if (requestId.current !== id) return;
       const fresh = ((data.results ?? []) as MovieSummary[]).filter((m) => {
         if (seen.current.has(m.id)) return false;
         seen.current.add(m.id);
@@ -160,9 +172,10 @@ export default function BrowseClient({
       setPage(page + 1);
       if (!data.hasMore || page + 1 >= 20) setDone(true);
     } catch {
+      if (requestId.current !== id) return;
       setError(labels.loadError);
     } finally {
-      setLoading(false);
+      if (requestId.current === id) setLoading(false);
     }
   }, [loading, done, page, genre, year, sort, minRating, labels.loadError]);
 
@@ -282,21 +295,28 @@ export default function BrowseClient({
 
       <div ref={sentinelRef} className="h-1" />
 
+      {/* 載入／結束／空結果都是非同步才出現的字，不放進 live region 的話
+          只有看得見畫面的人知道發生了什麼。錯誤要打斷（alert），
+          其餘等使用者手邊的事做完再報（status）。 */}
       <div className="mt-14 border-t border-hairline pt-8 text-center text-sm text-paper-faint">
         {error ? (
-          <div className="space-y-4">
+          <div role="alert" className="space-y-4">
             <p className="text-paper-dim">{error}</p>
             <button type="button" onClick={loadMore} className="btn-line">
               {labels.retry}
             </button>
           </div>
-        ) : loading ? (
-          <span className="animate-pulse">{labels.loading}</span>
-        ) : results.length === 0 ? (
-          labels.empty
-        ) : done ? (
-          labels.noMore
-        ) : null}
+        ) : (
+          <p role="status">
+            {loading ? (
+              <span className="animate-pulse">{labels.loading}</span>
+            ) : results.length === 0 ? (
+              labels.empty
+            ) : done ? (
+              labels.noMore
+            ) : null}
+          </p>
+        )}
       </div>
     </div>
   );

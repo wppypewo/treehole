@@ -1,4 +1,5 @@
 import { getLocale } from "@/i18n/server";
+import type { Metadata } from "next";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getForYouPage } from "@/lib/recommendations";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
@@ -6,8 +7,13 @@ import InfiniteMovieGrid from "@/components/InfiniteMovieGrid";
 import ErrorNotice from "@/components/ErrorNotice";
 import PageHeader from "@/components/PageHeader";
 
-// 需讀取雲端片庫的收藏／已看過作為推薦來源，故每次請求即時渲染
-export const dynamic = "force-dynamic";
+// 同 movie/[id]：getLocale() 已保證動態渲染，推薦種子直接查資料庫。
+// 加 force-dynamic 只會順手作廢底下 TMDB 查詢的 revalidate。
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = getDictionary(await getLocale());
+  return { title: dict.pages.recommendations };
+}
 
 export default async function RecommendationsPage() {
   const locale = await getLocale();

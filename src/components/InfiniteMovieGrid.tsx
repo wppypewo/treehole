@@ -60,7 +60,9 @@ export default function InfiniteMovieGrid({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${endpoint}?page=${next}`);
+      // endpoint 本身可能已經帶查詢字串（搜尋頁的 ?q=），所以要判斷接哪個符號
+      const join = endpoint.includes("?") ? "&" : "?";
+      const res = await fetch(`${endpoint}${join}page=${next}`);
       if (!res.ok) throw new Error("bad status");
       const data: { results: MovieSummary[]; hasMore: boolean } =
         await res.json();
@@ -128,19 +130,25 @@ export default function InfiniteMovieGrid({
       {/* 捲動哨兵：進入視窗就載入下一頁 */}
       <div ref={sentinelRef} className="h-1" />
 
+      {/* 這一行是自動載入唯一的回饋。不放進 live region 的話，
+          用鍵盤或報讀器的人不會知道下面又多了二十部片、或是沒有了。 */}
       <div className="mt-14 border-t border-hairline pt-8 text-center text-sm text-paper-faint">
         {error ? (
-          <div className="space-y-4">
+          <div role="alert" className="space-y-4">
             <p className="text-paper-dim">{error}</p>
             <button type="button" onClick={loadMore} className="btn-line">
               {labels.retry}
             </button>
           </div>
-        ) : loading ? (
-          <span className="animate-pulse">{labels.loading}</span>
-        ) : done ? (
-          labels.noMore
-        ) : null}
+        ) : (
+          <p role="status">
+            {loading ? (
+              <span className="animate-pulse">{labels.loading}</span>
+            ) : done ? (
+              labels.noMore
+            ) : null}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -14,9 +14,12 @@ import RankedList from "@/components/RankedList";
 import UpcomingStrip from "@/components/UpcomingStrip";
 import ErrorNotice from "@/components/ErrorNotice";
 
-// 首頁含「為你推薦」需讀雲端片庫，故每次請求即時渲染
-export const dynamic = "force-dynamic";
-
+// 這一頁本來就是動態渲染——getLocale() 讀 cookie，Next 不會把它預渲染。
+//
+// 不加 force-dynamic 是刻意的：那個旗標等同於 fetchCache = "force-no-store"，
+// 會把下面四路 TMDB 在 tmdbFetch 裡設好的 revalidate 一併作廢，
+// 每次進首頁都真的重打四次 TMDB。「為你挑的」讀資料庫，本來就不吃 fetch 快取，
+// 不需要用整頁的旗標去換它一路的即時性。
 export default async function Home() {
   const locale = await getLocale();
   const dict = getDictionary(locale);

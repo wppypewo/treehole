@@ -1,4 +1,5 @@
 import { getLocale } from "@/i18n/server";
+import type { Metadata } from "next";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getUpcoming } from "@/lib/tmdb";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
@@ -6,6 +7,11 @@ import UpcomingCard, { upcomingDateFormatter } from "@/components/UpcomingCard";
 import { IMAGE_SIZES } from "@/lib/images";
 import ErrorNotice from "@/components/ErrorNotice";
 import PageHeader from "@/components/PageHeader";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = getDictionary(await getLocale());
+  return { title: dict.pages.upcoming };
+}
 
 export default async function UpcomingPage() {
   const locale = await getLocale();

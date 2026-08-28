@@ -1,10 +1,15 @@
 import { getLocale } from "@/i18n/server";
+import type { Metadata } from "next";
 import { getDictionary } from "@/i18n/dictionaries";
 import { ownerConfig } from "@/lib/owner-session";
 import UnlockForm from "@/components/UnlockForm";
 
-// 這一頁的內容取決於請求（語系 cookie、環境變數），不預先產生
-export const dynamic = "force-dynamic";
+// 內容取決於請求（語系 cookie、環境變數）；getLocale() 讀 cookie 就已排除預先產生。
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = getDictionary(await getLocale());
+  return { title: dict.unlock.title };
+}
 
 export default async function UnlockPage() {
   const locale = await getLocale();
@@ -30,6 +35,7 @@ export default async function UnlockPage() {
               passcode: dict.unlock.passcode,
               submit: dict.unlock.submit,
               wrong: dict.unlock.wrong,
+              failed: dict.unlock.failed,
             }}
           />
         ) : (

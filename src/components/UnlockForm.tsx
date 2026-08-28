@@ -7,10 +7,12 @@ import { useState } from "react";
 export default function UnlockForm({
   labels,
 }: {
-  labels: { passcode: string; submit: string; wrong: string };
+  labels: { passcode: string; submit: string; wrong: string; failed: string };
 }) {
   const [passcode, setPasscode] = useState("");
-  const [failed, setFailed] = useState(false);
+  // null = 沒有錯；"wrong" = 通行碼不對；"failed" = 伺服器或網路出問題。
+  // 分兩種是因為把 500 也說成「通行碼不對」，會讓人一直重打其實沒錯的碼。
+  const [error, setError] = useState<"wrong" | "failed" | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function submit(event: React.FormEvent) {
@@ -18,7 +20,7 @@ export default function UnlockForm({
     if (busy || !passcode) return;
 
     setBusy(true);
-    setFailed(false);
+    setError(null);
     try {
       const response = await fetch("/api/unlock", {
         method: "POST",
@@ -31,9 +33,9 @@ export default function UnlockForm({
         window.location.reload();
         return;
       }
-      setFailed(true);
+      setError(response.status === 401 ? "wrong" : "failed");
     } catch {
-      setFailed(true);
+      setError("failed");
     } finally {
       setBusy(false);
     }
@@ -54,7 +56,7 @@ export default function UnlockForm({
           value={passcode}
           onChange={(e) => {
             setPasscode(e.target.value);
-            setFailed(false);
+            setError(null);
           }}
           placeholder={labels.passcode}
           className="w-full border-b border-paper-dim bg-transparent py-4 pr-20 text-xl text-paper outline-none transition-colors placeholder:text-paper-faint focus:border-paper"
@@ -68,12 +70,12 @@ export default function UnlockForm({
         </button>
       </div>
 
-      {failed && (
+      {error && (
         <p
           role="alert"
           className="mt-5 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
         >
-          {labels.wrong}
+          {error === "wrong" ? labels.wrong : labels.failed}
         </p>
       )}
     </form>

@@ -33,7 +33,13 @@ const notoSerifTC = Noto_Serif_TC({
 });
 
 export const metadata: Metadata = {
-  title: "Treehole",
+  // template 讓每一頁只要回傳自己的名字，站名由這裡補上。
+  // 沒有它的時候整站十四頁的分頁標題全都是「Treehole」——
+  // 開了五個分頁就分不出哪個是哪個，瀏覽器歷史紀錄也一樣廢。
+  title: {
+    default: "Treehole",
+    template: "%s — Treehole",
+  },
   description: "電影導覽站。瀏覽 TMDB 片單、收藏想看的、記下看過的。",
 };
 
@@ -59,9 +65,14 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${bodoni.variable} ${notoSerifTC.variable} dark antialiased`}
     >
       <body className="flex min-h-dvh flex-col bg-ink text-paper">
+        <a href="#main" className="skip-link">
+          {dict.nav.skipToContent}
+        </a>
         <SmoothScroll />
         {!locked && <Navbar locale={locale} dict={dict} />}
-        <main className="flex-1">{children}</main>
+        <main id="main" tabIndex={-1} className="flex-1 outline-none">
+          {children}
+        </main>
       </body>
     </html>
   );

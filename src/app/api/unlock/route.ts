@@ -23,17 +23,24 @@ export async function POST(request: Request) {
   // 固定延遲至少讓線上暴力嘗試變慢。真正的防線是通行碼本身要夠長。
   await new Promise((resolve) => setTimeout(resolve, 400));
 
-  if (!(await passcodeMatches(passcode, config.passcode))) {
-    return NextResponse.json({ error: "wrong-passcode" }, { status: 401 });
-  }
+  try {
+    if (!(await passcodeMatches(passcode, config.passcode))) {
+      return NextResponse.json({ error: "wrong-passcode" }, { status: 401 });
+    }
 
-  const response = NextResponse.json({ ok: true });
-  response.cookies.set(OWNER_COOKIE, await issueToken(config.secret), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: SESSION_MAX_AGE,
-  });
-  return response;
+    const response = NextResponse.json({ ok: true });
+    response.cookies.set(OWNER_COOKIE, await issueToken(config.secret), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: SESSION_MAX_AGE,
+    });
+    return response;
+  } catch (error) {
+    // Web Crypto 這兩步理論上不該炸，真炸了也不能放行——沒發出 cookie 就是關著的。
+    // 回 500 而不是 401，是為了不讓「伺服器壞了」被表單說成「通行碼不對」。
+    console.error("[api/unlock] POST failed:", error);
+    return NextResponse.json({ error: "unlock-failed" }, { status: 500 });
+  }
 }

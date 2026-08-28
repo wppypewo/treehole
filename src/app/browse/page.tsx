@@ -1,10 +1,16 @@
 import { getLocale } from "@/i18n/server";
+import type { Metadata } from "next";
 import { getDictionary } from "@/i18n/dictionaries";
 import { genreOptions } from "@/lib/genres";
 import { discoverMovies } from "@/lib/tmdb";
 import type { MovieSummary } from "@/lib/tmdb";
 import BrowseClient from "@/components/BrowseClient";
 import PageHeader from "@/components/PageHeader";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = getDictionary(await getLocale());
+  return { title: dict.browse.title };
+}
 
 export default async function BrowsePage() {
   const locale = await getLocale();

@@ -9,8 +9,9 @@ import type { SavedMovie, Rating } from "./db.types";
 // 每個請求可能落在不同的執行個體，維持不了連線池。HTTP driver 一次查詢一次請求，
 // 沒有連線要管。代價是無法跨查詢開 transaction——本站沒有這種需求。
 //
-// 授權不在這一層。整個部署由 Vercel Authentication 在邊緣擋住，未登入的請求
-// 到不了這裡。這是單人站的設計前提：關掉那個開關，這裡的每個寫入都會對外全開。
+// 授權不在這一層。唯一的檢查點是 src/proxy.ts，它用 src/lib/owner-session.ts
+// 的 HMAC cookie 擋在所有頁面與 route handler 之前，沒解鎖的請求到不了這裡。
+// 這是單人站的設計前提：那個檢查一旦被繞過，這裡的每個寫入都會對外全開。
 
 // 保持對外相容：讓現有 import type { SavedMovie } from "@/lib/db" 繼續有效
 export type { SavedMovie, Rating } from "./db.types";

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -9,6 +10,23 @@ import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import ErrorNotice from "@/components/ErrorNotice";
 import MovieGrid from "@/components/MovieGrid";
+import Biography from "@/components/Biography";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const personId = Number(id);
+  if (!Number.isInteger(personId) || personId <= 0) return {};
+  try {
+    const person = await getPerson(await getLocale(), personId);
+    return { title: person.name };
+  } catch {
+    return {};
+  }
+}
 
 export default async function PersonPage({
   params,
@@ -84,9 +102,11 @@ export default async function PersonPage({
             {person.name}
           </h1>
           <div className="mt-6 border-t border-hairline pt-6">
-            <p className="t-prose line-clamp-[14] whitespace-pre-line">
-              {person.biography || dict.person.noBio}
-            </p>
+            <Biography
+              text={person.biography || dict.person.noBio}
+              showMore={dict.person.showMore}
+              showLess={dict.person.showLess}
+            />
           </div>
         </div>
       </div>

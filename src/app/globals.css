@@ -137,6 +137,27 @@ body {
 
 /* ── 元件基礎 ──────────────────────────────────────────── */
 
+/* 跳到主要內容：只有鍵盤 Tab 到才浮出來，貼在左上角。
+   對只用鍵盤的人來說，沒有它就得每頁重按十幾次 Tab 才穿得過導覽列。
+   不用 display:none 藏——那樣它連焦點都拿不到，等於不存在。 */
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  transform: translateY(-150%);
+  padding: 0.75rem 1.25rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  color: var(--paper);
+  background: var(--ink-raised);
+  border: 1px solid var(--curtain);
+  transition: transform 160ms ease;
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
 /* 文字按鈕：hairline 外框，hover 時框變亮並填入極淡底色。
    沒有放大、沒有陰影、沒有漸層。 */
 .btn-line {

@@ -17,6 +17,7 @@ interface Labels {
   ratingPlaceholder: string;
   browse: string;
   count: string;
+  removeError: string;
 }
 
 /**
@@ -41,14 +42,23 @@ export default function LibraryGrid({
 }) {
   const [list, setList] = useState(items);
   const [removing, setRemoving] = useState<number | null>(null);
+  const [failed, setFailed] = useState(false);
   const [sortBy, setSortBy] = useState<"added" | "title" | "rating">("added");
   const [minRating, setMinRating] = useState("");
 
+  // 刪除成功才把卡片從格線拿掉。原本不看 res.ok，資料庫寫不進去時
+  // 卡片照樣消失，重新整理又長回來——那比留在原地更難理解發生了什麼事。
   async function remove(tmdbId: number) {
     setRemoving(tmdbId);
+    setFailed(false);
     try {
-      await fetch(`/api/${kind}?tmdb_id=${tmdbId}`, { method: "DELETE" });
+      const res = await fetch(`/api/${kind}?tmdb_id=${tmdbId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error(`${kind} responded ${res.status}`);
       setList((prev) => prev.filter((m) => m.tmdb_id !== tmdbId));
+    } catch {
+      setFailed(true);
     } finally {
       setRemoving(null);
     }
@@ -114,6 +124,15 @@ export default function LibraryGrid({
           {labels.count.replace("{n}", String(shown.length))}
         </p>
       </div>
+
+      {failed && (
+        <p
+          role="alert"
+          className="mt-5 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
+        >
+          {labels.removeError}
+        </p>
+      )}
 
       {shown.length === 0 ? (
         // 有片但篩選後歸零：控制條仍在上面，這裡純文字提示就夠

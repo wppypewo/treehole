@@ -11,6 +11,7 @@ export interface Dictionary {
     browse: string;
     openMenu: string;
     closeMenu: string;
+    skipToContent: string;
   };
   language: { label: string; zhTW: string; en: string };
   pages: {
@@ -50,7 +51,7 @@ export interface Dictionary {
     director: string;
     back: string;
   };
-  person: { filmography: string; noBio: string };
+  person: { filmography: string; noBio: string; showMore: string; showLess: string };
   browse: {
     genre: string;
     year: string;
@@ -114,6 +115,8 @@ export interface Dictionary {
     next: string;
     filmCount: string;
     browse: string;
+    saveError: string;
+    removeError: string;
   };
   unlock: {
     title: string;
@@ -121,6 +124,7 @@ export interface Dictionary {
     passcode: string;
     submit: string;
     wrong: string;
+    failed: string;
     notConfigured: string;
   };
   errors: {
@@ -144,6 +148,7 @@ const zhTW: Dictionary = {
     browse: "瀏覽",
     openMenu: "開啟選單",
     closeMenu: "關閉選單",
+    skipToContent: "跳到主要內容",
   },
   language: { label: "語言", zhTW: "繁體中文", en: "English" },
   pages: {
@@ -188,7 +193,12 @@ const zhTW: Dictionary = {
     director: "導演：",
     back: "返回",
   },
-  person: { filmography: "參演作品", noBio: "暫無人物簡介。" },
+  person: {
+    filmography: "參演作品",
+    noBio: "暫無人物簡介。",
+    showMore: "展開全文",
+    showLess: "收合",
+  },
   browse: {
     genre: "類型",
     year: "年份",
@@ -252,6 +262,8 @@ const zhTW: Dictionary = {
     next: "下一批",
     filmCount: "{n} 部",
     browse: "瀏覽電影",
+    saveError: "沒有存成功，請再試一次。",
+    removeError: "沒有拿掉，請再試一次。",
   },
   unlock: {
     title: "這個站是私人的",
@@ -259,6 +271,7 @@ const zhTW: Dictionary = {
     passcode: "通行碼",
     submit: "進入",
     wrong: "通行碼不對。",
+    failed: "伺服器出了問題，請再試一次。",
     notConfigured:
       "站台還沒設定通行碼，現在沒有人進得來。請設定 OWNER_PASSCODE 與 OWNER_SECRET 兩個環境變數。",
   },
@@ -283,6 +296,7 @@ const en: Dictionary = {
     browse: "Browse",
     openMenu: "Open menu",
     closeMenu: "Close menu",
+    skipToContent: "Skip to content",
   },
   language: { label: "Language", zhTW: "繁體中文", en: "English" },
   pages: {
@@ -327,7 +341,12 @@ const en: Dictionary = {
     director: "Director: ",
     back: "Back",
   },
-  person: { filmography: "Filmography", noBio: "No biography available." },
+  person: {
+    filmography: "Filmography",
+    noBio: "No biography available.",
+    showMore: "Read more",
+    showLess: "Show less",
+  },
   browse: {
     genre: "Genre",
     year: "Year",
@@ -391,6 +410,8 @@ const en: Dictionary = {
     next: "Next",
     filmCount: "{n} films",
     browse: "Browse movies",
+    saveError: "Couldn't save. Please try again.",
+    removeError: "Couldn't remove it. Please try again.",
   },
   unlock: {
     title: "This site is private",
@@ -398,6 +419,7 @@ const en: Dictionary = {
     passcode: "Passcode",
     submit: "Enter",
     wrong: "Wrong passcode.",
+    failed: "Something went wrong on the server. Please try again.",
     notConfigured:
       "No passcode is configured, so nobody can get in. Set the OWNER_PASSCODE and OWNER_SECRET environment variables.",
   },
