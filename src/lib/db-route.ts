@@ -4,7 +4,7 @@ import type { SavedMovie } from "./db.types";
 /**
  * 資料層錯誤 → JSON 回應（供 route handler 用）。
  *
- * 對照 `tmdb-route.ts` 的 `tmdbErrorResponse`。這一支之所以後來才補：
+ * 這一支之所以後來才補：
  * 片庫的四個 route handler 原本完全沒有 try/catch，Neon 一斷線就讓
  * handler 直接 throw，Next 回一個帶 digest 的 500 HTML-ish 回應。
  * 前端拿到的東西解析不了，也分不出「我送錯了」和「資料庫掛了」。
