@@ -32,7 +32,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 | 存取控制 | 自建擁有者鎖：`src/proxy.ts` + `src/lib/owner-session.ts`（Web Crypto HMAC） |
 | 型別 | TypeScript ^6 |
 | Lint | ESLint ^9（eslint-config-next 16.3.2） |
-| 動畫 | GSAP ^3.15 + ScrollTrigger（scroll 敘事）、Lenis ^1.3（捲動節奏）、Motion ^13.1（元件級，如 popLayout） |
+| 動畫 | GSAP ^3.15 + ScrollTrigger（scroll 敘事）+ Flip（片庫格線重排）、Lenis ^1.3（捲動節奏） |
 | 字體 | Bodoni Moda + Noto Serif TC（標題）、Geist（介面），皆走 `next/font` |
 
 ## 片庫資料
@@ -94,7 +94,13 @@ Neon 方案提供的為準，去 Neon console 看，不要假設。
 - Lenis：捲動節奏基礎設施，讓 scrub 連續。不是特效
 - CSS `animation-timeline: view()`：捲動揭露。**不用 IntersectionObserver**——
   快速捲動可能整段不觸發，內容會永久停在 opacity 0
-- Motion：僅元件級（LibraryGrid 的 popLayout）
+- GSAP Flip：只有 LibraryGrid 的格線重排（拿掉一部片、換排序、換評分門檻）
+
+  2026-09-03 之前這一段是 Motion 的 `AnimatePresence mode="popLayout"`。移除的理由是體積：
+  實測 motion 佔 client JS 的 39.5 KB gzip（14.2%），只服務片庫三個頁面的這一種動畫；
+  GSAP core 因為首頁與詳情頁的捲動動畫本來就已載入，補 Flip 只多 9.7 KB。
+  換完 client JS 由 278.2 KB gzip 降到 247.8 KB。動畫語彙不變。
+  註：`.claude/rules/animation.md` 仍把 Motion 列在允許來源內，但這個 repo 已不安裝它。
 
 可用元件來源：React Bits、Motion Primitives、Aceternity UI、Animate UI
 
