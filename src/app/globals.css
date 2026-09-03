@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Tailwind v4 的自動內容偵測會把 repo 裡的 .md 也當成模板掃，於是文件裡
+   隨手寫的 class 名會被當成真的在用而產出 CSS（實測：border-0 只出現在
+   markdown，卻進了 production 的 CSS）。把 markdown 排除掉。 */
+@source not "../../**/*.md";
+
 /* Lenis 自己的樣式表，不是可選項。第一條規則 html.lenis{height:auto} 是它
    對「高度被鎖住就量不到內容變長」這個坑的官方防線；另外兩條給 lenis.stop()
    與 [data-lenis-prevent] 用。之前沒引入，捲動上限就停在掛載當下的值。 */
