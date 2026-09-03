@@ -17,7 +17,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const dict = getDictionary(await getLocale());
   const query = ((await searchParams).q ?? "").trim();
-  return { title: query ? `${query} — ${dict.search.title}` : dict.search.title };
+  return { title: query ? `${query} · ${dict.search.title}` : dict.search.title };
 }
 
 export default async function SearchPage({

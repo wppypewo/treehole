@@ -38,7 +38,9 @@ export const metadata: Metadata = {
   // 開了五個分頁就分不出哪個是哪個，瀏覽器歷史紀錄也一樣廢。
   title: {
     default: "Treehole",
-    template: "%s — Treehole",
+    // 分隔符跟站內既有慣例一致（MovieCard／RankedList／BrowseClient 的
+    // metadata 都用 " · "），不要在分頁標題另開一套。
+    template: "%s · Treehole",
   },
   description: "電影導覽站。瀏覽 TMDB 片單、收藏想看的、記下看過的。",
 };
