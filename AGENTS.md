@@ -48,6 +48,12 @@ Schema 由 `src/lib/db.ts` 的 `createSchema()` 在**第一次查詢時**自動�
 **本機開發連的是 production 資料庫**（除非你另外開一個 Neon branch 換掉
 `DATABASE_URL`）。在瀏覽器上點的每一下都是真資料，沒有 seed 資料集可以躲。
 
+> **但這台機器上的 `.env` 目前只有 `NEXT_TELEMETRY_DISABLED` 與 `TMDB_API_KEY`**
+> （2026-09-03 實測）。`DATABASE_URL` / `OWNER_PASSCODE` / `OWNER_SECRET` 三個都沒設，
+> 所以本機跑起來是：擁有者鎖 fail closed（全站鎖死，連不進去）、DB 也連不上。
+> 上面那段描述的是「有設 `DATABASE_URL` 時」的行為。要在本機動片庫，
+> 得自己把 `.env.example` 那五個 key 補齊——**這件事由使用者做，AGENTS.md 禁止 AI 改 `.env`**。
+
 **這個 repo 沒有備份指令。** 雲端轉本機的備份已評估過並決定不做。備援範圍以
 Neon 方案提供的為準，去 Neon console 看，不要假設。
 

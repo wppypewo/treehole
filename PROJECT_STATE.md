@@ -1,36 +1,44 @@
 # PROJECT_STATE
 
-> 產出日期：2026-06-15
-> 僅針對 `movie-app`（Treehole）repo 據實盤點；git 狀態皆在本 repo 內判斷。
-> 本次只做狀態盤點：未改產品程式碼 / README / package.json / env / Vercel / CI 設定，未跑 formatter / migration / test / build。
+> 最後更新：2026-09-03（階段 17）。本檔上半部一律是**當下實測值**，
+> 下半部「階段 N」是不再更動的歷史紀錄。兩者矛盾時以上半部為準。
+> git 狀態皆在本 repo 內判斷，不要拿工作區根的狀態套進來。
 
 ## Repo Identity
 
 * Repo path: `~/ClaudeCode/projects/movie-app`（2026-07-30 由 Windows 遷至 Mac）
 * Repo type: Next.js 16 全端 Web App（git repo，有 GitHub remote）
 * Primary purpose: Treehole——TMDB 電影導覽 + 私人片庫。**2026-08-27 起線上版即正式版**（Vercel + Neon Postgres，全站鎖給擁有者一人）
-* Current status: 階段 1–15 完成並已部署。commit `4b45358` 已推上 `origin/main`（`ls-remote` 實際連線驗證），CI 綠燈，Vercel 正式站已切換為 Neon + 通行碼
+* Current status: 階段 1–17 完成。階段 15 之前已部署；**階段 16–17（2026-09-03）的改動全部還在 `optimize/2026-09-03` 分支上，未推、未部署**
 
-## Git Status
+## Git Status（2026-09-03 實測）
 
-* Branch: `main`
-* Latest commit: 見 `git log`（本檔的階段紀錄已滾到階段 11）
-* Working tree: clean（`git status --short` 無輸出）
-* Remote: `origin` → `https://github.com/zhuang060329-bit/treehole-movie-app.git`（依備忘為 private）
-* Sync status: 與 `origin/main` 同步（`## main...origin/main`，無 ahead / behind）
+* Branch: `optimize/2026-09-03`（**不是 `main`**）
+* Commits: 60（`main` 為 57）
+* Remote: `origin` → `https://github.com/zhuang060329-bit/treehole-movie-app.git`（private）
+* 未推送（`origin/main..HEAD`）共 3 個：
+  * `5c1d91a` 片庫格線改用 GSAP Flip，移除 motion 相依
+  * `7b270b5` 片庫輸入驗證補上型別與範圍檢查
+  * `7c28708` 補上擁有者鎖的行為測試
+* 未提交：**12 個檔**（2026-09-03 實測）
+  * 新增：`src/lib/csp.ts`、`src/__tests__/csp.test.ts`
+  * 修改：`src/proxy.ts`、`next.config.ts`、`src/app/layout.tsx`、`src/app/search/page.tsx`、
+    `src/app/globals.css`、`package.json`、`package-lock.json`、`AGENTS.md`、
+    `PROJECT_STATE.md`、`.claude/rules/animation.md`
+* **未經使用者明確指示不 push、不 commit。**
 
 ## Product Status
 
 * Production / deployment: Vercel + Neon Postgres（`https://treehole-movie-app.vercel.app`，真實讀寫，通行碼保護）；本 repo **無 `vercel.json`**（部署設定在 Vercel 端，未進 repo），另有 `.vercelignore`。AGENTS.md：不動 Vercel 部署設定，除非明確指示
 * README status: Treehole 標題、部署連結（載明需通行碼）、features、Access 一節、設計決策、tech stack、architecture、testing、資料位置、future。**2026-08-23 移除截圖區**（階段 5）；**2026-08-27 移除 demo/local 對照表與備份說明**（階段 15）
 * CI status: 有 GitHub Actions `.github/workflows/ci.yml`，push / PR 到 main 觸發 `typecheck → lint → test → build`。**build 不再帶 `DEMO_MODE=1`**，也不需要 `DATABASE_URL`——DB client 是 lazy 的，建置期不連線。actions 為 `@v7`、Node 24。`.github/dependabot.yml` 同時監看 npm 與 github-actions
-* Test status: Vitest；**63 tests / 6 files**（utility 層 + 擁有者鎖 session token），2026-08-27 實測通過。lint 已清到 0 error 0 warning
+* Test status: Vitest；**107 tests / 9 files**，2026-09-03 實測通過（階段 17 新增 `csp.test.ts` 15 tests）。lint 0 error 0 warning，`tsc --noEmit` 0 error，`next build` 通過。`npm audit`：**0 vulnerabilities**
 * Access control: `src/proxy.ts` 是唯一授權檢查點，擋在所有頁面與 route handler 之前。通行碼換 HMAC 簽章 cookie（`src/lib/owner-session.ts`）。`OWNER_PASSCODE` / `OWNER_SECRET` 缺任一則全站鎖死（fail closed）。**demo 模式已於階段 15 整套移除**
 * Known limitations: route handler 與 proxy 無整合測試（目前靠手動驗證）；DB 層無自動化測試（以真實 Neon 手動驗過）；通行碼無 rate limit，僅固定延遲——serverless 無可靠共享狀態
 
 ## Tech Stack
 
-* Framework: Next.js 16.3.2（App Router、Turbopack，port 3100）+ React 19.2.8 + TypeScript 6
+* Framework: Next.js 16.3.4（App Router、Turbopack，port 3100）+ React 19.2.8 + TypeScript 6
 * Data source: TMDB API（v3 key / v4 token，全部 server-side）
 * Database: Neon Postgres，`@neondatabase/serverless` ^1.1.0（HTTP driver，非 TCP pool）
 * Access control: 自建擁有者鎖（`src/proxy.ts` + `src/lib/owner-session.ts`，Web Crypto HMAC-SHA256）；TMDB key 為 server-side
@@ -38,7 +46,10 @@
 * Testing: Vitest（`vitest.config.ts`）
 * Deployment: Vercel。本機開發連同一個 Neon DB（bind `0.0.0.0`）。CI 建置在 Node 24
 
-> 動畫套件現況（2026-08-23 更新）：`gsap` ^3.15、`lenis` ^1.3、`motion` ^13.1 皆已安裝並使用中。分工見 AGENTS.md。
+> 動畫套件現況（2026-09-03 更新）：**只剩 `gsap` ^3.15 與 `lenis` ^1.3**。
+> `motion` ^13.1 已於階段 16 移除——當時全站只剩片庫格線的排序過場在用，
+> 改寫成 GSAP Flip（本來就已載入的 plugin）之後整包相依可以拿掉。
+> `.claude/rules/animation.md` 已同步更正。分工見 AGENTS.md。
 
 ## Available Commands
 
@@ -65,16 +76,19 @@
 
 ## Current Phase
 
-* Phase: 雲端化收尾（階段 15 段 4：文件更新 + commit）
-* Goal: 讓線上版成為唯一的正式版——資料存得住、只有擁有者進得去、文件與實際一致。
-* Success criteria: typecheck / lint / test / build 全綠、文件無 demo 殘留、線上部署後片庫讀寫與通行碼實測通過。
+* Phase: 階段 16「安全 / 效能 / 文件對齊」已做完，**等使用者決定要不要 commit 與 push**
+* Goal: 把安全標頭補上、砍掉沒在用的相依、讓文件與 repo 現況一致。
+* Success criteria: 四道關卡全綠（已達成）、安全標頭在 production build 上以 curl 實測到（已達成）、
+  文件不再有與現況矛盾的敘述（已達成）。
 
 ## Next 3 Allowed Tasks
 
-1. 線上片庫讀寫實測——需由使用者輸入通行碼操作，再回頭查 Neon 確認資料落地。
+1. **使用者決定階段 16 的 4 個改動要怎麼進 main**（3 個已 commit + 1 個未提交）。
+2. 線上片庫讀寫實測——需由使用者輸入通行碼操作，再回頭查 Neon 確認資料落地。
    （鎖本身的線上驗證已完成，見階段 15 末段。）
-2. Neon 資料庫密碼 reset（明文曾出現在對話紀錄中）。
-3. route handler / proxy 的整合測試可行性盤點——先列缺口與方案，不直接大改。
+3. Neon 資料庫密碼 reset（明文曾出現在對話紀錄中）。
+
+延後：route handler / proxy 的整合測試可行性盤點——先列缺口與方案，不直接大改。
 
 ## Deferred / Explicit Approval Required
 
@@ -785,6 +799,210 @@ commit `4b45358` 推上 `origin/main`（推送前後皆以 `git ls-remote` 實�
 - route handler 與 proxy 仍無整合測試。
 
 ---
+
+## 2026-09-03 階段 16：安全標頭、砍相依、文件對齊（已完成）
+
+使用者要求一晚的整體優化，拆成四批：A 安全與正確性、B 效能量測、
+C 前端質感、D 文件對齊。以下是 movie-app 這半邊。
+
+### A. 安全與正確性
+
+**1. 全站安全標頭（`next.config.ts`，未提交）**
+
+這個 repo 先前**一支安全標頭都沒有**。對照 StackWorth 已有的四個補齊：
+`X-Content-Type-Options: nosniff`、`X-Frame-Options: DENY`、
+`Referrer-Policy: strict-origin-when-cross-origin`、
+`Permissions-Policy: camera=(), microphone=(), geolocation=()`。
+
+不是宣稱有設就算數：用 `next build` + `next start -p 3111` 起 production server，
+`curl -D -` 實際看回應，確認四個標頭在 `/`（200）與 `/api/favorites`（401）都在。
+
+**刻意還沒有 CSP。** 這個站有 YouTube 預告片 iframe 與 TMDB 圖片，
+政策要寫對得先在真實瀏覽器裡繞一圈；而寫錯的 CSP 是唯一能把線上站打白的標頭。
+要做的話得照 StackWorth 那套先上 Report-Only。
+
+> 2026-09-03 補記：**同日稍後就做了，見階段 17。**現在有 CSP（Report-Only）。
+> 這一段保留作為當時的判斷紀錄。
+
+**2. 擁有者鎖的行為測試（`7c28708`）**
+
+原本鎖只有 session token 的單元測試。補上鎖本身的行為斷言。
+
+**3. 片庫輸入驗證（`7b270b5`）**
+
+寫入路徑補上型別與範圍檢查。
+
+**已複查、確認沒問題的**（不改）：`src/lib/owner-session.ts` 的鎖確實 fail closed
+——`ownerConfig()` 在 `OWNER_PASSCODE` / `OWNER_SECRET` 任一缺漏時回 `null`，
+沒有任何「設定缺漏就放行」的分支；HMAC-SHA256 走 Web Crypto，比對是常數時間，
+有效期與格式都驗。`/api/unlock` 沒有 rate limit 這件事，程式碼裡本來就自己註明了。
+
+**尚未處理**：`npm audit` 有 1 個 high（`browserslist`，建置期傳遞相依，
+不進 runtime bundle）。修它要動 `package.json`，AGENTS.md 規定未經確認不裝／不升套件。
+
+### B. 效能量測
+
+`next build` 在 Next 16 已經不印 First Load JS，只能自己讀 `.next` 的 manifest。
+兩個坑：`app-build-manifest.json` 在 Next 16 沒了（要讀 `build-manifest.json` 的
+`rootMainFiles` + `polyfillFiles`）；而且 `.next/static` 會累積前幾次 build 的舊 chunk，
+直接掃目錄會超算，只能算當次 manifest 引用到的。
+
+結果：**每頁必載底座 165.6 KB gzip（6 個檔）**，其中 70.0 KB 是 react-dom。
+`gsap` 與 `lenis` 都**不在**底座裡（逐檔查過字串），代表 route-split 是對的，
+沒有 StackWorth 那種「整包 SDK 被綁進每頁必載」的問題，這邊不需要改。
+
+字體：`.next/static/media` 有 121 個 woff2、磁碟上 5.9 MB。看起來很多，
+但那是 unicode-range 切片，瀏覽器只抓用得到的那幾片，實際下載量遠低於此。**不動。**
+
+**Tailwind 掃到 markdown（`src/app/globals.css`）**
+
+Tailwind v4 的自動內容偵測會把 repo 裡的 `.md` 也當成模板掃，於是文件裡
+隨手寫的 class 名會被當成真的在用而產出 CSS。實測抓到：`border-0` 只出現在
+markdown、沒有任何 `src/` 檔案在用，卻進了 production 的 CSS。
+
+加一行 `@source not "../../**/*.md";`（StackWorth 早就有，這邊漏了）。
+實測 CSS 262,126 → 252,334 B（gzip 85,875 → 84,078 B）。
+省的量不大，但這條的重點是「文件裡舉例的 class 不會變成實際樣式」這個正確性問題。
+
+### C. 前端質感
+
+**片庫格線的排序過場改用 GSAP Flip，移除 `motion` 相依（`5c1d91a`）**
+
+全站只剩這一處在用 `motion`，而 `gsap/Flip` 本來就已經載入了。
+改寫之後整包相依可以拿掉，動畫行為維持不變。
+
+### D. 文件對齊
+
+* 本檔上半部：Git Status、Test status、動畫套件現況、Current Phase、Next 3 Allowed Tasks
+  全部改成 2026-09-03 的實測值。舊值把分支寫成 `main`、working tree 寫成 clean、
+  測試寫成 63/6，都已經不成立。
+* `.claude/rules/animation.md`：把 Motion 從「已安裝並使用中」改成「已移除」，
+  並講清楚白名單上其餘幾支是「若要引入不必重新討論美學方向」，不代表已安裝。
+* `AGENTS.md`：補上這台機器的 `.env` 實況——只有 `NEXT_TELEMETRY_DISABLED`
+  與 `TMDB_API_KEY`，沒有 `DATABASE_URL` / `OWNER_PASSCODE` / `OWNER_SECRET`。
+  所以本機跑起來是鎖死 + 連不上 DB，與文件原本描述的「本機連 production 資料庫」不同。
+
+### 驗收（2026-09-03 實測，四道全綠）
+
+| Gate | 結果 |
+|---|---|
+| `npx tsc --noEmit` | 0 error |
+| `npx eslint src` | 0 error 0 warning |
+| `npx vitest run` | 8 files / 92 tests 全過 |
+| `NEXT_TELEMETRY_DISABLED=1 npx next build` | 通過 |
+
+### 未做（要使用者點頭）
+
+* `next.config.ts` 與 `src/app/globals.css` 尚未 commit；3 個 commit 尚未 push。
+* `browserslist` 的 high 未修（需要升套件）。
+* 4 處使用者可見的 em dash（`src/app/layout.tsx:41`、`src/app/search/page.tsx:20`、
+  `src/app/movie/[id]/page.tsx:118` 與 `:119`）維持原狀——只是標記，沒有為它改文案。
+
+## 2026-09-03 階段 17：CSP、相依安全、標題模板（已完成，未提交）
+
+* Goal: 把階段 16 刻意留下的 CSP 補上；把兩邊 repo 的 `npm audit` 清到 0；
+  順手修掉分頁標題模板。
+* Success criteria: CSP 以 Report-Only 上線並在**真實瀏覽器**繞過一輪確認零違規（已達成）、
+  `npm audit` 0 vulnerabilities（已達成）、四道關卡全綠（已達成）。
+
+**1. CSP（`src/lib/csp.ts` 新增、`src/proxy.ts` 改寫）**
+
+政策由 `src/lib/csp.ts` 產生，`src/proxy.ts` 每個 request 呼叫一次。
+`proxy.ts` 的授權邏輯**一行沒動**——CSP 是包在四條回傳路徑外面加上去的，
+四條都帶（OPEN_PATHS 放行、已解鎖、API 401、未解鎖 rewrite）。
+
+政策本文：
+
+```
+default-src 'self'
+script-src 'self' 'nonce-<每 request 一組>'   （dev 另加 'unsafe-eval'）
+style-src 'self'
+img-src 'self' data: https://image.tmdb.org https://img.youtube.com https://i.ytimg.com
+font-src 'self'
+connect-src 'self'
+frame-src https://www.youtube.com
+object-src 'none' / base-uri 'self' / form-action 'self' / frame-ancestors 'none'
+```
+
+三個和 StackWorth 不同的決定，都有實測依據：
+
+* **`style-src` 收到 `'self'`，沒有 `'unsafe-inline'`。** 建置產物實測六頁
+  （`/`、`/browse`、`/search`、`/popular`、`/person/[id]`、`/unlock`）：
+  內聯 `<style>` 0 個、`style="..."` 屬性 0 個；原始碼 `style={{...}}` 0 處。
+  GSAP 與 Lenis 是走 CSSOM 寫 `element.style`，那不歸 `style-src` 管——
+  執行期 DOM 上確實會出現兩個 `style` 屬性（GSAP 的 hero 影像層、Next 的
+  route announcer），瀏覽器沒有為它們報任何違規。
+* **不加 `'strict-dynamic'`。** StackWorth 在 Report-Only 階段實測過：它一出現，
+  瀏覽器就忽略 `'self'` 這類 host 來源，而初始 HTML 裡 Next 直接寫進去、
+  沒有 nonce 的 `<script src>` 屬 parser-inserted，會被擋掉。
+* **`upgrade-insecure-requests` 只在強制執行時才送。** 規範明定它在 Report-Only
+  政策裡無效，Chrome 會為此每開一頁印一則 error，等於用假警報蓋掉真違規。
+
+**瀏覽器實測（本機 production build，port 3111）**
+
+六頁繞完，console 零 CSP 違規；首頁另外捲到底觸發 GSAP ScrollTrigger 與 Lenis，
+一樣零違規。
+
+零違規是**真陰性**，不是工具沒讀到——同一輪在頁面上注入一段 inline `<script>`，
+console 立刻報 `script-src` 違規；掛一個 `player.vimeo.com` 的 iframe，
+立刻報 `frame-src` 違規。政策確實在運作。
+
+**`i.ytimg.com` 是這一輪唯一的真發現。**
+`/movie/[id]` 本機渲染不出來（要讀資料庫的觀看狀態，本機沒有 `DATABASE_URL`，
+只會落到錯誤邊界），所以預告片那一頁沒辦法整頁測。改成把 `TrailerPlayer.tsx`
+用的那個 iframe 單獨掛到別的頁面上——結果冒出
+`i.ytimg.com/vi_webp/<id>/mqdefault.webp` 的違規，記在**我們這份**政策上。
+
+會這樣是因為 iframe 剛建立、還沒 commit 到 youtube.com 之前是初始空文件，
+那個階段繼承父層 CSP，播放器最早的封面預載正好落在那個視窗裡；frame commit
+之後的腳本與 fetch 就歸 YouTube 自己的政策管了——實測只有 `img-src` 被報，
+沒有任何 `script-src` / `connect-src` 違規，正好對得上這個解釋。
+
+補上 `https://i.ytimg.com` 後重建，乾淨分頁重測，零違規。
+
+**沒補的話會怎樣**：翻成強制執行後預告片封面破在 `/movie/[id]`——
+本機唯一渲染不出來、因此最不容易被發現的那一頁。
+
+**2. 相依安全（`package.json`、`package-lock.json`）**
+
+`next` 16.3.2 → **16.3.4**、`eslint-config-next` 同步。`npm audit` 由 1 high 降到
+**0 vulnerabilities**（階段 16「未做」清單裡的 `browserslist` high 即此）。
+
+**3. 分頁標題模板（`src/app/layout.tsx`、`src/app/search/page.tsx`）**
+
+`template` 的分隔符從 em dash 改成 `" · "`，與站內既有慣例一致
+（`MovieCard` / `RankedList` / `BrowseClient` 的 metadata 本來就用 `" · "`）。
+搜尋頁同步。
+
+`src/app/movie/[id]/page.tsx:118-119` 那兩個 em dash **刻意不動**——
+它們是缺值的佔位符（`release_date` 或 `vote_average` 沒有時顯示 `—`），
+是資料排版慣例，與文案風格無關。階段 16 把四處並列為「使用者可見的 em dash」，
+這裡更正：只有前兩處屬於文案。
+
+**驗收（2026-09-03 實測）**
+
+| 指令 | 結果 |
+|---|---|
+| `npx tsc --noEmit` | 0 error |
+| `npx eslint src` | 0 error 0 warning |
+| `npx vitest run` | 9 files / 107 tests 全過 |
+| `NEXT_TELEMETRY_DISABLED=1 npx next build` | 通過 |
+| `npm audit` | found 0 vulnerabilities |
+
+**bundle 複測（升到 Next 16.3.4 之後）**
+
+每頁必載底座 **165.6 KB gzip（6 檔）**。這一項只含 Next 自己的
+`rootMainFiles` + `polyfillFiles`，量的是框架底座，
+GSAP / Lenis 落在各路由自己的 chunk 裡，不在這個數字內——
+所以它**看不出**階段 16 移除 motion 的效果（那一項的量法見階段 16，
+是 client JS 總量 278.2 → 247.8 KB gzip）。兩個數字量的不是同一件事，別互相比較。
+
+### 未做（要使用者點頭）
+
+* **`CSP_ENFORCE` 仍是 `false`（Report-Only）。** 翻成 `true` 之前，
+  `/movie/[id]` 要在**有 `DATABASE_URL` 的環境**開一次並按下播放。
+  頁面上的 YouTube iframe 已單獨驗過，但整頁一起跑的樣子沒看過。
+* 12 個檔尚未 commit；連同階段 16 的 3 個 commit 一併尚未 push。
 
 ## 已評估後決定不做（勿再提出）
 

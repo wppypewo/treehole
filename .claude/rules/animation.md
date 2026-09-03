@@ -13,8 +13,15 @@
 
 ## 允許的動畫來源（限定）
 
-React Bits、Motion Primitives、Aceternity UI、Motion (framer-motion)、GSAP、Animate UI。
-以上以外的動畫套件須先取得確認。
+**本專案目前實際安裝的只有 `gsap` 與 `lenis` 兩支**，新動畫優先用這兩支寫。
+
+`motion`（framer-motion）**已於 2026-09-03 移除**——當時全站只剩片庫格線的
+排序過場在用它，那段改寫成 GSAP Flip（`gsap/Flip`，本來就已載入），
+於是整包相依可以拿掉。**不要因為看到舊文件寫「已安裝並使用中」就重新裝回來。**
+
+清單上其餘的（React Bits、Motion Primitives、Aceternity UI、Animate UI）是
+「若要引入，不必重新討論美學方向」的白名單，**不代表已安裝**。
+實際安裝任何一支之前仍須取得使用者確認（AGENTS.md：未經確認不得安裝套件）。
 
 ## 發光類元件
 
