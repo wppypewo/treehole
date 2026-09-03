@@ -75,6 +75,25 @@ Neon 方案提供的為準，去 Neon console 看，不要假設。
 - 禁止把 `DATABASE_URL` 或通行碼寫進程式碼、文件或 commit
 - 禁止改動 Vercel 部署設定，除非我明確指示
 - 禁止安裝新 package，除非我明確確認
+- **`globals.css` 的 `@source not "../../**/*.md";` 別刪**。Tailwind v4 的自動內容
+  偵測會把 repo 裡的 `.md` 也當成模板掃，文件裡舉例的 class 名會被當成真的在用
+  而產出 CSS（實測 `border-0` 就是這樣進去的）。這行把 markdown 排除掉。
+- **安全標頭分兩處，別合併**（2026-09-03 加）：
+  - 靜態的四個在 `next.config.ts` 的 `headers()`：`nosniff` / `X-Frame-Options: DENY` /
+    `Referrer-Policy` / `Permissions-Policy`。
+  - **CSP 在 `src/lib/csp.ts`，由 `src/proxy.ts` 掛上**。它每個 request 要換一次
+    nonce，是動態值，放不進 `next.config.ts`。`proxy.ts` 有四條回傳路徑
+    （OPEN_PATHS 放行、已解鎖、API 401、未解鎖 rewrite），**四條都要帶 CSP**，
+    漏掉哪一條那一條就沒有政策。
+  - 目前是 **Report-Only**。翻成強制執行的開關是 `csp.ts` 的 `CSP_ENFORCE`，
+    翻之前要做的事寫在那支檔案的註解裡。**翻之前一定要先讀那段註解。**
+  - 這個站的 `style-src` 收到 `'self'`（沒有 `'unsafe-inline'`），比 StackWorth 緊。
+    前提是全站 0 個內聯 `<style>` 與 0 個 `style="..."`——GSAP 與 Lenis 走 CSSOM
+    寫 `element.style`，那不歸 `style-src` 管。日後若有人寫了 `style={{...}}`，
+    Report-Only 會先在 console 叫；那時候要問的是「能不能改成 class」，
+    而不是把 `'unsafe-inline'` 加回來。
+  - nonce 在這個站是免費的：用 nonce 等於全站動態渲染，而 14 條路由本來就全是 `ƒ`。
+    StackWorth 為了同一件事賠掉 7 個靜態頁，這裡沒有東西可以賠。
 
 ## 視覺方向（2026-08-23 已實作，首頁與詳情頁）
 
