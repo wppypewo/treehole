@@ -9,19 +9,20 @@
 * Repo path: `~/ClaudeCode/projects/movie-app`（2026-07-30 由 Windows 遷至 Mac）
 * Repo type: Next.js 16 全端 Web App（git repo，有 GitHub remote）
 * Primary purpose: Treehole——TMDB 電影導覽 + 私人片庫。**2026-08-27 起線上版即正式版**（Vercel + Neon Postgres，全站鎖給擁有者一人）
-* Current status: 階段 1–17 完成。階段 15 之前已部署；**階段 16–17（2026-09-03）的改動全部還在 `optimize/2026-09-03` 分支上，未推、未部署**
+* Current status: 階段 1–17 完成。**階段 16–17（2026-09-03）已合進 `main` 並推送**，Vercel 會自動部署——部署結果請自己去 Vercel 看，本檔不代為宣稱已上線
 
 ## Git Status（2026-09-03 實測）
 
-* Branch: `optimize/2026-09-03`（**不是 `main`**）
-* Commits: 65（`main` 為 57；本地 `main` = `05fecc7`，與遠端一致，`ls-remote` 實測）
+* Branch: `main`
 * Remote: `origin` → `https://github.com/zhuang060329-bit/treehole-movie-app.git`（private）
 * 工作區乾淨，沒有未提交的檔案。
-* 未推送（`origin/main..HEAD`）共 **9 個**，全部在 `optimize/2026-09-03` 上：
+* 2026-09-03：`optimize/2026-09-03` 的 9 個 commit 已**快轉合併**進 `main`（沒有 merge commit）
+  並推送。`main` 由 `05fecc7` 前進到這 9 個之後。分支本身也推上去了，留著當紀錄。
+  這 9 個是：
 
   | commit | 內容 | 階段 |
   |---|---|---|
-  | 本次 | 文件對齊：PROJECT_STATE 更新到已 commit 的現況 | 17 |
+  | `686e20e` | 文件對齊：PROJECT_STATE 更新到已 commit 的現況 | 17 |
   | `df48015` | 文件對齊到現況：階段 17、`.env` 現況、motion 已移除 | 17 |
   | `05b25bb` | 升級 Next 與 eslint-config-next 到 16.3.4 | 17 |
   | `05fa936` | 分頁標題的分隔符改成站內既有慣例的 `·` | 17 |
@@ -33,7 +34,7 @@
 
   註：`AGENTS.md` 的第三個 hunk 把 `globals.css` 的 `@source not` 說明和安全標頭
   寫在同一段連續改動裡，拆不開，整段跟著 `63be066` 走。這是已知的不乾淨處。
-* **未經使用者明確指示不 push。**
+* 這批的四道關卡在合併前已全數跑過並通過；合併是快轉，程式碼內容與當時一致。
 
 ## Product Status
 
@@ -84,14 +85,14 @@
 
 ## Current Phase
 
-* Phase: 階段 16「安全 / 效能 / 文件對齊」已做完，**等使用者決定要不要 commit 與 push**
+* Phase: 階段 16–17「安全 / 效能 / 文件對齊」已做完並合進 `main`、已推送
 * Goal: 把安全標頭補上、砍掉沒在用的相依、讓文件與 repo 現況一致。
 * Success criteria: 四道關卡全綠（已達成）、安全標頭在 production build 上以 curl 實測到（已達成）、
   文件不再有與現況矛盾的敘述（已達成）。
 
 ## Next 3 Allowed Tasks
 
-1. **使用者決定 `optimize/2026-09-03` 這 8 個 commit 要怎麼進 `main`**（全部已 commit，未 push）。
+1. **確認 Vercel 這次部署的結果**——CSP 目前是 Report-Only，不會攔東西，但這是第一次帶著安全標頭上線。
 2. 線上片庫讀寫實測——需由使用者輸入通行碼操作，再回頭查 Neon 確認資料落地。
    （鎖本身的線上驗證已完成，見階段 15 末段。）
 3. Neon 資料庫密碼 reset（明文曾出現在對話紀錄中）。
@@ -901,12 +902,12 @@ markdown、沒有任何 `src/` 檔案在用，卻進了 production 的 CSS。
 
 ### 未做（要使用者點頭）
 
-* 這些改動已 commit（`63be066`、`1091664`），連同階段 16 的 3 個一併尚未 push。
+* 這些改動已 commit（`63be066`、`1091664`），並於 2026-09-03 隨 `main` 推送。
 * `browserslist` 的 high 未修（需要升套件）。
 * 4 處使用者可見的 em dash（`src/app/layout.tsx:41`、`src/app/search/page.tsx:20`、
   `src/app/movie/[id]/page.tsx:118` 與 `:119`）維持原狀——只是標記，沒有為它改文案。
 
-## 2026-09-03 階段 17：CSP、相依安全、標題模板（已完成，已 commit，未 push）
+## 2026-09-03 階段 17：CSP、相依安全、標題模板（已完成，已合進 main 並推送）
 
 * Goal: 把階段 16 刻意留下的 CSP 補上；把兩邊 repo 的 `npm audit` 清到 0；
   順手修掉分頁標題模板。
@@ -1011,7 +1012,7 @@ GSAP / Lenis 落在各路由自己的 chunk 裡，不在這個數字內——
   `/movie/[id]` 要在**有 `DATABASE_URL` 的環境**開一次並按下播放。
   頁面上的 YouTube iframe 已單獨驗過，但整頁一起跑的樣子沒看過。
 * 12 個改動檔已切成 5 個 commit（`1091664`、`63be066`、`05fa936`、`05b25bb`、`df48015`）；
-  連同階段 16 的 3 個一併尚未 push。
+  連同階段 16 的 3 個已於 2026-09-03 合進 `main` 並推送。
 
 ## 已評估後決定不做（勿再提出）
 
