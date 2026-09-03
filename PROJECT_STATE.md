@@ -14,18 +14,26 @@
 ## Git Status（2026-09-03 實測）
 
 * Branch: `optimize/2026-09-03`（**不是 `main`**）
-* Commits: 60（`main` 為 57）
+* Commits: 65（`main` 為 57；本地 `main` = `05fecc7`，與遠端一致，`ls-remote` 實測）
 * Remote: `origin` → `https://github.com/zhuang060329-bit/treehole-movie-app.git`（private）
-* 未推送（`origin/main..HEAD`）共 3 個：
-  * `5c1d91a` 片庫格線改用 GSAP Flip，移除 motion 相依
-  * `7b270b5` 片庫輸入驗證補上型別與範圍檢查
-  * `7c28708` 補上擁有者鎖的行為測試
-* 未提交：**12 個檔**（2026-09-03 實測）
-  * 新增：`src/lib/csp.ts`、`src/__tests__/csp.test.ts`
-  * 修改：`src/proxy.ts`、`next.config.ts`、`src/app/layout.tsx`、`src/app/search/page.tsx`、
-    `src/app/globals.css`、`package.json`、`package-lock.json`、`AGENTS.md`、
-    `PROJECT_STATE.md`、`.claude/rules/animation.md`
-* **未經使用者明確指示不 push、不 commit。**
+* 工作區乾淨，沒有未提交的檔案。
+* 未推送（`origin/main..HEAD`）共 **9 個**，全部在 `optimize/2026-09-03` 上：
+
+  | commit | 內容 | 階段 |
+  |---|---|---|
+  | 本次 | 文件對齊：PROJECT_STATE 更新到已 commit 的現況 | 17 |
+  | `df48015` | 文件對齊到現況：階段 17、`.env` 現況、motion 已移除 | 17 |
+  | `05b25bb` | 升級 Next 與 eslint-config-next 到 16.3.4 | 17 |
+  | `05fa936` | 分頁標題的分隔符改成站內既有慣例的 `·` | 17 |
+  | `63be066` | 加上全站安全標頭與 CSP（先只回報不攔截） | 17 |
+  | `1091664` | 排除 markdown 不讓 Tailwind 當模板掃 | 17 |
+  | `5c1d91a` | 片庫格線改用 GSAP Flip，移除 motion 相依 | 16 |
+  | `7b270b5` | 片庫輸入驗證補上型別與範圍檢查 | 16 |
+  | `7c28708` | 補上擁有者鎖的行為測試 | 16 |
+
+  註：`AGENTS.md` 的第三個 hunk 把 `globals.css` 的 `@source not` 說明和安全標頭
+  寫在同一段連續改動裡，拆不開，整段跟著 `63be066` 走。這是已知的不乾淨處。
+* **未經使用者明確指示不 push。**
 
 ## Product Status
 
@@ -83,7 +91,7 @@
 
 ## Next 3 Allowed Tasks
 
-1. **使用者決定階段 16 的 4 個改動要怎麼進 main**（3 個已 commit + 1 個未提交）。
+1. **使用者決定 `optimize/2026-09-03` 這 8 個 commit 要怎麼進 `main`**（全部已 commit，未 push）。
 2. 線上片庫讀寫實測——需由使用者輸入通行碼操作，再回頭查 Neon 確認資料落地。
    （鎖本身的線上驗證已完成，見階段 15 末段。）
 3. Neon 資料庫密碼 reset（明文曾出現在對話紀錄中）。
@@ -807,7 +815,7 @@ C 前端質感、D 文件對齊。以下是 movie-app 這半邊。
 
 ### A. 安全與正確性
 
-**1. 全站安全標頭（`next.config.ts`，未提交）**
+**1. 全站安全標頭（`next.config.ts`，已 commit 於 `63be066`）**
 
 這個 repo 先前**一支安全標頭都沒有**。對照 StackWorth 已有的四個補齊：
 `X-Content-Type-Options: nosniff`、`X-Frame-Options: DENY`、
@@ -893,12 +901,12 @@ markdown、沒有任何 `src/` 檔案在用，卻進了 production 的 CSS。
 
 ### 未做（要使用者點頭）
 
-* `next.config.ts` 與 `src/app/globals.css` 尚未 commit；3 個 commit 尚未 push。
+* 這些改動已 commit（`63be066`、`1091664`），連同階段 16 的 3 個一併尚未 push。
 * `browserslist` 的 high 未修（需要升套件）。
 * 4 處使用者可見的 em dash（`src/app/layout.tsx:41`、`src/app/search/page.tsx:20`、
   `src/app/movie/[id]/page.tsx:118` 與 `:119`）維持原狀——只是標記，沒有為它改文案。
 
-## 2026-09-03 階段 17：CSP、相依安全、標題模板（已完成，未提交）
+## 2026-09-03 階段 17：CSP、相依安全、標題模板（已完成，已 commit，未 push）
 
 * Goal: 把階段 16 刻意留下的 CSP 補上；把兩邊 repo 的 `npm audit` 清到 0；
   順手修掉分頁標題模板。
@@ -1002,7 +1010,8 @@ GSAP / Lenis 落在各路由自己的 chunk 裡，不在這個數字內——
 * **`CSP_ENFORCE` 仍是 `false`（Report-Only）。** 翻成 `true` 之前，
   `/movie/[id]` 要在**有 `DATABASE_URL` 的環境**開一次並按下播放。
   頁面上的 YouTube iframe 已單獨驗過，但整頁一起跑的樣子沒看過。
-* 12 個檔尚未 commit；連同階段 16 的 3 個 commit 一併尚未 push。
+* 12 個改動檔已切成 5 個 commit（`1091664`、`63be066`、`05fa936`、`05b25bb`、`df48015`）；
+  連同階段 16 的 3 個一併尚未 push。
 
 ## 已評估後決定不做（勿再提出）
 
