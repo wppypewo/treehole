@@ -126,6 +126,7 @@ function BrowseSkeleton() {
 /**
  * 對齊 search/page.tsx 沒有關鍵字時的版面：刊頭、大搜尋框。
  * loading.tsx 拿不到 searchParams，分不出有沒有關鍵字；導覽列點進來的是這一種。
+ * 有關鍵字時不靠這裡：搜尋頁的殼層不等 TMDB，關鍵字標題先出，結果區自己有 Suspense 骨架。
  */
 function SearchSkeleton() {
   return (
