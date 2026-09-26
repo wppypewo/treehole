@@ -20,8 +20,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
   搜尋紀錄功能全部移除。本機開發連的是同一個 Neon 資料庫。
 - **全站鎖給一個人用**。`src/proxy.ts` 擋在所有頁面與 route handler 之前。
 - **主線已穩定**：除非收到明確 bug 回報，不重開部署主線；不動 Vercel 部署設定
-- **全面改版在 `redesign/2026-09-26` 分支**（2026-09-26，從 `main` `9d34b7a` 分出），
-  下方「視覺方向」寫的是這個分支的樣子。合進 `main` 之前，`main` 與線上版仍是舊版面
+- **2026-09-27 全面改版「放映表」已合進 `main`**（`redesign/2026-09-26` 快轉合併），
+  下方「視覺方向」就是 `main` 現在的樣子。改版只在 mock 資料上檢查過，真實資料尚未逐頁看
 
 ## 技術棧
 

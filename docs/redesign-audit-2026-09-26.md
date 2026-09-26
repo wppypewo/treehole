@@ -137,6 +137,10 @@ Codex 版的金色強調與簾幕紅並存，違反「唯一強調色」的設�
    瀏覽器會合成一個傾斜版（實測七人の侍、기생충）。新增 `.t-original`，加 `font-synthesis-style: none`，
    西文維持真斜體，其他文字保持正體。四處原文片名（詳情頁、今晚、想看表、首頁放映表）都改用它。
 4. **職務「Screenstory」沒有中文。** TMDB 的職務名，字典沒有收，畫面上直接出現英文。補為「電影故事」。
+5. **`paper-faint` 壓在 `--ink-raised` 上不過 AA。** 對 `--ink` 是 4.63:1，對 `--ink-raised` 只剩 4.45:1。
+   受影響的是 `ink-raised` 框裡的小字：沒有海報時的替代片名（`MovieCard`、`FavoritesWall`、`LibraryPicks`）
+   與評分備註框的 placeholder，全部改用 `paper-dim`（7.39:1），規則寫進 `globals.css` 的色票註解。
+   掃描用 computed style 疊合背景色逐元素算，首頁、看過、人物、詳情、搜尋五頁實測 0 項不及格。
 
 ### 階段 6 殘留的處理
 
@@ -147,11 +151,19 @@ Codex 版的金色強調與簾幕紅並存，違反「唯一強調色」的設�
 | 搜尋頁骨架分不出有沒有查詢字 | 頁面外殼只等 cookie 與 params，結果、筆數、推薦各自包 Suspense（以查詢字當 key），骨架出現在正確的位置 |
 | 人物頁看不出哪些片在自己片庫 | 用既有的 `listWatchlist`／`listWatched`／`listFavorites` 標記「看過／想看／收藏」，優先順序照這個順序。沒有改資料契約，沒有新查詢 |
 | 角色名 | 見下方限制 |
+| `global-error.tsx` 沒觸發過 | 補渲染測試 `error-boundaries.test.ts`（6 題），見下方 |
 
 ### 已知限制
 
 - **角色名無法翻譯。** TMDB 的 `character` 欄位不隨 `language` 參數變（zh-TW、en-US、ja-JP 實測都一樣）。
   `characterText()` 只把「(voice)」「(uncredited)」「Self」這類固定標記轉成中文，角色本名維持原文。
-- **`global-error.tsx` 沒有實際觸發過。** 根 layout 要壞掉才會走到它，mock 上不改程式碼無法觸發，
-  只做了型別、lint、build 與程式碼層面的確認。
-- **解鎖後的真資料對照仍未做。** 以上全部是 mock 資料，片庫的筆數、長片名、沒有劇照的片都只測了 mock 裡有的情況。
+  這是資料來源的狀況，程式端沒有可以再做的事；自己維護一份角色名對照表不划算，不做。
+- **`global-error.tsx` 沒有在執行期觸發過。** 根 layout 的資料庫讀取有 catch，外部弄不壞它，
+  要觸發只能暫改原始碼。改用 `react-dom/server` 直接渲染（`src/__tests__/error-boundaries.test.ts`）：
+  確認它自己帶 `<html lang>`、字體變數、深色底、`<title>`、有無 `digest` 兩種文案與重試鍵，也確認不畫導覽列；
+  `error.tsx` 則確認不自己畫 `<html>`。這證明畫面本身沒問題，沒證明 Next 在正式環境一定會走到它。
+- **真實資料還沒看過。** 全部檢查都在 mock 資料上。mock 另外加了兩個邊界開關實測：
+  片庫全部沒有海報（替代片名顏色 `rgb(165,161,154)`，即 `paper-dim`）、片名後面再接 24 個字，
+  首頁、想看、看過、收藏在 375 寬下都沒有橫向捲動，長片名正常換行。
+  看過紀錄的小縮圖沒有海報時是一格空的 `ink-raised`，44px 寬放不下字，保留作對齊。
+  真實片庫的筆數與內容仍要解鎖後才看得到。

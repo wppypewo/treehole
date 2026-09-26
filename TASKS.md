@@ -172,9 +172,18 @@ Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）不動，也不當基�
   - 字典：職務 `Screenstory` 補「電影故事」
   - gate：typecheck／lint／test（175）／build 全綠；impeccable 偵測器 0 項
 
+- [x] 收尾：發現與限制再處理（2026-09-27）
+  - 對比度：`paper-faint` 在 `--ink-raised` 上只有 4.45:1，框內小字（替代片名 ×3、評分備註 placeholder）改 `paper-dim`；
+    首頁、看過、人物、詳情、搜尋五頁以 computed style 逐元素量，0 項不及格
+  - `global-error.tsx`：新增 `error-boundaries.test.ts` 渲染測試（6 題）
+  - mock 邊界：沒有海報、長片名（原片名後再接 24 字）兩種開關實測，375 寬四頁無橫向捲動
+  - 角色名：上游限制，只記文件
+  - gate：typecheck／lint／test（181）／build 全綠；impeccable 偵測器 0 項
+- [x] 推送 `redesign/2026-09-26` 並快轉合進 `main`（2026-09-27，使用者指示）
+  - 使用者決定不等真實資料檢查就合併；真實資料檢查改成上線後由使用者看
+
 ## 之後另外處理（需使用者決定）
 
-- 推送 `redesign/2026-09-26`：推上遠端可能觸發 Vercel preview 部署，先問
-- 合進 `main`：等真實資料檢查過再決定；合併等於上線
+- 上線後用真實資料逐頁看一次（本機要補 `.env`，或直接看線上版）
 - Codex 分支 `chore/deps-minor-2026-09-12` 去留
 - 相依升級 commit `bd65638` 是否單獨挑進 `main`
