@@ -1,0 +1,162 @@
+# 全面改版（2026-09-26 起）
+
+分支：`redesign/2026-09-26`，從 `main`（`9d34b7a`）分出。
+Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）不動，也不當基底。
+
+## 前提（已確認或採用預設）
+
+- 基底是 `main` 的 MUBI 式編輯策展版。
+- 保留設計鎖：圓角 0、唯一強調色簾幕紅 `#c8503f`、Bodoni Moda + Noto Serif TC 標題、
+  首頁一次只推一部、手機不壓字在影像上。
+- 資料模型不變：`favorites`／`watchlist`／`watched`／`ratings` 四張表。（2026-09-26 使用者確認）
+- 文案語氣：平實、資訊優先。（2026-09-26 使用者確認）
+- 視覺方向：**A 放映表**（字排為主、片庫上首頁）。（2026-09-26 使用者選定）
+- 動畫只用已安裝的 GSAP（ScrollTrigger、Flip）、Lenis、CSS `animation-timeline: view()`，不新增套件。
+- 不動 production、不動 Vercel 設定、不改 `.env`。
+
+## 阻擋項
+
+- [ ] 使用者在 `.env` 補齊 `DATABASE_URL`／`OWNER_PASSCODE`／`OWNER_SECRET`，
+      並在內建瀏覽器自己輸入通行碼解鎖。沒有這一步無法實際截圖比對。
+      注意：本機連的是 production 資料庫，預覽時不點會寫入的按鈕。
+
+## 進度
+
+- [x] 建立分支 `redesign/2026-09-26`
+- [x] 讀 Codex 版差異（`77631a6`）
+- [x] 讀 `main` 全部頁面與元件的程式碼
+- [x] 寫問題清單（見 `docs/redesign-audit-2026-09-26.md`）
+- [x] 兩個方向稿（靜態 HTML，不是 production code），2026-09-26 已交付，放在 session scratchpad 的
+      `mockup-directions.html`，不進 repo。桌機 1440 與手機 375 寬都檢查過，沒有橫向捲動。
+- [x] 使用者選方向：A 放映表（2026-09-26）
+- [x] 標記「看過了」時自動移出「想看」：2026-09-26 使用者同意，階段 2 實作，畫面上明示並可復原。
+- [ ] 解鎖後截圖：`main` 與 Codex 版逐頁對照，補進問題清單
+  - 2026-09-26 部分替代：session scratchpad 內的 mock Neon（攔截 `fetch`，資料在記憶體）
+    加上 `.claude/launch.json` 的 `treehole-mock`（port 3101、`--webpack`，檔案在 gitignore 內），
+    首頁、詳情頁、三個片庫頁已在桌機 1440／手機 375 截圖檢查。不碰 production。
+    `main` 與 Codex 版的逐頁對照仍未做
+
+## 分階段實作（每階段跑 typecheck／lint／test／build + `/impeccable` 審查，等使用者確認再進下一階段）
+
+- [x] 階段 0：設計 token 與共用元件（2026-09-26 完成，等使用者確認）
+  - 字級工具 `.t-num`／`.t-label`／`.t-reason`；hover 依角色分四種
+    （列＝左緣簾幕紅線、海報＝壓暗一階、日誌＝日期轉色、行內連結＝底線變亮），
+    MovieCard／UpcomingCard／LibraryPicks／PersonCard／LibraryGrid／RankedList 已換上
+  - 新元件 `Segmented`（尚未接進頁面，階段 3、4 用）、`RatingRuler`（已接進 RatingEditor，
+    十格一排、可拖曳）、`NavCount`（導覽列想看／看過片數，不改資料契約）
+  - 導覽列順序：瀏覽、想看、看過、收藏、搜尋
+  - `loading.tsx` 骨架對齊刊頭；`movie/[id]/loading.tsx` 留到階段 2 跟詳情頁一起改
+  - 字典：拿掉 ✓ 與「暫無」、空狀態寫明怎麼填、「已看過」→「看過」，
+    新增 `library.filteredEmpty`（片庫篩到 0 部時用，原本誤用「片庫是空的」那句）
+  - gate：typecheck／lint／test（107）／build 全綠；impeccable 偵測器 0 項
+  - 簾幕紅填塊對比：2026-09-26 使用者同意，壓字的填塊改用 `--curtain-fill #b04537`（4.66:1），
+    線條與標記維持 `#c8503f`
+- [x] 階段 1：首頁（2026-09-26 完成，等使用者確認）
+  - 順序：今晚（想看清單放最久的一部，`?pick=n` 換一部）→ 想看放映表（最多 8 列）→
+    最近看過（4 格日誌）→ 外面在放（TMDB 熱門海報列）→ 即將上映（檔期表）→ 其他片單入口
+  - 新元件 `SectionHead`、`home/Tonight`、`home/ProgramTable`、`home/DiaryStrip`、`home/ScheduleList`；
+    `MovieRow` 加可選的 `aside`／`headingId`
+  - 資料契約沒改：加入日與看過日期兩格先留空（元件已支援，拿到資料就顯示）
+  - gate：typecheck／lint／test（107）／build 全綠；impeccable 偵測器 0 項
+  - 資料契約 `listWatchlistEntries()`、`listRecentWatched(limit)`：2026-09-26 使用者核可並已實作
+  - `FeatureFilm`、`UpcomingStrip`、`RankedList`：2026-09-26 使用者同意刪除，已刪（未 stage）
+- [x] 階段 2：電影詳情頁（2026-09-26 完成，等使用者確認）
+  - 版面：左欄 片名 → 事實行 → 21:9 劇照 → 簡介 → 演職員表；右欄「我的紀錄」1000px 以上黏在導覽列下
+    （`.detail-grid`，手機順序 片名／劇照／簡介／紀錄／演職員）。劇照不再出血壓字；沒有劇照才放海報
+  - 拿掉永遠連回 `/` 的「返回」（導覽列黏在上方、瀏覽器上一頁都在）
+  - `MovieActions`：想看／看過／收藏一條等寬鍵，字不隨狀態改；標記看過時同步關掉想看，
+    顯示「已從想看清單移除。」＋復原（不自動消失），復原帶原加入時間放回原位
+  - `RatingEditor`：不再自帶 section 與標題，併入紀錄欄；清除在左、儲存在右
+  - 資料層：`markWatched()`（一句 SQL 同時寫看過、刪想看，回傳原加入時間）取代 `addWatched()`；
+    `addWatchlist(movie, addedAt)`；`db-route.ts` 新增 `addedAtFromBody()` 與 5 組測試
+  - API：`POST /api/watched` 回應多 `removedFromWatchlist: { added_at } | null`；
+    `POST /api/watchlist` 可帶 `added_at`（格式錯、日期不存在、未來時間 → 400 `invalid-added-at`）
+  - 字典：刪 `favorited`／`watchlistAdded`／`watchedDone`／`rating.title`／`movie.rating`，
+    新增 `actions.group`／`removedFromWatchlist`／`undo`、`movie.tmdbScore`／`castRail`／`ledger`
+  - 刪掉沒人用的 `.scrim-bottom`、`IMAGE_SIZES.fullBleed`／`rankThumb`；新增 `detailStill`
+  - gate：typecheck／lint／test（112）／build 全綠；impeccable 偵測器 0 項
+  - `getMovieRecord(tmdbId)`：2026-09-26 使用者回「可以」，階段 3 一併實作，
+    一次取回四張表的狀態與日期，紀錄欄寫出加入想看／看過／收藏的日期，取代原本的四次查詢
+- [x] 階段 3：片庫（收藏／想看／已看過）（2026-09-26 完成，等使用者確認）
+  - 三頁各自成形，不再共用 `LibraryGrid`：
+    想看＝放映表（序號、片名＋原文片名、導演、年份·片長、加入日；排序：排隊／片長／片名），
+    看過＝依月份分組的日誌（篩選：全部／8 分以上／未評分），收藏＝海報牆（2／3／4 欄，排序：最近／片名／我的評分）
+  - 想看列可直接「記為看過」，畫面上留一行復原；拿掉一律兩步確認；排序、移除都走 GSAP Flip
+  - 刊頭：想看寫「N 部 · 全部看完約 X 小時 Y 分」（每部都查到片長才寫），看過寫「N 部 · 今年 N 部」
+  - 想看頁最多替 40 部查 TMDB 片長與導演（`DETAIL_LIMIT`），超過照實標出
+  - 三頁各有對應形狀的 `loading.tsx`（`library/LibrarySkeleton`）
+  - 資料層：新增 `listWatchedEntries()`、`listFavoriteEntries()`（帶日期與自評分，2026-09-26 使用者核可）、
+    `getMovieRecord()`；schema 不變
+  - API：`POST /api/watched` 回應多 `watchedAdded`（加法，舊欄位不動），復原時用來決定要不要一併刪看過
+  - 新增 `lib/library.ts`（排序、總片長）、`lib/dates.ts`（台北時區日期）與兩支測試檔
+  - 修掉階段 2 的弱點：視差改為從影像進入視窗就起算（`clamp(top bottom)`），位移改為對稱 ±6.5%，不再露出框邊；以 mock 補截圖
+  - 本輪截圖後修正：收藏牆手機兩欄時「收藏」二字被拆行；想看記為看過／拿掉後序號沒有遞補
+  - 取消看過不會把片放回想看：刻意維持（理由寫在階段 3 回報）
+  - gate：typecheck／lint／test（135）／build 全綠；impeccable 偵測器 0 項
+  - `LibraryGrid.tsx` 與字典 `library.sortAdded`／`sortRating`／`ratingPlaceholder`：2026-09-26 使用者回「確認」，
+    階段 4 開工時已刪（未 stage）；同時發現頂層 `library.sortTitle` 也是 0 處引用，一併刪
+- [x] 階段 4：探索、榜單、即將上映（2026-09-26 完成，等使用者確認）
+  - 探索：條件寫進網址（重新整理、分享連結都留得住，`lib/browse-filters.ts` 把不認得的值退回預設）；
+    伺服器第一頁失敗時顯示錯誤加重試，不再說「沒有片」；第一頁失敗後重試可用；控制項 250ms 防抖；
+    捲過條件區後出現黏在導覽列下的摘要列（「正在看 …」＋清除＋改條件）
+  - 評分最高、最賣座：由海報牆改為榜單（名次、小海報、片名＋原文片名、年份、TMDB 分數），
+    手機收成三欄、年份與分數併到片名下；`InfiniteMovieGrid` 加 `variant="ranked"` 與重複載入防護
+  - 即將上映：依台灣上映日分組的檔期表，過濾掉今天以前的日期，桌機日期欄黏住
+  - 搜尋頁只改了錯誤訊息的位置，版面仍是原本的海報牆，沒有另外重排
+  - 各頁出錯時刊頭照樣在（`ErrorNotice` 加 `placement`）；四頁新增對應形狀的 `loading.tsx`（`ListSkeleton`）
+  - `PageHeader` 加 `rule`：內容本身以粗線開頭的四頁不畫刊頭細線（截圖發現手機上兩條平行線）
+  - 刪：`MovieCard` 的 `rank`、`MovieGrid` 的 `ranked`／`startIndex`、`InfiniteMovieGrid` 的 `dated`／`locale`、
+    `IMAGE_SIZES.upcomingGrid`、字典 `browse.genrePlaceholder`／`yearPlaceholder`／`ratingPlaceholder`
+  - 字典新增 `browse.editFilters`、頂層 `lists`（名次／片名／年份／TMDB／上映表空狀態）
+  - gate：typecheck／lint／test（147）／build 全綠；impeccable 偵測器 0 項；mock 截圖桌機 1440／手機 375
+  - `UpcomingCard.tsx` 已無人引用，2026-09-26 經使用者同意刪除
+- [x] 階段 5：人物頁（2026-09-26 完成，等使用者確認）
+  - 修掉一個舊 bug：原本只讀 TMDB 的 `cast`，導演、編劇的頁面看不到自己拍的片
+    （實測 Nolan：cast 34 筆多為紀錄片「本人」，crew 78 筆）。新增 `lib/filmography.ts` 合併 cast／crew，
+    同片多角色、多職務收成一列，「Thanks」（片尾致謝）不算作品
+  - 作品改為依年份的年表（版面沿用即將上映的檔期表），分「演出／幕後」兩個分頁；
+    預設看 `known_for_department`，只有一邊有作品時不出現切換
+  - 演出列：「飾 X」「本人」「（配音）」「（未掛名）」，卡司前三順位且不是演自己的標「主演」；
+    幕後列：職務譯成中文，Screenplay 與 Writer 都是「編劇」時只留一個；未上映的片附上映日
+  - 首屏：照片＋姓名＋一行基本資料（領域 · 生 · 卒 · 出生地，缺哪項略過哪項）＋簡介；拿掉固定連回首頁的「返回」
+  - 作品取得失敗不拖垮整頁；人物取得失敗時錯誤訊息包在 `page-shell` 裡
+  - `lib/tmdb.ts`：`PersonDetails` 加 `deathday`，`getPersonMovieCredits` 改回傳合併後的 `Filmography`
+  - `lib/dates.ts` 加 `calendarDateFormatter`（中文「1970 年 7 月 30 日」）
+  - 新增 `person/[id]/loading.tsx` 骨架；刪字典 `movie.back`（已無引用）
+  - 新測試 `filmography.test.ts`；`dates.test.ts` 加 `calendarDateFormatter`
+  - gate：typecheck／lint／test（168）／build 全綠；impeccable 偵測器 0 項；
+    mock 實測 Nolan（預設幕後、29 部）、梁朝偉（預設演出、108 部、主演標記）、分頁切換與鍵盤焦點、手機 375 無橫向捲動、console 無錯誤
+  - 已知限制：TMDB 中文資料的角色名多半仍是英文（「飾 Tony」），是資料來源的狀況
+  - 延後（要改資料契約，需先提案）：年表上標出已在片庫的片（要讀 DB）
+- [x] 階段 6：解鎖／錯誤／404／載入（2026-09-26 完成，等使用者確認）
+  - 新增 `StatusNotice`：整頁只剩一則狀態時的共用版面（粗線起頭，左欄代碼、右欄標題／說明／動作／小字），
+    404、錯誤邊界、詳情頁／人物頁／首頁載不出來都改用它
+  - 新增 `RefreshButton`：伺服器元件自己回錯誤畫面時用 `router.refresh()` 重抓，不必整頁重新整理
+  - `error.tsx`：`reset` 改 `retry`（`reset` 不重抓資料，伺服器元件的錯誤按了只會原樣再錯）；
+    有 `digest` 時顯示錯誤代碼供對照伺服器紀錄；client 錯誤 `console.error`
+  - `not-found.tsx`：代碼 404＋說明＋「回首頁」「搜尋片名」兩個出口
+  - 首頁 `tonightId === null` 原本顯示的 `fallbackError` 文案與情境不符，改為依 TMDB 錯誤給訊息
+  - 根 `loading.tsx` 改成首頁形狀（原本是清單頁刊頭＋海報牆，首頁載入時閃一個不存在的版面）；
+    `ListSkeleton` 加 `grid`／`search` 兩種；popular／recommendations／search／unlock 補自己的 `loading.tsx`
+    （unlock 用空白佔位，未解鎖的人不該看到首頁骨架）
+  - `UnlockForm`：送出中 `readOnly`＋`aria-busy`；錯誤時 `aria-invalid`＋`aria-describedby`、底線轉簾幕紅、
+    焦點回欄位並全選，可以直接重打
+  - 字典 `errors` 新增 `pageNotFoundBody`／`loadFailed`／`reload`／`home`／`searchTitles`；`pageNotFound` 去句號當標題用
+  - gate：typecheck／lint／test（168）／build 全綠；impeccable 偵測器 0 項；
+    mock 實測 404（桌機 1440／手機 375，無橫向捲動）、解鎖頁輸錯（焦點、全選、底線 `rgb(200,80,63)`、錯誤訊息）
+  - 未實測：錯誤邊界與三個「載不出來」畫面在 mock 上不易觸發，只做了程式碼層面的確認
+  - 殘留：沒有 `global-error.tsx`（根 layout 出錯時是 Next 預設頁）；已解鎖時進 `/unlock` 仍顯示表單；
+    `loading.tsx` 拿不到 searchParams，搜尋頁骨架分不出有沒有查詢字
+- [x] 階段 6 使用者確認（2026-09-27）
+- [x] 收尾：AGENTS.md 視覺方向段落對齊、PROJECT_STATE 更新（2026-09-27 完成，等使用者確認）
+  - `AGENTS.md`：視覺方向改寫為放映表（簾幕紅三個 token 的用途、hover 四種、`StatusNotice`、動畫實際用在哪）；
+    「目前狀態」補一行改版分支尚未合進 `main`
+  - `PROJECT_STATE.md`：上半部改成 2026-09-27 實測值（分支、未 commit 的檔案數、測試數、Current Phase、Next 3）；
+    新增「階段 18」歷史段；Handoff 路徑由 `D:\ClaudeCode` 改為 `~/ClaudeCode`
+  - `globals.css`：刪掉沒人用的 `.reveal`（`RankedList` 刪除後的死碼）
+  - gate：typecheck／lint／test（168）／build 全綠；impeccable 偵測器 0 項
+
+## 之後另外處理（需使用者決定）
+
+- Codex 分支 `chore/deps-minor-2026-09-12` 去留
+- 相依升級 commit `bd65638` 是否單獨挑進 `main`

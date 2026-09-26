@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-> 最後更新：2026-09-03（階段 17）。本檔上半部一律是**當下實測值**，
+> 最後更新：2026-09-27（階段 18，全面改版，尚未 commit）。本檔上半部一律是**當下實測值**，
 > 下半部「階段 N」是不再更動的歷史紀錄。兩者矛盾時以上半部為準。
 > git 狀態皆在本 repo 內判斷，不要拿工作區根的狀態套進來。
 
@@ -9,9 +9,23 @@
 * Repo path: `~/ClaudeCode/projects/movie-app`（2026-07-30 由 Windows 遷至 Mac）
 * Repo type: Next.js 16 全端 Web App（git repo，有 GitHub remote）
 * Primary purpose: Treehole——TMDB 電影導覽 + 私人片庫。**2026-08-27 起線上版即正式版**（Vercel + Neon Postgres，全站鎖給擁有者一人）
-* Current status: 階段 1–17 完成。**階段 16–17（2026-09-03）已合進 `main` 並推送**，Vercel 會自動部署——部署結果請自己去 Vercel 看，本檔不代為宣稱已上線
+* Current status: **階段 18 全面改版（放映表）在 `redesign/2026-09-26` 分支完成，全部未 commit、未推送**，`main` 與線上版仍是階段 17 的版面。階段 1–17 完成。**階段 16–17（2026-09-03）已合進 `main` 並推送**，Vercel 會自動部署——部署結果請自己去 Vercel 看，本檔不代為宣稱已上線
 
-## Git Status（2026-09-03 實測）
+## Git Status
+
+### 2026-09-27 實測：改版分支
+
+* Branch: `redesign/2026-09-26`，HEAD 仍是 `main` 的 `9d34b7a`（分支上**沒有任何 commit**）
+* 遠端沒有這條分支（`git ls-remote --heads origin redesign/2026-09-26` 無輸出）；
+  遠端 `main` = `9d34b7a`，與本機一致
+* 改動全在工作區：43 個修改、5 個刪除（`FeatureFilm`、`LibraryGrid`、`RankedList`、
+  `UpcomingCard`、`UpcomingStrip`，皆經使用者同意）、41 個新檔（`git status -uall` 計），
+  另加本次收尾改的 `AGENTS.md`、本檔。追蹤中檔案對 `main`：48 files、+2,973 / −1,820
+  （不含新檔，也不含本次收尾兩檔）
+* commit 方式未定：要一個 commit 還是依階段拆，由使用者決定。不得 `git add -A`
+  （`.claude/launch.json` 的 mock 設定在 gitignore 內，但仍要逐檔加）
+
+### 2026-09-03 實測：main
 
 * Branch: `main`
 * Remote: `origin` → `https://github.com/zhuang060329-bit/treehole-movie-app.git`（private）
@@ -41,7 +55,7 @@
 * Production / deployment: Vercel + Neon Postgres（`https://treehole-movie-app.vercel.app`，真實讀寫，通行碼保護）；本 repo **無 `vercel.json`**（部署設定在 Vercel 端，未進 repo），另有 `.vercelignore`。AGENTS.md：不動 Vercel 部署設定，除非明確指示
 * README status: Treehole 標題、部署連結（載明需通行碼）、features、Access 一節、設計決策、tech stack、architecture、testing、資料位置、future。**2026-08-23 移除截圖區**（階段 5）；**2026-08-27 移除 demo/local 對照表與備份說明**（階段 15）
 * CI status: 有 GitHub Actions `.github/workflows/ci.yml`，push / PR 到 main 觸發 `typecheck → lint → test → build`。**build 不再帶 `DEMO_MODE=1`**，也不需要 `DATABASE_URL`——DB client 是 lazy 的，建置期不連線。actions 為 `@v7`、Node 24。`.github/dependabot.yml` 同時監看 npm 與 github-actions
-* Test status: Vitest；**107 tests / 9 files**，2026-09-03 實測通過（階段 17 新增 `csp.test.ts` 15 tests）。lint 0 error 0 warning，`tsc --noEmit` 0 error，`next build` 通過。`npm audit`：**0 vulnerabilities**
+* Test status: 改版分支 **168 tests / 13 files**（2026-09-27 實測通過）。`main` 為 Vitest **107 tests / 9 files**，2026-09-03 實測通過（階段 17 新增 `csp.test.ts` 15 tests）。lint 0 error 0 warning，`tsc --noEmit` 0 error，`next build` 通過。`npm audit`：**0 vulnerabilities**
 * Access control: `src/proxy.ts` 是唯一授權檢查點，擋在所有頁面與 route handler 之前。通行碼換 HMAC 簽章 cookie（`src/lib/owner-session.ts`）。`OWNER_PASSCODE` / `OWNER_SECRET` 缺任一則全站鎖死（fail closed）。**demo 模式已於階段 15 整套移除**
 * Known limitations: route handler 與 proxy 無整合測試（目前靠手動驗證）；DB 層無自動化測試（以真實 Neon 手動驗過）；通行碼無 rate limit，僅固定延遲——serverless 無可靠共享狀態
 
@@ -85,19 +99,21 @@
 
 ## Current Phase
 
-* Phase: 階段 16–17「安全 / 效能 / 文件對齊」已做完並合進 `main`、已推送
-* Goal: 把安全標頭補上、砍掉沒在用的相依、讓文件與 repo 現況一致。
-* Success criteria: 四道關卡全綠（已達成）、安全標頭在 production build 上以 curl 實測到（已達成）、
-  文件不再有與現況矛盾的敘述（已達成）。
+* Phase: 階段 18「全面改版：放映表」（2026-09-26 起），階段 0–6 與收尾皆已完成並經使用者逐階段確認（收尾待確認）
+* Goal: UI／UX、互動、文案、動畫全面重做；資料模型（四張表）不變
+* Success criteria: 每階段四道 gate 全綠＋impeccable 偵測器 0 項＋mock 截圖桌機 1440／手機 375（皆已達成）；
+  **尚未達成**：真實資料下的截圖比對（見 Next 3 第 2 項）
 
 ## Next 3 Allowed Tasks
 
-1. **確認 Vercel 這次部署的結果**——CSP 目前是 Report-Only，不會攔東西，但這是第一次帶著安全標頭上線。
-2. 線上片庫讀寫實測——需由使用者輸入通行碼操作，再回頭查 Neon 確認資料落地。
-   （鎖本身的線上驗證已完成，見階段 15 末段。）
-3. Neon 資料庫密碼 reset（明文曾出現在對話紀錄中）。
+1. **commit 改版分支**——等使用者決定一個 commit 或依階段拆、要不要推上遠端。
+2. **有真實資料時的逐頁檢查**——目前只在 session scratchpad 的 mock Neon 上看過（port 3101，資料在記憶體）。
+   本機 `.env` 沒有 `DATABASE_URL`／`OWNER_PASSCODE`／`OWNER_SECRET`，要使用者自己補；
+   補了之後連的是 production 資料庫，檢查時不點會寫入的按鈕。
+3. **合進 `main`**——要使用者點頭。合併等於上線（Vercel 自動部署）。
 
-延後：route handler / proxy 的整合測試可行性盤點——先列缺口與方案，不直接大改。
+延後（沿用階段 17）：確認 CSP 帶上線後的部署結果、`CSP_ENFORCE` 翻強制執行、Neon 密碼 reset、
+route handler / proxy 整合測試盤點。
 
 ## Deferred / Explicit Approval Required
 
@@ -129,12 +145,13 @@
 
 Next assistant / Claude Code session should first read:
 
-* `D:\ClaudeCode\WORKSPACE_STATE.md`
+* `~/ClaudeCode/WORKSPACE_STATE.md`
 * `CLAUDE.md` / `AGENTS.md`（本 repo；CLAUDE.md 內容為 `@AGENTS.md`，並讀 `.claude/rules/`）
 * `PROJECT_STATE.md`（本檔）
 * `README.md`
 * `package.json`
-* `git status --short`（在本 repo 內執行，勿用 `D:\ClaudeCode` 根目錄狀態）
+* `git status --short`（在本 repo 內執行，勿用 `~/ClaudeCode` 根目錄狀態）
+* `TASKS.md`（改版各階段的細節與殘留問題）
 * `git log --oneline -5`
 
 Then it should only execute Current Phase or Next 3 Allowed Tasks.
@@ -1013,6 +1030,64 @@ GSAP / Lenis 落在各路由自己的 chunk 裡，不在這個數字內——
   頁面上的 YouTube iframe 已單獨驗過，但整頁一起跑的樣子沒看過。
 * 12 個改動檔已切成 5 個 commit（`1091664`、`63be066`、`05fa936`、`05b25bb`、`df48015`）；
   連同階段 16 的 3 個已於 2026-09-03 合進 `main` 並推送。
+
+## 2026-09-26 階段 18：全面改版「放映表」（未 commit，在 `redesign/2026-09-26`）
+
+* 起因：使用者要全面重做 UI／UX／互動／文案／動畫。Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）
+  不當基底，從 `main` 的 MUBI 式版本出發。問題清單在 `docs/redesign-audit-2026-09-26.md`，
+  逐階段細節與殘留問題在 `TASKS.md`，本節只記結論。
+* 方向：**A 放映表**（使用者從兩份靜態方向稿中選定）——字排為主、片庫優先，清單排成表。
+  保留設計鎖：圓角 0、唯一強調色簾幕紅、Bodoni Moda + Noto Serif TC + Geist、首頁一次一部、手機不壓字。
+  新規則寫進 `AGENTS.md`「視覺方向」。
+
+| 階段 | 範圍 | 重點 |
+|---|---|---|
+| 0 | token 與共用元件 | 字級工具、hover 依角色分四種、`Segmented`／`RatingRuler`（十格可拖曳）／`NavCount`；壓字填塊改 `--curtain-fill #b04537`（4.66:1） |
+| 1 | 首頁 | 今晚（想看清單最久那部，`?pick=n` 換）→ 想看放映表 → 最近看過 → 外面在放 → 即將上映 |
+| 2 | 詳情頁 | 左欄讀片、右欄「我的紀錄」黏住；標記看過同步移出想看並可復原 |
+| 3 | 片庫三頁 | 想看＝放映表（總片長）、看過＝月份日誌、收藏＝海報牆；GSAP Flip 重排 |
+| 4 | 探索／榜單／上映 | 探索條件進網址；兩個榜單改成表；即將上映改成依台灣上映日分組的檔期表 |
+| 5 | 人物頁 | 修舊 bug：原本只讀 `cast`，導演、編劇看不到作品；改成演出／幕後兩個年表 |
+| 6 | 解鎖／錯誤／404／載入 | `StatusNotice` 共用版面；錯誤邊界 `reset`→`retry`；首頁骨架對齊首頁；解鎖表單錯誤狀態 |
+
+**資料契約變更（每項都先提案、經使用者核可）**
+
+* schema 不變，仍是四張表。
+* `db.ts` 新增：`listWatchlistEntries()`、`listRecentWatched(limit)`、`listWatchedEntries()`、
+  `listFavoriteEntries()`、`getMovieRecord(tmdbId)`（一次取回四張表的狀態與日期）、
+  `markWatched()`（一句 SQL 同時寫看過、刪想看，取代 `addWatched()`）、`addWatchlist(movie, addedAt)`。
+* API 皆為加法：`POST /api/watched` 回應多 `removedFromWatchlist` 與 `watchedAdded`；
+  `POST /api/watchlist` 可帶 `added_at`（格式錯、日期不存在、未來時間回 400 `invalid-added-at`）。
+* `lib/tmdb.ts`：`PersonDetails` 加 `deathday`；`getPersonMovieCredits` 改回傳合併 cast／crew 的 `Filmography`。
+
+**驗證方式與限制**
+
+* 本機 `.env` 沒有 DB 與通行碼，改用 session scratchpad 的 mock Neon（攔截 `fetch`、資料在記憶體）
+  加上 gitignore 內的 `.claude/launch.json`（`treehole-mock`，port 3101、`--webpack`）。**沒碰 production。**
+* 每階段四道 gate＋impeccable 偵測器＋mock 截圖（桌機 1440／手機 375、無橫向捲動）。
+
+**驗收（2026-09-27 實測，收尾後重跑）**
+
+| 指令 | 結果 |
+|---|---|
+| `npx tsc --noEmit` | 0 error |
+| `npx eslint src` | 0 error 0 warning |
+| `npx vitest run` | 13 files / 168 tests 全過 |
+| `NEXT_TELEMETRY_DISABLED=1 npx next build` | 通過，26 條路由全為 `ƒ` |
+| impeccable 偵測器（`globals.css`） | 0 項 |
+
+收尾另刪 `globals.css` 的 `.reveal`（`view()` 捲動揭露）：`main` 上只有 `RankedList` 在用，
+階段 4 刪掉 `RankedList` 後成了死碼，刪後 `src/` 內 0 處引用。
+
+**殘留（未做，需使用者決定）**
+
+* 沒有 `global-error.tsx`（根 layout 出錯時是 Next 預設頁）
+* 已解鎖時進 `/unlock` 仍顯示表單
+* `loading.tsx` 拿不到 searchParams，搜尋頁骨架分不出有沒有查詢字
+* TMDB 中文資料的角色名多半仍是英文（「飾 Tony」），是資料來源的狀況
+* 延後（要改資料契約）：人物年表標出已在片庫的片
+* 錯誤邊界與三個「載不出來」畫面在 mock 上不易觸發，只做了程式碼層面的確認
+* `main` 與 Codex 版的逐頁截圖對照沒有做
 
 ## 已評估後決定不做（勿再提出）
 

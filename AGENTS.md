@@ -20,6 +20,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
   搜尋紀錄功能全部移除。本機開發連的是同一個 Neon 資料庫。
 - **全站鎖給一個人用**。`src/proxy.ts` 擋在所有頁面與 route handler 之前。
 - **主線已穩定**：除非收到明確 bug 回報，不重開部署主線；不動 Vercel 部署設定
+- **全面改版在 `redesign/2026-09-26` 分支**（2026-09-26，從 `main` `9d34b7a` 分出），
+  下方「視覺方向」寫的是這個分支的樣子。合進 `main` 之前，`main` 與線上版仍是舊版面
 
 ## 技術棧
 
@@ -101,33 +103,47 @@ Neon 方案提供的為準，去 Neon console 看，不要假設。
   - nonce 在這個站是免費的：用 nonce 等於全站動態渲染，而 14 條路由本來就全是 `ƒ`。
     StackWorth 為了同一件事賠掉 7 個靜態頁，這裡沒有東西可以賠。
 
-## 視覺方向（2026-08-23 已實作，首頁與詳情頁）
+## 視覺方向（2026-09-26 改版：放映表）
 
-**MUBI 式編輯策展**。不是 Netflix / Apple TV 的海報牆語彙。
+**放映表**：字排為主、片庫優先。首頁先看自己的想看清單與看過紀錄，
+TMDB 的片單放在後面。清單一律排成「表」（序號、片名、年份、日期欄），
+只有收藏頁與「外面在放」保留海報。改版紀錄與逐頁說明見 `TASKS.md`、
+`docs/redesign-audit-2026-09-26.md`。
 
 已鎖定、不得單方面推翻的決定：
 - **形狀鎖**：全站 `border-radius: 0`（`globals.css` 的 `*` reset）
 - **配色鎖**：中性三階（`--paper` / `--paper-dim` / `--paper-faint`，皆過 WCAG AA）
-  + 唯一強調色 `--curtain: #c8503f`（戲院簾幕紅）。只用在「使用者留下的痕跡」
-- **字體**：Bodoni Moda（西文標題）+ Noto Serif TC（中文標題）+ Geist（介面）
-- **卡片 hover 不放大**：只浮現內縮 hairline 框（片夾），整列保持安靜
-- **首頁不做自動輪播**：一次只推一部
-- **手機不把文字壓在影像上**：影像一段、文字一段
+  + 唯一強調色簾幕紅，分三個 token（`globals.css` 開頭有對比數據）：
+  - `--curtain #c8503f`：線條與標記，不承載文字（列 hover 左緣線、訊息與錯誤的左側粗線、導覽目前位置底線）
+  - `--curtain-ink #e4897b`：小字（自評分數、「今晚」的理由、今晚那一部的序號）
+  - `--curtain-fill #b04537`：上面壓字的填塊（詳情頁「我的紀錄」開著的想看／看過／收藏鍵、評分尺填滿的格）
+  主要用途仍是「使用者留下的痕跡」；新增用途前先問它是不是痕跡、位置或錯誤
+- **字體**：Bodoni Moda（西文標題）+ Noto Serif TC（中文標題）+ Geist（介面）。
+  字級工具在 `globals.css`：`.t-film`／`.t-num`／`.t-meta`／`.t-label`／`.t-section`／`.t-reason`
+- **首頁不做自動輪播**：「今晚」一次只推一部（想看清單放最久的那部，`?pick=n` 換下一部）
+- **手機不把文字壓在影像上**：影像一段、文字一段。詳情頁劇照在欄內，不出血
+- **hover 依角色分四種，不放大**（`globals.css` 的 `.hov-*`）：
+  列＝左緣簾幕紅線（`.hov-row`，手機要配 `max-sm:pl-3`）、海報＝壓暗一階（`.hov-poster`）、
+  日誌＝日期轉色（`.hov-date`）、行內連結＝底線變亮（`.link-hair`）。鍵盤聚焦等同 hover
+- **整頁只剩一則狀態時用 `StatusNotice`**（404、錯誤邊界、載不出來），不另做版面
+- **沒有內聯樣式**：CSP 的 `style-src 'self'` 不容許 `style={{...}}`，見上方安全標頭一節
 
-動畫分工：
-- GSAP + ScrollTrigger：**只有一種** scroll 動畫（影像隨捲動下沉），用在首頁開場與詳情頁首屏
-- Lenis：捲動節奏基礎設施，讓 scrub 連續。不是特效
-- CSS `animation-timeline: view()`：捲動揭露。**不用 IntersectionObserver**——
+動畫分工（只用已安裝的兩支，不新增套件）：
+- GSAP + ScrollTrigger：**只有一種** scroll 動畫（影像隨捲動下沉，`ParallaxImage`），
+  用在首頁「今晚」的劇照與詳情頁劇照
+- Lenis：捲動節奏基礎設施（`SmoothScroll`），讓 scrub 連續。不是特效
+- GSAP Flip：片庫三頁的列表重排（`library/useFlip.ts`：拿掉一部片、換排序、換篩選）
+- 進場：`animate-rise`（載入時一次，CSS keyframes），用在頁首與狀態頁
+- 捲動揭露目前**沒有**。原本的 `.reveal`（CSS `animation-timeline: view()`）只有榜單在用，
+  2026-09-26 榜單改寫後已刪。日後要加，用 `view()`，**不用 IntersectionObserver**——
   快速捲動可能整段不觸發，內容會永久停在 opacity 0
-- GSAP Flip：只有 LibraryGrid 的格線重排（拿掉一部片、換排序、換評分門檻）
 
-  2026-09-03 之前這一段是 Motion 的 `AnimatePresence mode="popLayout"`。移除的理由是體積：
+  2026-09-03 之前 Flip 那一段是 Motion 的 `AnimatePresence mode="popLayout"`。移除的理由是體積：
   實測 motion 佔 client JS 的 39.5 KB gzip（14.2%），只服務片庫三個頁面的這一種動畫；
   GSAP core 因為首頁與詳情頁的捲動動畫本來就已載入，補 Flip 只多 9.7 KB。
   換完 client JS 由 278.2 KB gzip 降到 247.8 KB。動畫語彙不變。
-  註：`.claude/rules/animation.md` 仍把 Motion 列在允許來源內，但這個 repo 已不安裝它。
 
-可用元件來源：React Bits、Motion Primitives、Aceternity UI、Animate UI
+可用元件來源（白名單，**都未安裝**，安裝前要使用者確認）：React Bits、Motion Primitives、Aceternity UI、Animate UI
 
 ## Rules 位置
 
