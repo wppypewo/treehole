@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-> 最後更新：2026-09-27（階段 18，全面改版，尚未 commit）。本檔上半部一律是**當下實測值**，
+> 最後更新：2026-09-27（階段 18，全面改版，已在分支上 commit、未推送、未合併）。本檔上半部一律是**當下實測值**，
 > 下半部「階段 N」是不再更動的歷史紀錄。兩者矛盾時以上半部為準。
 > git 狀態皆在本 repo 內判斷，不要拿工作區根的狀態套進來。
 
@@ -9,21 +9,31 @@
 * Repo path: `~/ClaudeCode/projects/movie-app`（2026-07-30 由 Windows 遷至 Mac）
 * Repo type: Next.js 16 全端 Web App（git repo，有 GitHub remote）
 * Primary purpose: Treehole——TMDB 電影導覽 + 私人片庫。**2026-08-27 起線上版即正式版**（Vercel + Neon Postgres，全站鎖給擁有者一人）
-* Current status: **階段 18 全面改版（放映表）在 `redesign/2026-09-26` 分支完成，全部未 commit、未推送**，`main` 與線上版仍是階段 17 的版面。階段 1–17 完成。**階段 16–17（2026-09-03）已合進 `main` 並推送**，Vercel 會自動部署——部署結果請自己去 Vercel 看，本檔不代為宣稱已上線
+* Current status: **階段 18 全面改版（放映表）在 `redesign/2026-09-26` 分支完成並 commit（9 個），未推送、未合併**，`main` 與線上版仍是階段 17 的版面。階段 1–17 完成。**階段 16–17（2026-09-03）已合進 `main` 並推送**，Vercel 會自動部署——部署結果請自己去 Vercel 看，本檔不代為宣稱已上線
 
 ## Git Status
 
 ### 2026-09-27 實測：改版分支
 
-* Branch: `redesign/2026-09-26`，HEAD 仍是 `main` 的 `9d34b7a`（分支上**沒有任何 commit**）
+* Branch: `redesign/2026-09-26`，從 `main` 的 `9d34b7a` 分出，**領先 `main` 9 個 commit**，工作區乾淨
 * 遠端沒有這條分支（`git ls-remote --heads origin redesign/2026-09-26` 無輸出）；
-  遠端 `main` = `9d34b7a`，與本機一致
-* 改動全在工作區：43 個修改、5 個刪除（`FeatureFilm`、`LibraryGrid`、`RankedList`、
-  `UpcomingCard`、`UpcomingStrip`，皆經使用者同意）、41 個新檔（`git status -uall` 計），
-  另加本次收尾改的 `AGENTS.md`、本檔。追蹤中檔案對 `main`：48 files、+2,973 / −1,820
-  （不含新檔，也不含本次收尾兩檔）
-* commit 方式未定：要一個 commit 還是依階段拆，由使用者決定。不得 `git add -A`
-  （`.claude/launch.json` 的 mock 設定在 gitignore 內，但仍要逐檔加）
+  遠端 `main` = `9d34b7a`，與本機一致（2026-09-27 以 `ls-remote` 實際連線驗證）
+* 分支對 `main`：97 files、+6,985 / −2,017（不含最後一個文件 commit）
+* 推送前要先問使用者：推上遠端可能觸發 Vercel preview 部署。
+
+  | commit | 內容 |
+  |---|---|
+  | `ae59499` | 全面改版「放映表」：階段 0–6 的程式碼 |
+  | `aafce0b` | 文件：改版紀錄、問題清單，AGENTS／PROJECT_STATE 對齊放映表 |
+  | `4c47888` | 已解鎖時進 /unlock 轉回首頁 |
+  | `42c6198` | 補上 global-error.tsx |
+  | `e0aae80` | 搜尋頁改用 Suspense 分段串流 |
+  | `df373ca` | 字級 class 移進 components layer，原文片名不合成斜體 |
+  | `a54389f` | 人物頁作品列標出片庫狀態，角色標記轉成中文 |
+  | `967f63a` | 詳情頁在片庫讀不到時降級，不整頁報錯 |
+  | （本檔所在的 commit） | 文件：殘留處理與三方對照 |
+
+  `4c47888`～`967f63a` 六個 commit 各自 checkout 跑過 `tsc --noEmit`，每一個單獨都通過。
 
 ### 2026-09-03 實測：main
 
@@ -55,7 +65,7 @@
 * Production / deployment: Vercel + Neon Postgres（`https://treehole-movie-app.vercel.app`，真實讀寫，通行碼保護）；本 repo **無 `vercel.json`**（部署設定在 Vercel 端，未進 repo），另有 `.vercelignore`。AGENTS.md：不動 Vercel 部署設定，除非明確指示
 * README status: Treehole 標題、部署連結（載明需通行碼）、features、Access 一節、設計決策、tech stack、architecture、testing、資料位置、future。**2026-08-23 移除截圖區**（階段 5）；**2026-08-27 移除 demo/local 對照表與備份說明**（階段 15）
 * CI status: 有 GitHub Actions `.github/workflows/ci.yml`，push / PR 到 main 觸發 `typecheck → lint → test → build`。**build 不再帶 `DEMO_MODE=1`**，也不需要 `DATABASE_URL`——DB client 是 lazy 的，建置期不連線。actions 為 `@v7`、Node 24。`.github/dependabot.yml` 同時監看 npm 與 github-actions
-* Test status: 改版分支 **168 tests / 13 files**（2026-09-27 實測通過）。`main` 為 Vitest **107 tests / 9 files**，2026-09-03 實測通過（階段 17 新增 `csp.test.ts` 15 tests）。lint 0 error 0 warning，`tsc --noEmit` 0 error，`next build` 通過。`npm audit`：**0 vulnerabilities**
+* Test status: 改版分支 **175 tests / 13 files**（2026-09-27 實測通過）。`main` 為 Vitest **107 tests / 9 files**，2026-09-03 實測通過（階段 17 新增 `csp.test.ts` 15 tests）。lint 0 error 0 warning，`tsc --noEmit` 0 error，`next build` 通過。`npm audit`：**0 vulnerabilities**
 * Access control: `src/proxy.ts` 是唯一授權檢查點，擋在所有頁面與 route handler 之前。通行碼換 HMAC 簽章 cookie（`src/lib/owner-session.ts`）。`OWNER_PASSCODE` / `OWNER_SECRET` 缺任一則全站鎖死（fail closed）。**demo 模式已於階段 15 整套移除**
 * Known limitations: route handler 與 proxy 無整合測試（目前靠手動驗證）；DB 層無自動化測試（以真實 Neon 手動驗過）；通行碼無 rate limit，僅固定延遲——serverless 無可靠共享狀態
 
@@ -99,14 +109,14 @@
 
 ## Current Phase
 
-* Phase: 階段 18「全面改版：放映表」（2026-09-26 起），階段 0–6 與收尾皆已完成並經使用者逐階段確認（收尾待確認）
+* Phase: 階段 18「全面改版：放映表」（2026-09-26 起），階段 0–6、收尾與殘留處理皆已完成，已在分支上 commit
 * Goal: UI／UX、互動、文案、動畫全面重做；資料模型（四張表）不變
 * Success criteria: 每階段四道 gate 全綠＋impeccable 偵測器 0 項＋mock 截圖桌機 1440／手機 375（皆已達成）；
   **尚未達成**：真實資料下的截圖比對（見 Next 3 第 2 項）
 
 ## Next 3 Allowed Tasks
 
-1. **commit 改版分支**——等使用者決定一個 commit 或依階段拆、要不要推上遠端。
+1. **推送改版分支**——要使用者點頭；推上遠端可能觸發 Vercel preview 部署。
 2. **有真實資料時的逐頁檢查**——目前只在 session scratchpad 的 mock Neon 上看過（port 3101，資料在記憶體）。
    本機 `.env` 沒有 `DATABASE_URL`／`OWNER_PASSCODE`／`OWNER_SECRET`，要使用者自己補；
    補了之後連的是 production 資料庫，檢查時不點會寫入的按鈕。
@@ -1031,7 +1041,7 @@ GSAP / Lenis 落在各路由自己的 chunk 裡，不在這個數字內——
 * 12 個改動檔已切成 5 個 commit（`1091664`、`63be066`、`05fa936`、`05b25bb`、`df48015`）；
   連同階段 16 的 3 個已於 2026-09-03 合進 `main` 並推送。
 
-## 2026-09-26 階段 18：全面改版「放映表」（未 commit，在 `redesign/2026-09-26`）
+## 2026-09-26 階段 18：全面改版「放映表」（在 `redesign/2026-09-26`，2026-09-27 已 commit、未合併）
 
 * 起因：使用者要全面重做 UI／UX／互動／文案／動畫。Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）
   不當基底，從 `main` 的 MUBI 式版本出發。問題清單在 `docs/redesign-audit-2026-09-26.md`，
@@ -1072,22 +1082,26 @@ GSAP / Lenis 落在各路由自己的 chunk 裡，不在這個數字內——
 |---|---|
 | `npx tsc --noEmit` | 0 error |
 | `npx eslint src` | 0 error 0 warning |
-| `npx vitest run` | 13 files / 168 tests 全過 |
+| `npx vitest run` | 13 files / 175 tests 全過（殘留處理後；收尾時為 168） |
 | `NEXT_TELEMETRY_DISABLED=1 npx next build` | 通過，26 條路由全為 `ƒ` |
 | impeccable 偵測器（`globals.css`） | 0 項 |
 
 收尾另刪 `globals.css` 的 `.reveal`（`view()` 捲動揭露）：`main` 上只有 `RankedList` 在用，
 階段 4 刪掉 `RankedList` 後成了死碼，刪後 `src/` 內 0 處引用。
 
-**殘留（未做，需使用者決定）**
+**殘留（2026-09-27 處理結果，細節在 `TASKS.md` 與 audit 文件第五節）**
 
-* 沒有 `global-error.tsx`（根 layout 出錯時是 Next 預設頁）
-* 已解鎖時進 `/unlock` 仍顯示表單
-* `loading.tsx` 拿不到 searchParams，搜尋頁骨架分不出有沒有查詢字
-* TMDB 中文資料的角色名多半仍是英文（「飾 Tony」），是資料來源的狀況
-* 延後（要改資料契約）：人物年表標出已在片庫的片
-* 錯誤邊界與三個「載不出來」畫面在 mock 上不易觸發，只做了程式碼層面的確認
-* `main` 與 Codex 版的逐頁截圖對照沒有做
+* ~~沒有 `global-error.tsx`~~ 已補（`42c6198`）。**未實際觸發過**，只做了型別、lint、build 的確認
+* ~~已解鎖時進 `/unlock` 仍顯示表單~~ 已改為轉回首頁（`4c47888`）
+* ~~搜尋頁骨架分不出有沒有查詢字~~ 改用 Suspense 分段（`e0aae80`）
+* TMDB 角色名多半是英文：**資料來源限制，無法解**。`character` 不隨 `language` 變（zh-TW／en-US／ja-JP 實測相同）；
+  `characterText()` 只轉 voice／uncredited／Self（`a54389f`）
+* ~~人物年表標出已在片庫的片~~ 已做，用既有的三支 list 函式，**沒有改資料契約**（`a54389f`）
+* 錯誤畫面：詳情頁在資料庫讀不到時原本整頁報錯，已改為降級（`967f63a`）；TMDB 斷線與資料庫斷線兩種情況已在 mock 上實測
+* ~~`main` 與 Codex 版的逐頁截圖對照~~ 已做（mock 資料，audit 文件第五節）
+* 對照時另外發現並修正：`.t-*` 蓋掉顏色 class（16 處顏色因此改變）、日韓原文片名被合成斜體（`df373ca`）、
+  職務 Screenstory 沒有中文（`a54389f`）
+* **仍未做**：解鎖後用真實資料逐頁檢查（要使用者補 `.env`）
 
 ## 已評估後決定不做（勿再提出）
 

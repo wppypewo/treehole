@@ -30,11 +30,13 @@ Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）不動，也不當基�
       `mockup-directions.html`，不進 repo。桌機 1440 與手機 375 寬都檢查過，沒有橫向捲動。
 - [x] 使用者選方向：A 放映表（2026-09-26）
 - [x] 標記「看過了」時自動移出「想看」：2026-09-26 使用者同意，階段 2 實作，畫面上明示並可復原。
-- [ ] 解鎖後截圖：`main` 與 Codex 版逐頁對照，補進問題清單
+- [x] `main` 與 Codex 版逐頁對照，補進問題清單（2026-09-27，mock 資料；寫在 audit 文件第五節）
   - 2026-09-26 部分替代：session scratchpad 內的 mock Neon（攔截 `fetch`，資料在記憶體）
     加上 `.claude/launch.json` 的 `treehole-mock`（port 3101、`--webpack`，檔案在 gitignore 內），
     首頁、詳情頁、三個片庫頁已在桌機 1440／手機 375 截圖檢查。不碰 production。
-    `main` 與 Codex 版的逐頁對照仍未做
+  - 2026-09-27：`main`（`9d34b7a`）與 Codex（`77631a6`）各開臨時 worktree 接同一個 mock，
+    首頁、詳情、想看、人物四頁在 1440／375 三方截圖對照。對照完 worktree 與 launch 設定已移除。
+    **解鎖後用真資料的對照仍未做**，等阻擋項解除
 
 ## 分階段實作（每階段跑 typecheck／lint／test／build + `/impeccable` 審查，等使用者確認再進下一階段）
 
@@ -156,7 +158,23 @@ Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）不動，也不當基�
   - `globals.css`：刪掉沒人用的 `.reveal`（`RankedList` 刪除後的死碼）
   - gate：typecheck／lint／test（168）／build 全綠；impeccable 偵測器 0 項
 
+- [x] 收尾：殘留處理（2026-09-27）
+  - `global-error.tsx`：新增；字型定義移到 `src/app/fonts.ts`、錯誤文案與語系 hook 移到 `src/app/error-copy.ts`，
+    `layout.tsx`／`error.tsx`／`global-error.tsx` 共用。未實際觸發（要根 layout 壞掉才走得到）
+  - `/unlock`：已解鎖時 `proxy.ts` 307 轉回首頁；未解鎖照舊帶 `LOCK_HEADER` 放行。
+    回傳路徑四條變六條，全部帶 CSP；`proxy.test.ts` 補 5 題
+  - 搜尋頁：外殼只等 cookie 與 params，推薦／筆數／結果各包 Suspense（key 為查詢字），骨架跟著有沒有查詢字走
+  - 人物頁：作品列標出片庫狀態（看過 > 想看 > 收藏），用既有三支 list 函式，資料庫錯誤時不標、記 `[person-library-marks]`
+  - 角色名：`characterText()` 轉 voice／uncredited／Self；角色本名 TMDB 不翻，維持原文
+  - 詳情頁：資料庫讀不到時「我的紀錄」降級為說明＋重試鍵（字典 `movie.ledgerUnavailable`），其餘照常顯示
+  - `globals.css`：`.t-*` 移進 `@layer components`，顏色 class 才蓋得過去（影響 16 處）；新增 `.t-original`
+    （`font-synthesis-style: none`，日韓中原文片名不再被合成斜體）
+  - 字典：職務 `Screenstory` 補「電影故事」
+  - gate：typecheck／lint／test（175）／build 全綠；impeccable 偵測器 0 項
+
 ## 之後另外處理（需使用者決定）
 
+- 推送 `redesign/2026-09-26`：推上遠端可能觸發 Vercel preview 部署，先問
+- 合進 `main`：等真實資料檢查過再決定；合併等於上線
 - Codex 分支 `chore/deps-minor-2026-09-12` 去留
 - 相依升級 commit `bd65638` 是否單獨挑進 `main`
