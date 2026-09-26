@@ -71,3 +71,30 @@ export function movieFromBody(body: unknown): SavedMovie | null {
 export function tmdbIdFromQuery(url: string): number | null {
   return toTmdbId(new URL(url).searchParams.get("tmdb_id"));
 }
+
+/** markWatched 回傳的時間格式，也是唯一收的格式 */
+const ADDED_AT_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+
+/**
+ * 「復原」時送回來的原加入時間。沒帶是正常情況（一般的加入想看），回 null；
+ * 帶了但格式不對、不是真的日期、或在未來，回 "invalid"，由呼叫端轉成 400。
+ *
+ * 擋未來時間：想看清單照加入先後排，一個未來的時間會讓那部片永遠排在最後，
+ * 而且沒有任何畫面能看出是哪裡出錯。留 60 秒寬限給兩端時鐘誤差。
+ */
+export function addedAtFromBody(
+  body: unknown,
+  now: number = Date.now(),
+): string | null | "invalid" {
+  const raw = (body as Record<string, unknown> | null)?.added_at;
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw !== "string" || !ADDED_AT_PATTERN.test(raw)) return "invalid";
+  const t = Date.parse(raw);
+  // 2026-02-30T… 這種格式對、日期不存在的字串，Date.parse 會自動進位，
+  // 轉回 ISO 比對一次才抓得到
+  if (!Number.isFinite(t) || new Date(t).toISOString().slice(0, 19) + "Z" !== raw) {
+    return "invalid";
+  }
+  if (t > now + 60_000) return "invalid";
+  return raw;
+}

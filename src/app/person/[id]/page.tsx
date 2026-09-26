@@ -1,22 +1,30 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getPerson, getPersonMovieCredits } from "@/lib/tmdb";
-import type { MovieSummary } from "@/lib/tmdb";
 import { TmdbError } from "@/lib/tmdb";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
-import ErrorNotice from "@/components/ErrorNotice";
-import MovieGrid from "@/components/MovieGrid";
+import { calendarDateFormatter, todayInTaipei } from "@/lib/dates";
+import {
+  actingRoleText,
+  crewRoleText,
+  groupByYear,
+  isLeadRole,
+  type Credit,
+  type Filmography as FilmographyData,
+  type RoleLabels,
+} from "@/lib/filmography";
+import Link from "next/link";
+import StatusNotice from "@/components/StatusNotice";
+import RefreshButton from "@/components/RefreshButton";
 import Biography from "@/components/Biography";
+import Filmography, { type FilmographyYear } from "@/components/Filmography";
 
 export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ id: string }>;
-}): Promise<Metadata> {
+}: PageProps<"/person/[id]">): Promise<Metadata> {
   const { id } = await params;
   const personId = Number(id);
   if (!Number.isInteger(personId) || personId <= 0) return {};
@@ -28,18 +36,19 @@ export async function generateMetadata({
   }
 }
 
-export default async function PersonPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+/**
+ * 人物頁：照片、姓名、一行基本資料、簡介，底下是作品年表。
+ *
+ * 沒有「返回」：原本那顆固定連回首頁，從詳情頁點進來的人按了反而離開原路。
+ * 回上一頁交給瀏覽器。
+ */
+export default async function PersonPage({ params }: PageProps<"/person/[id]">) {
   const locale = await getLocale();
   const dict = getDictionary(locale);
   const { id } = await params;
   const personId = Number(id);
 
-  // 同詳情頁：不存在的 id 回真正的 404。
-  // 這裡先前還會顯示「找不到這部電影」——人物頁講電影，文案張冠李戴。
+  // 同詳情頁：不存在的 id 回真正的 404
   if (!Number.isInteger(personId) || personId <= 0) {
     notFound();
   }
@@ -51,32 +60,84 @@ export default async function PersonPage({
     if (error instanceof TmdbError && error.kind === "not-found") {
       notFound();
     }
-    return <ErrorNotice message={tmdbErrorMessage(error, dict)} />;
+    return (
+      <StatusNotice
+        title={dict.errors.loadFailed}
+        body={tmdbErrorMessage(error, dict)}
+      >
+        <RefreshButton label={dict.errors.reload} />
+        <Link href="/" className="btn-line">
+          {dict.errors.home}
+        </Link>
+      </StatusNotice>
+    );
   }
 
-  // 作品取得失敗不應拖垮整頁
-  let films: MovieSummary[] = [];
+  // 作品取得失敗不拖垮整頁，年表顯示成沒有作品
+  let credits: FilmographyData = { acting: [], crew: [] };
   try {
-    films = await getPersonMovieCredits(locale, personId);
+    credits = await getPersonMovieCredits(locale, personId);
   } catch {
-    films = [];
+    // 維持空年表
   }
+
+  const date = calendarDateFormatter(locale);
+  const today = todayInTaipei();
+  const roleLabels: RoleLabels = {
+    as: dict.person.as,
+    self: dict.person.self,
+    voice: dict.person.voice,
+    uncredited: dict.person.uncredited,
+    jobs: dict.person.jobs,
+  };
+
+  function toYears(list: Credit[], kind: "acting" | "crew"): FilmographyYear[] {
+    return groupByYear(list).map((g) => ({
+      year: g.year,
+      rows: g.credits.map((c) => {
+        const released = c.film.release_date;
+        const opensOn = released && released > today ? date(released) : null;
+        return {
+          id: c.film.id,
+          title: c.film.title,
+          original:
+            c.film.original_title && c.film.original_title !== c.film.title
+              ? c.film.original_title
+              : null,
+          poster: tmdbImage(c.film.poster_path, "w185"),
+          role:
+            kind === "acting"
+              ? actingRoleText(c.roles, roleLabels)
+              : crewRoleText(c.roles, roleLabels),
+          lead: kind === "acting" && isLeadRole(c),
+          opens: opensOn ? dict.person.opens.replace("{date}", opensOn) : null,
+        };
+      }),
+    }));
+  }
+
+  // 預設分頁：以演員為人所知的看演出，其餘（導演、編劇、攝影⋯⋯）看幕後
+  const defaultKind =
+    person.known_for_department === "Acting" || credits.crew.length === 0
+      ? "acting"
+      : "crew";
+
+  // 基本資料一行：領域 · 生 · 卒 · 出生地。缺哪項就略過哪項
+  const facts: string[] = [];
+  const dept = person.known_for_department;
+  if (dept) facts.push(dict.person.departments[dept] ?? dept);
+  const born = date(person.birthday);
+  if (born) facts.push(dict.person.born.replace("{date}", born));
+  const died = date(person.deathday);
+  if (died) facts.push(dict.person.died.replace("{date}", died));
+  if (person.place_of_birth) facts.push(person.place_of_birth);
 
   const photo = tmdbImage(person.profile_path, "w342");
 
   return (
     <article className="page-shell">
-      <Link
-        href="/"
-        className="tap-safe gap-2 text-[0.75rem] tracking-[0.08em] text-paper-dim transition-colors hover:text-paper"
-      >
-        <span aria-hidden>←</span>
-        {dict.movie.back}
-      </Link>
-
-      {/* 人物首屏：照片與姓名並置。照片欄固定寬，與詳情頁的海報欄同一個尺度，
-          讓兩種「人／片」的頁面在視覺上是同一個系統。 */}
-      <div className="animate-rise mt-8 grid gap-8 md:grid-cols-[minmax(0,220px)_minmax(0,1fr)] md:gap-16">
+      {/* 首屏：照片與姓名並置。照片欄固定寬，跟詳情頁的海報同一個尺度 */}
+      <div className="animate-rise grid gap-8 md:grid-cols-[minmax(0,220px)_minmax(0,1fr)] md:gap-16">
         <div className="w-32 md:w-full">
           <div className="aspect-[2/3] overflow-hidden bg-ink-raised">
             {photo ? (
@@ -90,18 +151,35 @@ export default async function PersonPage({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="t-film flex h-full w-full items-center justify-center text-5xl text-paper-faint">
+              <div
+                aria-hidden
+                className="t-film flex h-full w-full items-center justify-center text-5xl text-paper-faint"
+              >
                 {person.name.slice(0, 1)}
               </div>
             )}
           </div>
         </div>
 
-        <div>
-          <h1 className="t-film text-[2.125rem] text-paper sm:text-[3rem]">
+        <div className="min-w-0">
+          <h1 className="t-film text-[clamp(2.25rem,4.6vw,3.75rem)] text-paper">
             {person.name}
           </h1>
-          <div className="mt-6 border-t border-hairline pt-6">
+          {facts.length > 0 && (
+            <p className="t-meta mt-4 text-paper-dim">
+              {facts.map((f, i) => (
+                <span key={f}>
+                  {i > 0 && (
+                    <span aria-hidden className="px-2 text-paper-faint">
+                      ·
+                    </span>
+                  )}
+                  {f}
+                </span>
+              ))}
+            </p>
+          )}
+          <div className="mt-7 max-w-[62ch] border-t border-hairline pt-6">
             <Biography
               text={person.biography || dict.person.noBio}
               showMore={dict.person.showMore}
@@ -111,20 +189,22 @@ export default async function PersonPage({
         </div>
       </div>
 
-      {/* 作品列表 */}
-      <section className="mt-20">
-        <div className="flex items-baseline justify-between gap-6 border-b border-hairline pb-5">
-          <h2 className="t-section text-paper">{dict.person.filmography}</h2>
-          {films.length > 0 && (
-            <p className="t-meta shrink-0 text-paper-faint">
-              {dict.common.filmCount.replace("{n}", String(films.length))}
-            </p>
-          )}
-        </div>
-        <div className="mt-10">
-          <MovieGrid movies={films} emptyText={dict.common.empty} />
-        </div>
-      </section>
+      <Filmography
+        acting={toYears(credits.acting, "acting")}
+        crew={toYears(credits.crew, "crew")}
+        counts={{ acting: credits.acting.length, crew: credits.crew.length }}
+        defaultKind={defaultKind}
+        labels={{
+          title: dict.person.filmography,
+          acting: dict.person.acting,
+          crew: dict.person.crew,
+          creditKind: dict.person.creditKind,
+          lead: dict.person.lead,
+          undated: dict.person.undated,
+          noCredits: dict.person.noCredits,
+          filmCount: dict.common.filmCount,
+        }}
+      />
     </article>
   );
 }

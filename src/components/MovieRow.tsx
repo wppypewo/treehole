@@ -23,6 +23,8 @@ export default function MovieRow({
   size = "sm",
   prevLabel,
   nextLabel,
+  aside,
+  headingId,
 }: {
   title: string;
   movies: MovieSummary[];
@@ -31,6 +33,10 @@ export default function MovieRow({
   size?: "sm" | "lg";
   prevLabel: string;
   nextLabel: string;
+  /** 標題後的一句事實，例如資料來源（「TMDB 熱門」）；寫法同 SectionHead */
+  aside?: string;
+  /** 給外層 section 的 aria-labelledby 用 */
+  headingId?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   // 已經捲到頭／尾時箭頭要看得出來按了也沒用。
@@ -74,9 +80,14 @@ export default function MovieRow({
       : "w-[32vw] max-w-[180px] sm:w-36 md:w-40";
 
   return (
-    <section>
+    <section aria-labelledby={headingId}>
       <div className="mx-auto flex max-w-[1400px] items-baseline justify-between gap-6 px-5 sm:px-8">
-        <h2 className="t-section text-paper">{title}</h2>
+        <div className="flex flex-wrap items-baseline gap-x-3.5 gap-y-1">
+          <h2 id={headingId} className="t-section text-paper">
+            {title}
+          </h2>
+          {aside && <p className="t-meta text-paper-faint">{aside}</p>}
+        </div>
         <div className="flex items-center gap-4">
           <Link
             href={moreHref}

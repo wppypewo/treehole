@@ -30,14 +30,38 @@
   /* ── 唯一強調色：戲院簾幕紅 ───────────────────────────────
      依據是實物——放映廳的絨布簾幕與座椅。不是趨勢色，也不是
      科技藍紫。全站只有這一個彩色，其餘一律中性。
-     curtain 用於填色與線條（大面積 4.4:1，僅限非內文）；
-     curtain-ink 用於小字（7.7:1，通過 AA）。 */
+     curtain 用於線條與標記（不承載文字）；
+     curtain-ink 用於小字（7.7:1，通過 AA）；
+     curtain-fill 用於上面壓著字的填塊：paper 字在 #c8503f 上只有 3.74:1，
+     13px 字要 4.5:1，所以填塊壓暗一階到 4.66:1（2026-09-26 使用者同意）。
+     curtain-fill-hover 是填塊的 hover，再暗一階（5.64:1）。 */
   --curtain: #c8503f;
   --curtain-ink: #e4897b;
+  --curtain-fill: #b04537;
+  --curtain-fill-hover: #9c3c30;
 
   /* ── 分隔線 ───────────────────────────────────────────── */
   --hairline: rgb(255 255 255 / 0.11);
   --hairline-strong: rgb(255 255 255 / 0.22);
+
+  /* ── 區塊節奏（放映表方向，2026-09-26）──────────────────────
+     刻意不等距。每一區上方留多少，取決於它在頁面上的份量：
+     open 是開場之後第一次換氣；major 給使用者自己的片庫（想看、看過）；
+     minor 給外部片單（TMDB 在放什麼）。手機一律收成約六成。 */
+  --rhythm-open: 5.5rem;
+  --rhythm-major: 6.5rem;
+  --rhythm-minor: 4.5rem;
+
+  /* 海報靜止時的亮度。片庫是字排為主的頁面，海報壓暗一階，
+     讓游標停下的那一張自己亮起來，而不是靠框線或放大。 */
+  --poster-rest: brightness(0.82) saturate(0.9);
+}
+@media (min-width: 900px) {
+  :root {
+    --rhythm-open: 8rem;
+    --rhythm-major: 6.5rem;
+    --rhythm-minor: 6rem;
+  }
 }
 
 @theme inline {
@@ -49,6 +73,7 @@
   --color-paper-faint: var(--paper-faint);
   --color-curtain: var(--curtain);
   --color-curtain-ink: var(--curtain-ink);
+  --color-curtain-fill: var(--curtain-fill);
   --color-hairline: var(--hairline);
   --color-hairline-strong: var(--hairline-strong);
 
@@ -78,7 +103,7 @@ body {
 }
 
 ::selection {
-  background: var(--curtain);
+  background: var(--curtain-fill);
   color: var(--paper);
 }
 
@@ -128,6 +153,34 @@ body {
   line-height: 1.5;
   letter-spacing: 0.01em;
   color: var(--paper-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 數字：日期、分數、序號、片長。Bodoni 預設是舊式數字（高低不齊），
+   這裡強制齊線＋等寬，排成一欄才對得齊。放映表與日誌的左欄都靠它撐。 */
+.t-num {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+/* 資料欄位標籤：年份、片長、導演、類型這類 dl 的 dt。
+   比 eyebrow 小一階、不全大寫，因為它會成排出現，大寫加寬字距排起來太吵。 */
+.t-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  color: var(--paper-faint);
+}
+
+/* 推薦理由：「為什麼是這一部」。使用者留下的痕跡才用簾幕紅，
+   而理由正是從使用者自己的片庫推出來的，所以用 curtain-ink。 */
+.t-reason {
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  color: var(--curtain-ink);
   font-variant-numeric: tabular-nums;
 }
 
@@ -196,15 +249,15 @@ body {
   color: var(--paper-faint);
   border-color: var(--hairline);
 }
-/* 已啟用狀態（已收藏／已看過）：簾幕紅實填，是全站唯一的彩色填塊 */
+/* 已啟用狀態（已收藏／看過）：簾幕紅實填。字壓在上面，所以用 curtain-fill */
 .btn-line[data-on="true"] {
-  border-color: var(--curtain);
-  background: var(--curtain);
+  border-color: var(--curtain-fill);
+  background: var(--curtain-fill);
   color: var(--paper);
 }
 .btn-line[data-on="true"]:hover {
-  background: #b04537;
-  border-color: #b04537;
+  background: var(--curtain-fill-hover);
+  border-color: var(--curtain-fill-hover);
 }
 
 /* 主要動作：反白實心。用在「看這部」這種單一入口 */
@@ -229,19 +282,261 @@ body {
   transform: translateY(1px);
 }
 
-/* 影像底部遮罩：保證壓在影像上的片名與 metadata 一定讀得到。
-   單層 to-t 漸層在亮圖上不夠——手機版的詳情頁就因此糊掉過。
-   這裡底部 24% 是實色，中段才開始透，上緣才完全放開影像。 */
-.scrim-bottom {
-  background: linear-gradient(
-    to top,
-    rgb(10 10 11 / 1) 0%,
-    rgb(10 10 11 / 1) 24%,
-    rgb(10 10 11 / 0.82) 46%,
-    rgb(10 10 11 / 0.45) 68%,
-    rgb(10 10 11 / 0.12) 88%,
-    rgb(10 10 11 / 0) 100%
-  );
+/* ── hover 依角色分化 ────────────────────────────────────────
+   四種可點的東西，各自一種回饋，彼此不混用。共同點是都不放大、不淡出：
+
+   列（放映表、排行）   左緣一條 2px 簾幕紅從上往下長出來，像手指點在節目表上
+   海報／劇照            靜止時壓暗一階，停下的那張恢復原亮度，片名加底線
+   日誌條目             大字日期轉成 curtain-ink，其餘不動
+   行內文字連結          hairline 底線變亮
+
+   鍵盤聚焦一律等同 hover，用 :focus-visible／:has(:focus-visible)，
+   不用 :focus-within——那會在滑鼠點擊後殘留。 */
+
+.hov-row {
+  position: relative;
+}
+.hov-row::before {
+  content: "";
+  position: absolute;
+  left: -0.875rem;
+  top: 0.875rem;
+  bottom: 0.875rem;
+  width: 2px;
+  background: var(--curtain);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hov-row:hover::before,
+.hov-row:focus-visible::before,
+.hov-row:has(:focus-visible)::before {
+  transform: scaleY(1);
+}
+/* 手機左側沒有內距可以放那條線，改畫在列內側 */
+@media (max-width: 639px) {
+  .hov-row::before {
+    left: 0;
+  }
+}
+
+.hov-poster .poster-img {
+  filter: var(--poster-rest);
+  /* opacity 一併寫進來：這條規則的權重高過 Tailwind 的 transition-opacity，
+     只寫 filter 會把 MovieCard 海報載入時的淡入蓋掉 */
+  transition:
+    filter 400ms ease,
+    opacity 700ms cubic-bezier(0, 0, 0.2, 1);
+}
+.hov-poster:hover .poster-img,
+.hov-poster:focus-visible .poster-img {
+  filter: none;
+}
+.hov-poster .poster-cap {
+  color: var(--paper-dim);
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition:
+    color 200ms ease,
+    text-decoration-color 200ms ease;
+}
+.hov-poster:hover .poster-cap,
+.hov-poster:focus-visible .poster-cap {
+  color: var(--paper);
+  text-decoration-color: var(--hairline-strong);
+}
+
+.hov-date .date-num {
+  color: var(--paper-dim);
+  transition: color 200ms ease;
+}
+.hov-date:hover .date-num,
+.hov-date:focus-visible .date-num {
+  color: var(--curtain-ink);
+}
+
+.link-hair {
+  text-decoration-line: underline;
+  text-decoration-color: var(--hairline-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition:
+    color 200ms ease,
+    text-decoration-color 200ms ease;
+}
+.link-hair:hover,
+.link-hair:focus-visible {
+  color: var(--paper);
+  text-decoration-color: var(--paper-dim);
+}
+
+/* ── 分段選擇：排序、檢視方式這類「幾選一、隨時可換」的切換 ──────
+   選中的那段反白。不用簾幕紅——排序不是使用者留下的痕跡。 */
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--hairline-strong);
+}
+.seg > button {
+  min-height: 44px;
+  padding-inline: 0.875rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--paper-dim);
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+.seg > button + button {
+  border-left: 1px solid var(--hairline-strong);
+}
+.seg > button:hover:not([aria-checked="true"]) {
+  color: var(--paper);
+  background: rgb(255 255 255 / 0.04);
+}
+.seg > button[aria-checked="true"] {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* ── 文字選項：選項多到框不住時（瀏覽頁的十九個類型）改用這個 ──
+   一排字，選中的那個變亮並畫一條底線。十九格的外框會變成一面格子牆，
+   比選項本身還搶眼。 */
+.pick {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 1.125rem;
+}
+.pick > button {
+  min-height: 44px;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  color: var(--paper-dim);
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+  cursor: pointer;
+  transition:
+    color 200ms ease,
+    text-decoration-color 200ms ease;
+}
+.pick > button:hover {
+  color: var(--paper);
+}
+.pick > button[aria-checked="true"] {
+  color: var(--paper);
+  text-decoration-color: var(--paper);
+}
+
+/* ── 評分刻度：十格平分整條寬度 ────────────────────────────
+   原本是十顆 44px 的方塊加 flex-wrap，375px 手機會斷成 7＋3 兩排。
+   改成 grid 十等分之後，寬度跟著容器走，永遠一排；1px 的格線
+   用底色透出來，不用每格各畫邊框。 */
+.ruler {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
+  /* 手指在刻度上左右拖要能連續改分數，不能被當成頁面捲動 */
+  touch-action: pan-y;
+}
+.ruler > button {
+  min-height: 44px;
+  background: var(--ink);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--paper-faint);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+.ruler > button:hover {
+  color: var(--paper);
+}
+.ruler > button[data-filled="true"] {
+  background: var(--curtain-fill);
+  color: var(--paper);
+}
+.ruler > button:focus-visible {
+  outline-offset: -2px;
+}
+
+/* ── 詳情頁：左欄讀片、右欄記錄 ────────────────────────────
+   手機由上往下是 片名 → 劇照 → 簡介 → 我的紀錄 → 演職員：
+   先知道這是哪一部，再決定要不要記它。
+   1000px 以上「我的紀錄」獨立成右欄、貫穿左邊四列並黏在導覽列下方，
+   讀簡介時不用捲回去找按鈕。 */
+.detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "head" "still" "prose" "ledger" "credits";
+}
+.detail-head { grid-area: head; }
+.detail-still { grid-area: still; }
+.detail-prose { grid-area: prose; }
+.detail-ledger { grid-area: ledger; }
+.detail-credits { grid-area: credits; }
+@media (min-width: 1000px) {
+  .detail-grid {
+    grid-template-columns: minmax(0, 1fr) 380px;
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas:
+      "head    ledger"
+      "still   ledger"
+      "prose   ledger"
+      "credits ledger";
+    column-gap: 4rem;
+  }
+  .detail-ledger {
+    position: sticky;
+    /* 導覽列 h-16 再留 24px */
+    top: 5.5rem;
+    align-self: start;
+  }
+}
+
+/* 我的紀錄的三顆切換：一條等寬的鍵，共用外框。
+   開著的那顆填 curtain-fill，這是使用者在這頁留下的痕跡。 */
+.ledger-keys {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--hairline-strong);
+}
+.ledger-keys > button {
+  min-height: 48px;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  color: var(--paper-dim);
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+.ledger-keys > button + button {
+  border-left: 1px solid var(--hairline-strong);
+}
+.ledger-keys > button:hover:not(:disabled):not([data-on="true"]) {
+  color: var(--paper);
+  background: rgb(255 255 255 / 0.05);
+}
+.ledger-keys > button[data-on="true"] {
+  background: var(--curtain-fill);
+  color: var(--paper);
+}
+.ledger-keys > button[data-on="true"]:hover:not(:disabled) {
+  background: var(--curtain-fill-hover);
+}
+.ledger-keys > button:disabled {
+  cursor: progress;
+}
+.ledger-keys > button:focus-visible {
+  outline-offset: -2px;
 }
 
 /* 一般頁面的內容欄。<main> 本身不設寬度與內距（首頁與詳情頁要出血），
@@ -344,23 +639,6 @@ body {
 
 @theme inline {
   --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* 捲動揭露：由捲動位置直接驅動，不靠 IntersectionObserver 事件。
-   這很重要——事件式的揭露（whileInView）在一次跨越整段的快速捲動中
-   可能完全不觸發，內容會永久停在 opacity 0。scroll-driven animation
-   是每一幀依位置計算進度，跳過去就是直接停在結束狀態。
-
-   預設狀態是「已顯示」，動畫只在支援且使用者沒要求減少動態時才接手，
-   所以任何不支援的瀏覽器看到的都是正常內容。 */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .reveal {
-      animation: rise linear both;
-      animation-timeline: view();
-      animation-range: entry 8% cover 22%;
-    }
-  }
 }
 
 /* 減少動態：拿掉的是位移與進場，不是狀態回饋。

@@ -1,9 +1,12 @@
 import { getLocale } from "@/i18n/server";
 import type { Metadata } from "next";
 import { getDictionary } from "@/i18n/dictionaries";
-import { listFavorites } from "@/lib/db";
-import LibraryGrid from "@/components/LibraryGrid";
+import { listFavoriteEntries } from "@/lib/db";
+import { shelfDateFormatter, todayInTaipei } from "@/lib/dates";
 import PageHeader from "@/components/PageHeader";
+import FavoritesWall, {
+  type FavoriteTile,
+} from "@/components/library/FavoritesWall";
 
 // getLocale() 讀 cookie，這頁不會被預先產生；片庫資料每次請求直接查資料庫。
 
@@ -15,30 +18,56 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function FavoritesPage() {
   const locale = await getLocale();
   const dict = getDictionary(locale);
-  const items = await listFavorites();
+  const entries = await listFavoriteEntries();
+
+  const shelfDate = shelfDateFormatter(locale, todayInTaipei().slice(0, 4));
+  const tiles: FavoriteTile[] = entries.map((m) => {
+    const date = shelfDate(m.added_at);
+    return {
+      movie: {
+        tmdb_id: m.tmdb_id,
+        title: m.title,
+        poster_path: m.poster_path,
+        vote_average: m.vote_average,
+      },
+      added_at: m.added_at,
+      added: date ? dict.actions.since.favorites.replace("{date}", date) : null,
+      score: m.score,
+    };
+  });
+
+  const lf = dict.library.favorites;
 
   return (
-    <section className="page-shell space-y-10">
+    <section className="page-shell">
       <PageHeader
         title={dict.library.favoritesTitle}
+        meta={
+          entries.length > 0
+            ? dict.common.filmCount.replace("{n}", String(entries.length))
+            : undefined
+        }
       />
-      <LibraryGrid
-        items={items}
-        kind="favorites"
-        labels={{
-          remove: dict.library.remove,
-          empty: dict.library.emptyFavorites,
-          sort: dict.browse.sort,
-          sortAdded: dict.library.sortAdded,
-          sortTitle: dict.library.sortTitle,
-          sortRating: dict.library.sortRating,
-          minRating: dict.browse.minRating,
-          ratingPlaceholder: dict.library.ratingPlaceholder,
-          browse: dict.common.browse,
-          count: dict.common.filmCount,
-          removeError: dict.common.removeError,
-        }}
-      />
+      <div className="mt-8">
+        <FavoritesWall
+          tiles={tiles}
+          locale={locale}
+          labels={{
+            remove: dict.library.remove,
+            confirmRemove: dict.library.confirmRemove,
+            cancel: dict.library.cancel,
+            removeNamed: dict.library.removeNamed,
+            sortGroup: dict.library.sortGroup,
+            sortRecent: lf.sortRecent,
+            sortTitle: lf.sortTitle,
+            sortMine: lf.sortMine,
+            score: dict.home.diary.score,
+            removeError: dict.common.removeError,
+            empty: dict.library.emptyFavorites,
+            browse: dict.common.browse,
+          }}
+        />
+      </div>
     </section>
   );
 }

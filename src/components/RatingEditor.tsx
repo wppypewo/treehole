@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { SavedMovie } from "@/lib/db";
+import RatingRuler from "./RatingRuler";
 
 interface Labels {
-  title: string;
   scorePrompt: string;
   note: string;
   notePlaceholder: string;
@@ -15,9 +15,10 @@ interface Labels {
   removeError: string;
 }
 
-const SCORES = Array.from({ length: 10 }, (_, i) => i + 1);
-
 // 個人評分（1–10）與短評，寫入雲端片庫。
+//
+// 放在詳情頁「我的紀錄」欄裡，排在片庫三顆鍵之下，所以自己不帶標題與外框。
+// 欄名用 .t-label，跟上面那組「片庫」同一級。
 export default function RatingEditor({
   movie,
   initialScore,
@@ -34,7 +35,6 @@ export default function RatingEditor({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const scaleRef = useRef<HTMLDivElement>(null);
 
   async function save() {
     if (!score || saving) return;
@@ -83,78 +83,23 @@ export default function RatingEditor({
     setError(null);
   }
 
-  /**
-   * radiogroup 的鍵盤約定：整組只吃一次 Tab，方向鍵在選項之間移動並直接選取。
-   *
-   * 十格刻度視覺上是溫度計，語意上是「十選一」。原本十顆各自掛 aria-pressed
-   * 的按鈕會被讀成十個獨立開關，而且鍵盤要按十次 Tab 才走得完。
-   */
-  function onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    const current = score ?? 1;
-    let next: number | null = null;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-      next = current === 10 ? 1 : current + 1;
-    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-      next = current === 1 ? 10 : current - 1;
-    } else if (event.key === "Home") {
-      next = 1;
-    } else if (event.key === "End") {
-      next = 10;
-    }
-    if (next === null) return;
-    event.preventDefault();
-    pick(next);
-    // 焦點要跟著走，否則螢幕報讀者聽不到選取變化
-    scaleRef.current
-      ?.querySelector<HTMLButtonElement>(`[data-score="${next}"]`)
-      ?.focus();
-  }
-
   return (
-    <section className="max-w-2xl border-t border-hairline pt-8">
-      <h2 className="t-section text-paper">{labels.title}</h2>
-
-      <div className="mt-6">
-        <p id="rating-scale-label" className="text-xs text-paper-faint">
+    <div>
+      <div className="mt-[1.375rem]">
+        <p id="rating-scale-label" className="t-label">
           {labels.scorePrompt}
         </p>
-        {/* 十格刻度：選到的分數以下全部填實，像溫度計而不是十顆獨立按鈕。
-            填色用簾幕紅，與片庫動作同一個「這是你留下的」語意。 */}
-        <div
-          ref={scaleRef}
-          role="radiogroup"
-          aria-labelledby="rating-scale-label"
-          onKeyDown={onKeyDown}
-          className="mt-3 flex flex-wrap gap-px"
-        >
-          {SCORES.map((n) => {
-            const on = score !== null && n <= score;
-            const selected = score === n;
-            return (
-              <button
-                key={n}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                data-score={n}
-                // 整組只留一個可 Tab 到的落點：已選的那格，或還沒選時的第一格
-                tabIndex={selected || (score === null && n === 1) ? 0 : -1}
-                onClick={() => pick(n)}
-                className={`h-11 w-11 border text-sm transition-colors ${
-                  on
-                    ? "border-curtain bg-curtain text-paper"
-                    : "border-hairline-strong text-paper-faint hover:border-paper-dim hover:text-paper"
-                }`}
-              >
-                {n}
-              </button>
-            );
-          })}
+        <div className="mt-2.5">
+          <RatingRuler
+            value={score}
+            onChange={pick}
+            labelledBy="rating-scale-label"
+          />
         </div>
       </div>
 
-      <div className="mt-7">
-        <label htmlFor="rating-note" className="block text-xs text-paper-faint">
+      <div className="mt-[1.375rem]">
+        <label htmlFor="rating-note" className="t-label block">
           {labels.note}
         </label>
         <textarea
@@ -166,20 +111,13 @@ export default function RatingEditor({
           }}
           placeholder={labels.notePlaceholder}
           rows={3}
-          className="mt-2 w-full border border-hairline bg-ink-raised px-4 py-3 text-sm text-paper outline-none transition-colors placeholder:text-paper-faint focus:border-paper-dim"
+          className="mt-2.5 min-h-[5.75rem] w-full resize-y border border-hairline bg-ink-raised px-3.5 py-3 text-sm leading-relaxed text-paper outline-none transition-colors placeholder:text-paper-faint focus:border-paper-dim"
         />
       </div>
 
-      <div className="mt-5 flex items-center gap-3">
-        <button
-          type="button"
-          onClick={save}
-          disabled={!score || saving}
-          className="btn-line"
-        >
-          {saved ? labels.saved : labels.save}
-        </button>
-        {score !== null && (
+      {/* 儲存放右邊、清除放左邊：兩個動作方向相反，拉開距離免得誤按 */}
+      <div className="mt-4 flex items-center justify-between gap-3">
+        {score !== null ? (
           <button
             type="button"
             onClick={clearRating}
@@ -188,7 +126,17 @@ export default function RatingEditor({
           >
             {labels.clear}
           </button>
+        ) : (
+          <span aria-hidden />
         )}
+        <button
+          type="button"
+          onClick={save}
+          disabled={!score || saving}
+          className="btn-line"
+        >
+          {saved ? labels.saved : labels.save}
+        </button>
       </div>
 
       {error && (
@@ -199,6 +147,6 @@ export default function RatingEditor({
           {error}
         </p>
       )}
-    </section>
+    </div>
   );
 }

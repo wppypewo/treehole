@@ -27,31 +27,31 @@ export default async function RecommendationsPage() {
     errorMessage = tmdbErrorMessage(error, dict);
   }
 
-  if (errorMessage) {
-    return <ErrorNotice message={errorMessage} />;
-  }
-
   return (
-    <section className="page-shell space-y-10">
-      <PageHeader
-        title={dict.pages.recommendations}
-      />
-      <InfiniteMovieGrid
-        endpoint="/api/recommendations"
-        initialMovies={first?.results ?? []}
-        initialHasMore={first?.hasMore ?? false}
-        maxPages={20}
-        labels={{
-          loading: dict.common.loading,
-          noMore: dict.common.noMore,
-          loadError: dict.common.loadError,
-          retry: dict.common.retry,
-          // 片庫為空時顯示引導文案，否則顯示一般空狀態
-          empty: first?.hasSeeds
-            ? dict.recommendations.relatedEmpty
-            : dict.recommendations.forYouEmpty,
-        }}
-      />
+    <section className="page-shell">
+      <PageHeader title={dict.pages.recommendations} />
+      <div className="mt-10">
+        {errorMessage ? (
+          <ErrorNotice message={errorMessage} placement="" />
+        ) : (
+          <InfiniteMovieGrid
+            endpoint="/api/recommendations"
+            initialMovies={first?.results ?? []}
+            initialHasMore={first?.hasMore ?? false}
+            maxPages={20}
+            labels={{
+              loading: dict.common.loading,
+              noMore: dict.common.noMore,
+              loadError: dict.common.loadError,
+              retry: dict.common.retry,
+              // 片庫為空時顯示引導文案，否則顯示一般空狀態
+              empty: first?.hasSeeds
+                ? dict.recommendations.relatedEmpty
+                : dict.recommendations.forYouEmpty,
+            }}
+          />
+        )}
+      </div>
     </section>
   );
 }

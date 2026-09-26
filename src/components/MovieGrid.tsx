@@ -9,13 +9,9 @@ export const POSTER_GRID =
 export default function MovieGrid({
   movies,
   emptyText,
-  ranked = false,
-  startIndex = 1,
 }: {
   movies: MovieSummary[];
   emptyText: string;
-  ranked?: boolean;
-  startIndex?: number;
 }) {
   if (movies.length === 0) {
     return (
@@ -27,12 +23,8 @@ export default function MovieGrid({
 
   return (
     <div className={POSTER_GRID}>
-      {movies.map((movie, i) => (
-        <MovieCard
-          key={movie.id}
-          movie={movie}
-          rank={ranked ? startIndex + i : undefined}
-        />
+      {movies.map((movie) => (
+        <MovieCard key={movie.id} movie={movie} />
       ))}
     </div>
   );

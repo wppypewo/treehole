@@ -12,7 +12,7 @@ import type { SavedMovie } from "@/lib/db";
  * 刻意做小。卡片寬度只有列表頁的三分之一，整區與搜尋框切齊，
  * 讓它明確是次要的。這一頁的主體仍然是那個輸入框。
  *
- * 卡片語彙沿用 MovieCard / LibraryGrid：不放大，只浮現內縮 hairline 片夾框。
+ * 卡片語彙沿用 MovieCard 的 .hov-poster：不放大，海報恢復亮度、片名加底線。
  */
 export default function LibraryPicks({
   items,
@@ -47,7 +47,7 @@ export default function LibraryPicks({
           const poster = tmdbImage(movie.poster_path, "w185");
           return (
             <li key={movie.tmdb_id} className="min-w-0">
-              <Link href={`/movie/${movie.tmdb_id}`} className="group/pick block">
+              <Link href={`/movie/${movie.tmdb_id}`} className="hov-poster block">
                 <div className="relative aspect-[2/3] w-full overflow-hidden bg-ink-raised">
                   {poster ? (
                     // 原生 img：與站上其他海報一致，不走 next/image
@@ -58,19 +58,15 @@ export default function LibraryPicks({
                       sizes={IMAGE_SIZES.libraryPicks}
                       alt={movie.title}
                       loading="lazy"
-                      className="h-full w-full object-cover"
+                      className="poster-img h-full w-full object-cover"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center px-2 text-center text-[0.625rem] text-paper-faint">
                       {movie.title}
                     </div>
                   )}
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute inset-1.5 border border-paper/0 transition-colors duration-300 group-hover/pick:border-paper/60 group-focus-visible/pick:border-paper/60"
-                  />
                 </div>
-                <h3 className="mt-2 line-clamp-2 text-[0.75rem] leading-snug text-paper-dim transition-colors duration-300 group-hover/pick:text-paper">
+                <h3 className="poster-cap mt-2 line-clamp-2 text-[0.75rem] leading-snug">
                   {movie.title}
                 </h3>
               </Link>

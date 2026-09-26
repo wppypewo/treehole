@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { movieFromBody, tmdbIdFromQuery } from '@/lib/db-route'
+import { addedAtFromBody, movieFromBody, tmdbIdFromQuery } from '@/lib/db-route'
 
 /**
  * 片庫四個 route handler 的輸入全部經過這兩支函式。它們回 null 就是 400，
@@ -115,5 +115,37 @@ describe('tmdbIdFromQuery', () => {
 
   it('重複參數取第一個', () => {
     expect(tmdbIdFromQuery(`${BASE}?tmdb_id=550&tmdb_id=1`)).toBe(550)
+  })
+})
+
+describe('addedAtFromBody（標記看過後的復原）', () => {
+  const NOW = Date.parse('2026-09-26T12:00:00Z')
+
+  it('沒帶或帶 null 是一般加入，回 null', () => {
+    expect(addedAtFromBody({ id: 550 }, NOW)).toBeNull()
+    expect(addedAtFromBody({ id: 550, added_at: null }, NOW)).toBeNull()
+    expect(addedAtFromBody(null, NOW)).toBeNull()
+  })
+
+  it('收下 markWatched 回傳的格式', () => {
+    expect(addedAtFromBody({ added_at: '2026-09-12T08:30:00Z' }, NOW)).toBe('2026-09-12T08:30:00Z')
+  })
+
+  it('格式不對一律拒絕', () => {
+    expect(addedAtFromBody({ added_at: 1726130000000 }, NOW)).toBe('invalid')
+    expect(addedAtFromBody({ added_at: '2026-09-12' }, NOW)).toBe('invalid')
+    expect(addedAtFromBody({ added_at: '2026-09-12T08:30:00.000Z' }, NOW)).toBe('invalid')
+    expect(addedAtFromBody({ added_at: '2026-09-12T08:30:00+08:00' }, NOW)).toBe('invalid')
+    expect(addedAtFromBody({ added_at: "2026-09-12T08:30:00Z'; --" }, NOW)).toBe('invalid')
+  })
+
+  it('格式對但日期不存在也拒絕', () => {
+    expect(addedAtFromBody({ added_at: '2026-02-30T08:30:00Z' }, NOW)).toBe('invalid')
+    expect(addedAtFromBody({ added_at: '2026-09-12T25:00:00Z' }, NOW)).toBe('invalid')
+  })
+
+  it('未來時間拒絕，60 秒內的時鐘誤差放行', () => {
+    expect(addedAtFromBody({ added_at: '2026-09-26T12:00:59Z' }, NOW)).toBe('2026-09-26T12:00:59Z')
+    expect(addedAtFromBody({ added_at: '2026-09-26T12:01:01Z' }, NOW)).toBe('invalid')
   })
 })

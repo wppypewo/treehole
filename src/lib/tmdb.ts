@@ -1,4 +1,10 @@
 import { tmdbLanguage, type Locale } from "@/i18n/config";
+import {
+  mergeCredits,
+  type Filmography,
+  type RawCastCredit,
+  type RawCrewCredit,
+} from "@/lib/filmography";
 
 // TMDB 伺服器端存取層。金鑰只在此讀取，瀏覽器不會碰到。
 // 認證採官方兩法擇一：v3 api_key 帶 query，或 v4 read access token 帶 Authorization: Bearer。
@@ -268,6 +274,7 @@ export interface PersonDetails {
   profile_path: string | null;
   known_for_department: string;
   birthday: string | null;
+  deathday: string | null;
   place_of_birth: string | null;
 }
 
@@ -293,27 +300,22 @@ export async function getPerson(
 }
 
 interface RawPersonMovieCredits {
-  cast: (MovieSummary & { popularity?: number })[];
+  cast: RawCastCredit[];
+  crew: RawCrewCredit[];
 }
 
-// 人物的電影作品：去重、依上映日期新到舊排序
+// 人物的電影作品：演出與幕後分開，各自以片為單位合併、依上映日新到舊。
+// 只讀 cast 會讓導演、編劇的頁面只剩他們在紀錄片裡以本人入鏡的那幾部
 export async function getPersonMovieCredits(
   locale: Locale,
   id: number,
-): Promise<MovieSummary[]> {
+): Promise<Filmography> {
   const data = await tmdbFetch<RawPersonMovieCredits>(
     `/person/${id}/movie_credits`,
     { language: tmdbLanguage(locale) },
     3600,
   );
-  const seen = new Set<number>();
-  const unique = data.cast.filter((m) => {
-    if (seen.has(m.id)) return false;
-    seen.add(m.id);
-    return true;
-  });
-  unique.sort((a, b) => (b.release_date ?? "").localeCompare(a.release_date ?? ""));
-  return unique;
+  return mergeCredits(data.cast ?? [], data.crew ?? []);
 }
 
 export interface DiscoverFilters {

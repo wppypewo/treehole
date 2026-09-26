@@ -117,7 +117,7 @@ export default async function SearchPage({
       </header>
 
       {errorMessage ? (
-        <ErrorNotice message={errorMessage} />
+        <ErrorNotice message={errorMessage} placement="mt-10" />
       ) : results.length === 0 ? (
         <div className="py-24 text-center">
           <p className="text-[0.9375rem] text-paper-dim">

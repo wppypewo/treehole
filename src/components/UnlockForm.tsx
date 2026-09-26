@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 // 解鎖表單。輸入框語彙沿用 SearchField：一條底線加一個純文字送出鍵，
 // 不另外畫外框——這一頁只有一件事可做，不需要再加視覺重量。
@@ -14,6 +14,7 @@ export default function UnlockForm({
   // 分兩種是因為把 500 也說成「通行碼不對」，會讓人一直重打其實沒錯的碼。
   const [error, setError] = useState<"wrong" | "failed" | null>(null);
   const [busy, setBusy] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -39,27 +40,38 @@ export default function UnlockForm({
     } finally {
       setBusy(false);
     }
+    // 打錯時把整串選起來：下一次直接重打就會覆蓋，不用先刪。
+    // 送出時按鈕被 disabled，焦點可能已經離開輸入框，一併拉回來。
+    // 等 busy 解除、輸入框不再 readOnly 的那次 render 之後再做
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    });
   }
 
   return (
-    <form onSubmit={submit} className="mt-10">
+    <form onSubmit={submit} aria-busy={busy} className="mt-10">
       <div className="relative">
         <label htmlFor="passcode" className="sr-only">
           {labels.passcode}
         </label>
         <input
           id="passcode"
+          ref={inputRef}
           type="password"
           name="passcode"
           autoComplete="current-password"
           autoFocus
+          readOnly={busy}
+          aria-invalid={error !== null}
+          aria-describedby={error ? "passcode-error" : undefined}
           value={passcode}
           onChange={(e) => {
             setPasscode(e.target.value);
             setError(null);
           }}
           placeholder={labels.passcode}
-          className="w-full border-b border-paper-dim bg-transparent py-4 pr-20 text-xl text-paper outline-none transition-colors placeholder:text-paper-faint focus:border-paper"
+          className="w-full border-b border-paper-dim bg-transparent py-4 pr-20 text-xl text-paper outline-none transition-colors placeholder:text-paper-faint focus:border-paper aria-invalid:border-curtain"
         />
         <button
           type="submit"
@@ -72,6 +84,7 @@ export default function UnlockForm({
 
       {error && (
         <p
+          id="passcode-error"
           role="alert"
           className="mt-5 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
         >

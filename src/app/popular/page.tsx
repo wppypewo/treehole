@@ -25,29 +25,29 @@ export default async function PopularPage() {
     errorMessage = tmdbErrorMessage(error, dict);
   }
 
-  if (errorMessage) {
-    return <ErrorNotice message={errorMessage} />;
-  }
-
   return (
-    <section className="page-shell space-y-10">
-      <PageHeader
-        title={dict.pages.popular}
-      />
-      <InfiniteMovieGrid
-        endpoint="/api/popular"
-        initialMovies={data?.results ?? []}
-        initialHasMore={data ? data.page < data.total_pages : false}
-        maxPages={20}
-        variant="grid"
-        labels={{
-          loading: dict.common.loading,
-          noMore: dict.common.noMore,
-          loadError: dict.common.loadError,
-          retry: dict.common.retry,
-          empty: dict.common.empty,
-        }}
-      />
+    <section className="page-shell">
+      <PageHeader title={dict.pages.popular} />
+      <div className="mt-10">
+        {errorMessage ? (
+          <ErrorNotice message={errorMessage} placement="" />
+        ) : (
+          <InfiniteMovieGrid
+            endpoint="/api/popular"
+            initialMovies={data?.results ?? []}
+            initialHasMore={data ? data.page < data.total_pages : false}
+            maxPages={20}
+            variant="grid"
+            labels={{
+              loading: dict.common.loading,
+              noMore: dict.common.noMore,
+              loadError: dict.common.loadError,
+              retry: dict.common.retry,
+              empty: dict.common.empty,
+            }}
+          />
+        )}
+      </div>
     </section>
   );
 }

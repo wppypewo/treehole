@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LanguageSwitcher from "./LanguageSwitcher";
-import NavLinks from "./NavLinks";
+import NavLinks, { type NavLink } from "./NavLinks";
+import NavCount, { type NavCounts } from "./NavCount";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
@@ -13,9 +14,12 @@ import type { Dictionary } from "@/i18n/dictionaries";
 export default function Navbar({
   locale,
   dict,
+  counts,
 }: {
   locale: Locale;
   dict: Dictionary;
+  /** 想看／看過的片數，layout 傳下來的未解 promise。null 代表不顯示數字。 */
+  counts: Promise<NavCounts | null> | null;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -30,11 +34,13 @@ export default function Navbar({
     return () => document.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
-  const links = [
+  // 順序依使用頻率：想看、看過緊跟在瀏覽後面，收藏是回頭翻的，排後面。
+  // 只有想看與看過帶片數——這兩個數字會隨著看片變動，收藏的數字沒有訊息量。
+  const links: NavLink[] = [
     { href: "/browse", label: dict.nav.browse },
+    { href: "/watchlist", label: dict.nav.watchlist, count: "watchlist" },
+    { href: "/watched", label: dict.nav.watched, count: "watched" },
     { href: "/favorites", label: dict.nav.favorites },
-    { href: "/watchlist", label: dict.nav.watchlist },
-    { href: "/watched", label: dict.nav.watched },
     { href: "/search", label: dict.nav.search },
   ];
 
@@ -55,7 +61,7 @@ export default function Navbar({
 
         {/* Desktop nav links */}
         <div className="hidden flex-1 items-center gap-7 sm:flex">
-          <NavLinks links={links} />
+          <NavLinks links={links} counts={counts} />
         </div>
 
         <div className="hidden sm:block">
@@ -134,6 +140,7 @@ export default function Navbar({
                 }`}
               >
                 {link.label}
+                {link.count && <NavCount counts={counts} kind={link.count} />}
               </Link>
             );
           })}

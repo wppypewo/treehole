@@ -9,23 +9,18 @@ import type { MovieSummary } from "@/lib/tmdb";
  * 單張電影卡。
  *
  * 刻意不做「hover 放大浮起」——那是 Netflix / Apple TV 的語彙，會讓整列海報
- * 在游標經過時此起彼落。這裡改成：海報位置不動，內縮一圈 hairline 框浮現，
- * 像幻燈片的片夾；片名同時由灰轉白。回饋清楚，但整列是安靜的。
+ * 在游標經過時此起彼落。這裡用 .hov-poster：海報靜止時壓暗一階，停下的那張
+ * 恢復原亮度，片名加底線。位置不動，整列是安靜的。
  *
  * 評分不壓在海報上。海報是完整的印刷品，資訊放在它下面。
- *
- * rank：榜單頁（評分最高、最賣座）用的名次。名次是那些頁面真正的內容，
- * 沒有它就只是一面和其他頁一樣的海報牆。
  */
 export default function MovieCard({
   movie,
   size = "sm",
-  rank,
   sizes = IMAGE_SIZES.posterGrid,
 }: {
   movie: MovieSummary;
   size?: "sm" | "lg";
-  rank?: number;
   /** 這張卡在版面上實際佔多寬。橫列與格線差很多，所以由呼叫端指定。 */
   sizes?: string;
 }) {
@@ -43,7 +38,7 @@ export default function MovieCard({
   }, []);
 
   return (
-    <Link href={`/movie/${movie.id}`} className="group/card block">
+    <Link href={`/movie/${movie.id}`} className="hov-poster group/card block">
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-ink-raised">
         {poster ? (
           // 原生 img：避免 next/image 對 TMDB 遠端網域的額外設定
@@ -56,7 +51,7 @@ export default function MovieCard({
             alt={movie.title}
             loading="lazy"
             onLoad={() => setLoaded(true)}
-            className={`h-full w-full object-cover transition-opacity duration-700 ease-out ${
+            className={`poster-img h-full w-full object-cover ${
               loaded ? "opacity-100" : "opacity-0"
             }`}
           />
@@ -66,36 +61,21 @@ export default function MovieCard({
           </div>
         )}
 
-        {/* 內縮片夾框：hover / 鍵盤聚焦時浮現 */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-2 border border-paper/0 transition-colors duration-300 ease-out group-hover/card:border-paper/60 group-focus-visible/card:border-paper/60"
-        />
       </div>
 
-      <div className={`mt-3 ${rank !== undefined ? "flex gap-3" : ""}`}>
-        {rank !== undefined && (
-          <span
-            aria-hidden
-            className="t-film w-7 shrink-0 text-2xl leading-none text-paper-dim transition-colors duration-300 group-hover/card:text-curtain-ink"
-          >
-            {rank}
-          </span>
+      <div className="mt-3">
+        <h3
+          className={`poster-cap line-clamp-2 ${
+            size === "lg" ? "text-[0.9375rem]" : "text-[0.8125rem]"
+          }`}
+        >
+          {movie.title}
+        </h3>
+        {(year || rating) && (
+          <p className="t-meta mt-1 text-paper-faint">
+            {[year, rating].filter(Boolean).join(" · ")}
+          </p>
         )}
-        <div className="min-w-0">
-          <h3
-            className={`line-clamp-2 text-paper-dim transition-colors duration-300 group-hover/card:text-paper ${
-              size === "lg" ? "text-[0.9375rem]" : "text-[0.8125rem]"
-            }`}
-          >
-            {movie.title}
-          </h3>
-          {(year || rating) && (
-            <p className="t-meta mt-1 text-paper-faint">
-              {[year, rating].filter(Boolean).join(" · ")}
-            </p>
-          )}
-        </div>
       </div>
     </Link>
   );

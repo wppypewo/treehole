@@ -67,21 +67,19 @@ export const IMAGE_SIZES = {
   railSmall: "(min-width: 768px) 160px, (min-width: 640px) 144px, 32vw",
   // MovieRow size="lg"
   railLarge: "(min-width: 768px) 256px, (min-width: 640px) 224px, 46vw",
-  // UpcomingStrip 的橫捲卡
-  upcomingRail: "(min-width: 640px) 340px, 72vw",
-  // /upcoming 的 1 / 2 / 3 欄格線
-  upcomingGrid:
-    "(min-width: 1400px) 430px, (min-width: 1024px) 31vw, (min-width: 640px) 48vw, 100vw",
-  // 出血劇照（首頁開場、詳情頁首屏）
-  fullBleed: "100vw",
-  // 詳情頁的海報欄
-  detailPoster: "(min-width: 768px) 200px, 128px",
+  // 首頁「今晚」的劇照欄：900px 以上佔 7/12（扣掉欄距），以下整欄寬
+  tonightStill: "(min-width: 1400px) 780px, (min-width: 900px) 56vw, 100vw",
+  // 詳情頁左欄的 21:9 劇照：1000px 以上扣掉右欄 380px 與欄距，以下整欄寬
+  detailStill: "(min-width: 1400px) 892px, (min-width: 1000px) calc(100vw - 508px), 100vw",
+  // 詳情頁沒有劇照時改放海報
+  detailPoster: "(min-width: 640px) 208px, 160px",
   // 人物頁的照片欄
   personPhoto: "(min-width: 768px) 220px, 128px",
   // 演職員橫列的小頭像
   personThumb: "112px",
-  // 編號榜的小海報
-  rankThumb: "48px",
   // 搜尋頁空狀態的片庫入口：max-w-2xl 內 3 / 6 欄
   libraryPicks: "(min-width: 640px) 102px, 30vw",
+  // 收藏海報牆：2 / 3 / 4 欄
+  favoritesWall:
+    "(min-width: 1400px) 310px, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw",
 } as const;
