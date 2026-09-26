@@ -84,7 +84,7 @@ export default function Tonight({
         {showOriginal && (
           <p
             lang="und"
-            className="mt-2.5 font-display text-[clamp(1.125rem,2vw,1.5rem)] italic text-paper-dim"
+            className="t-original mt-2.5 text-[clamp(1.125rem,2vw,1.5rem)] text-paper-dim"
           >
             {film.originalTitle}
           </p>

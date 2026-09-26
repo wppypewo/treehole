@@ -241,7 +241,7 @@ export default function WatchlistTable({
                 {row.originalTitle && row.originalTitle !== row.title && (
                   <small
                     lang="und"
-                    className="ml-2.5 font-display text-sm italic text-paper-faint"
+                    className="t-original ml-2.5 text-sm text-paper-faint"
                   >
                     {row.originalTitle}
                   </small>

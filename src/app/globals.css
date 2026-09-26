@@ -114,83 +114,97 @@ body {
 }
 
 /* ── 字級：編輯型階層 ──────────────────────────────────────
-   標題靠字體與尺寸拉開，不靠色彩或裝飾。 */
-.t-film {
-  font-family: var(--font-display);
-  font-weight: 400;
-  line-height: 1.02;
-  letter-spacing: -0.015em;
-}
-.t-section {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.5rem;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-}
-@media (min-width: 768px) {
+   標題靠字體與尺寸拉開，不靠色彩或裝飾。
+   放在 components 層：沒分層的規則會壓過所有 Tailwind 工具類，
+   「t-label text-curtain-ink」「t-meta text-paper-faint」原本寫了顏色卻不生效。
+   進了這一層，工具類才能在個別位置覆寫字色、字距。 */
+@layer components {
+  .t-film {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+  }
   .t-section {
-    font-size: 1.875rem;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.5rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
   }
-}
+  @media (min-width: 768px) {
+    .t-section {
+      font-size: 1.875rem;
+    }
+  }
 
-/* 編輯型內文：字級比一般 UI 大一階，行長收在 62ch，為了讀而不是為了塞 */
-.t-prose {
-  font-size: 1.0625rem;
-  line-height: 1.75;
-  color: var(--paper-dim);
-  max-width: 62ch;
-}
-@media (min-width: 768px) {
+  /* 編輯型內文：字級比一般 UI 大一階，行長收在 62ch，為了讀而不是為了塞 */
   .t-prose {
-    font-size: 1.1875rem;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--paper-dim);
+    max-width: 62ch;
   }
-}
+  @media (min-width: 768px) {
+    .t-prose {
+      font-size: 1.1875rem;
+    }
+  }
 
-/* metadata 行：年份・片長・導演。用 tabular 數字讓數值對齊 */
-.t-meta {
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  letter-spacing: 0.01em;
-  color: var(--paper-dim);
-  font-variant-numeric: tabular-nums;
-}
+  /* metadata 行：年份・片長・導演。用 tabular 數字讓數值對齊 */
+  .t-meta {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    color: var(--paper-dim);
+    font-variant-numeric: tabular-nums;
+  }
 
-/* 數字：日期、分數、序號、片長。Bodoni 預設是舊式數字（高低不齊），
-   這裡強制齊線＋等寬，排成一欄才對得齊。放映表與日誌的左欄都靠它撐。 */
-.t-num {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-variant-numeric: lining-nums tabular-nums;
-  line-height: 1;
-  letter-spacing: -0.01em;
-}
+  /* 數字：日期、分數、序號、片長。Bodoni 預設是舊式數字（高低不齊），
+     這裡強制齊線＋等寬，排成一欄才對得齊。放映表與日誌的左欄都靠它撐。 */
+  .t-num {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-variant-numeric: lining-nums tabular-nums;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
 
-/* 資料欄位標籤：年份、片長、導演、類型這類 dl 的 dt。
-   比 eyebrow 小一階、不全大寫，因為它會成排出現，大寫加寬字距排起來太吵。 */
-.t-label {
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  color: var(--paper-faint);
-}
+  /* 原文片名：西文用 Bodoni 真斜體。
+     日文、韓文、中文沒有斜體字面，不關掉合成的話瀏覽器會把字硬推斜
+     （七人の侍、기생충 實測都被推斜），所以只留有真斜體的字元斜著。 */
+  .t-original {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-synthesis-style: none;
+  }
 
-/* 推薦理由：「為什麼是這一部」。使用者留下的痕跡才用簾幕紅，
-   而理由正是從使用者自己的片庫推出來的，所以用 curtain-ink。 */
-.t-reason {
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
-  line-height: 1.5;
-  color: var(--curtain-ink);
-  font-variant-numeric: tabular-nums;
-}
+  /* 資料欄位標籤：年份、片長、導演、類型這類 dl 的 dt。
+     比 eyebrow 小一階、不全大寫，因為它會成排出現，大寫加寬字距排起來太吵。 */
+  .t-label {
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    color: var(--paper-faint);
+  }
 
-/* eyebrow：全站配額極少，只在首頁開場與詳情頁各用一次 */
-.eyebrow {
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--paper-faint);
+  /* 推薦理由：「為什麼是這一部」。使用者留下的痕跡才用簾幕紅，
+     而理由正是從使用者自己的片庫推出來的，所以用 curtain-ink。 */
+  .t-reason {
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+    color: var(--curtain-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* eyebrow：全站配額極少，只在首頁開場與詳情頁各用一次 */
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--paper-faint);
+  }
 }
 
 /* ── 元件基礎 ──────────────────────────────────────────── */
