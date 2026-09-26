@@ -56,7 +56,7 @@ export default function MovieCard({
             }`}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center px-3 text-center text-[0.6875rem] tracking-wide text-paper-faint">
+          <div className="flex h-full w-full items-center justify-center px-3 text-center text-[0.6875rem] tracking-wide text-paper-dim">
             {movie.title}
           </div>
         )}

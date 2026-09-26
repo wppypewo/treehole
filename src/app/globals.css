@@ -22,7 +22,9 @@
   --ink-sunken: #060607;
 
   /* ── 文字：膠片白三階，全部對 --ink 通過 WCAG AA ──────────
-     paper 15.4:1／paper-dim 7.7:1／paper-faint 4.6:1 */
+     paper 15.4:1／paper-dim 7.7:1／paper-faint 4.6:1
+     但 paper-faint 放在 --ink-raised 上只剩 4.45:1，小字不過 AA；
+     ink-raised 框裡的小字（例如沒有海報時的替代片名）一律用 paper-dim。 */
   --paper: #edeae4;
   --paper-dim: #a5a19a;
   --paper-faint: #7d7a75;

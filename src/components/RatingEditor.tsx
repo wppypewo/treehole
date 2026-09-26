@@ -111,7 +111,7 @@ export default function RatingEditor({
           }}
           placeholder={labels.notePlaceholder}
           rows={3}
-          className="mt-2.5 min-h-[5.75rem] w-full resize-y border border-hairline bg-ink-raised px-3.5 py-3 text-sm leading-relaxed text-paper outline-none transition-colors placeholder:text-paper-faint focus:border-paper-dim"
+          className="mt-2.5 min-h-[5.75rem] w-full resize-y border border-hairline bg-ink-raised px-3.5 py-3 text-sm leading-relaxed text-paper outline-none transition-colors placeholder:text-paper-dim focus:border-paper-dim"
         />
       </div>
 

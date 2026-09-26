@@ -137,7 +137,7 @@ export default function FavoritesWall({
                       className="poster-img h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center px-3 text-center text-[0.6875rem] tracking-wide text-paper-faint">
+                    <div className="flex h-full w-full items-center justify-center px-3 text-center text-[0.6875rem] tracking-wide text-paper-dim">
                       {t.movie.title}
                     </div>
                   )}
