@@ -15,7 +15,12 @@ export interface FilmographyRow {
   lead: boolean;
   /** 還沒上映的片：「2026 年 12 月 18 日上映」 */
   opens: string | null;
+  /** 這部片在自己片庫裡的狀態；不在片庫為 null */
+  library: LibraryMark | null;
 }
+
+/** 一列只標一個狀態，優先序見人物頁的 libraryMark */
+export type LibraryMark = "watched" | "watchlist" | "favorite";
 
 export interface FilmographyYear {
   /** 「2024」；沒有上映日的那一組為 null */
@@ -54,6 +59,7 @@ export default function Filmography({
     noCredits: string;
     /** 「{n} 部」 */
     filmCount: string;
+    library: Record<LibraryMark, string>;
   };
 }) {
   const [kind, setKind] = useState<Kind>(defaultKind);
@@ -110,7 +116,12 @@ export default function Filmography({
 
               <ul className="-mt-2.5 sm:-mt-2">
                 {y.rows.map((row) => (
-                  <CreditRow key={row.id} row={row} leadLabel={labels.lead} />
+                  <CreditRow
+                    key={row.id}
+                    row={row}
+                    leadLabel={labels.lead}
+                    libraryLabels={labels.library}
+                  />
                 ))}
               </ul>
             </li>
@@ -121,7 +132,19 @@ export default function Filmography({
   );
 }
 
-function CreditRow({ row, leadLabel }: { row: FilmographyRow; leadLabel: string }) {
+/**
+ * 片庫標記放在片名右邊、用 curtain-ink：它是使用者留下的痕跡，
+ * 在一長串作品裡一眼看得出哪幾部自己已經有紀錄。只寫字，不做徽章。
+ */
+function CreditRow({
+  row,
+  leadLabel,
+  libraryLabels,
+}: {
+  row: FilmographyRow;
+  leadLabel: string;
+  libraryLabels: Record<LibraryMark, string>;
+}) {
   return (
     <li className="hov-row grid grid-cols-[2.5rem_minmax(0,1fr)] items-center gap-x-4 py-2.5 max-sm:pl-3 sm:grid-cols-[2.75rem_minmax(0,1fr)]">
       <div className="aspect-[2/3] w-full overflow-hidden bg-ink-raised">
@@ -143,6 +166,11 @@ function CreditRow({ row, leadLabel }: { row: FilmographyRow; leadLabel: string 
         >
           {row.title}
         </Link>
+        {row.library && (
+          <span className="t-label ml-2.5 whitespace-nowrap text-curtain-ink">
+            {libraryLabels[row.library]}
+          </span>
+        )}
         {row.original && (
           <p lang="und" className="mt-0.5 truncate text-[0.8125rem] text-paper-faint">
             {row.original}

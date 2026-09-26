@@ -369,6 +369,8 @@ const zhTW: Dictionary = {
       Screenplay: "編劇",
       Writer: "編劇",
       Story: "故事",
+      // TMDB 的職務名，指的是寫原始電影故事（不是改編自別的作品）
+      Screenstory: "電影故事",
       Novel: "原著小說",
       Characters: "角色原創",
       Idea: "構想",

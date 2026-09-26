@@ -168,18 +168,40 @@ export function isSelfRole(role: string): boolean {
   return SELF.test(role.trim());
 }
 
-function actingPart(role: string, labels: RoleLabels): string {
-  let text = role;
+/**
+ * 角色名本身：配音／未掛名的英文括號換成當前語言，演自己換成「本人」。
+ * 角色名不翻譯——TMDB 的 character 是單一字串，不隨 language 參數變
+ * （2026-09-27 實測 zh-TW／en-US／ja-JP 回傳完全相同），能換的只有這幾個固定字。
+ */
+function splitRole(
+  role: string,
+  labels: Pick<RoleLabels, "self" | "voice" | "uncredited">,
+): { name: string; self: boolean; suffix: string } {
   let suffix = "";
-  // TMDB 把配音與未掛名寫在角色名後面的括號裡，英文，這裡換成當前語言
-  text = text.replace(/\s*\((voice|uncredited)\)/gi, (_, kind: string) => {
-    suffix += kind.toLowerCase() === "voice" ? labels.voice : labels.uncredited;
-    return "";
-  });
-  text = text.trim();
-  if (!text) return suffix.trim();
-  if (isSelfRole(text)) return `${labels.self}${suffix}`;
-  return `${labels.as.replace("{role}", text)}${suffix}`;
+  const name = role
+    .replace(/\s*\((voice|uncredited)\)/gi, (_, kind: string) => {
+      suffix += kind.toLowerCase() === "voice" ? labels.voice : labels.uncredited;
+      return "";
+    })
+    .trim();
+  return { name, self: name !== "" && isSelfRole(name), suffix };
+}
+
+function actingPart(role: string, labels: RoleLabels): string {
+  const { name, self, suffix } = splitRole(role, labels);
+  if (!name) return suffix.trim();
+  if (self) return `${labels.self}${suffix}`;
+  return `${labels.as.replace("{role}", name)}${suffix}`;
+}
+
+/** 卡司列頭像下的角色文字：「Chihiro（配音）」「本人」。不加「飾」，位置已經說明了 */
+export function characterText(
+  role: string | null | undefined,
+  labels: Pick<RoleLabels, "self" | "voice" | "uncredited">,
+): string {
+  const { name, self, suffix } = splitRole(role ?? "", labels);
+  if (!name) return suffix.trim();
+  return `${self ? labels.self : name}${suffix}`;
 }
 
 /** 演出列的角色文字：「飾 Bruce Wayne」「本人」「飾 Woody（配音）」 */

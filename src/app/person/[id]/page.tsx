@@ -20,7 +20,11 @@ import Link from "next/link";
 import StatusNotice from "@/components/StatusNotice";
 import RefreshButton from "@/components/RefreshButton";
 import Biography from "@/components/Biography";
-import Filmography, { type FilmographyYear } from "@/components/Filmography";
+import Filmography, {
+  type FilmographyYear,
+  type LibraryMark,
+} from "@/components/Filmography";
+import { listFavorites, listWatched, listWatchlist } from "@/lib/db";
 
 export async function generateMetadata({
   params,
@@ -81,6 +85,24 @@ export default async function PersonPage({ params }: PageProps<"/person/[id]">) 
     // 維持空年表
   }
 
+  // 片庫標記：沿用既有的三個清單查詢，不另開資料層函式。
+  // 資料庫失敗只是少了標記，年表照樣顯示，所以吞掉錯誤但留紀錄。
+  const marks = new Map<number, LibraryMark>();
+  try {
+    const [watchlist, watched, favorites] = await Promise.all([
+      listWatchlist(),
+      listWatched(),
+      listFavorites(),
+    ]);
+    // 後寫的蓋掉先寫的：看過 > 想看 > 收藏。
+    // 看過比想看新（看完通常就不想看了）；收藏的片多半也看過，只剩沒標看過的才顯示收藏
+    for (const m of favorites) marks.set(m.tmdb_id, "favorite");
+    for (const m of watchlist) marks.set(m.tmdb_id, "watchlist");
+    for (const m of watched) marks.set(m.tmdb_id, "watched");
+  } catch (error) {
+    console.error("[person-library-marks]", error);
+  }
+
   const date = calendarDateFormatter(locale);
   const today = todayInTaipei();
   const roleLabels: RoleLabels = {
@@ -111,6 +133,7 @@ export default async function PersonPage({ params }: PageProps<"/person/[id]">) 
               : crewRoleText(c.roles, roleLabels),
           lead: kind === "acting" && isLeadRole(c),
           opens: opensOn ? dict.person.opens.replace("{date}", opensOn) : null,
+          library: marks.get(c.film.id) ?? null,
         };
       }),
     }));
@@ -203,6 +226,11 @@ export default async function PersonPage({ params }: PageProps<"/person/[id]">) 
           undated: dict.person.undated,
           noCredits: dict.person.noCredits,
           filmCount: dict.common.filmCount,
+          library: {
+            watched: dict.nav.watched,
+            watchlist: dict.nav.watchlist,
+            favorite: dict.nav.favorites,
+          },
         }}
       />
     </article>

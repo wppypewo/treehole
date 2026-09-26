@@ -3,6 +3,7 @@ import {
   mergeCredits,
   groupByYear,
   actingRoleText,
+  characterText,
   crewRoleText,
   isLeadRole,
   isSelfRole,
@@ -127,6 +128,19 @@ describe('actingRoleText', () => {
   it('分飾多角用斜線隔開；沒有角色名回空字串', () => {
     expect(actingRoleText(['A', 'B'], zh)).toBe('飾 A / 飾 B')
     expect(actingRoleText([], zh)).toBe('')
+  })
+})
+
+describe('characterText', () => {
+  it('不加「飾」，配音與未掛名換成當前語言', () => {
+    expect(characterText('Chihiro (voice)', zh)).toBe('Chihiro（配音）')
+    expect(characterText('Guard (uncredited)', zh)).toBe('Guard（未掛名）')
+  })
+
+  it('演自己換成「本人」；空值回空字串', () => {
+    expect(characterText('Himself', zh)).toBe('本人')
+    expect(characterText('', zh)).toBe('')
+    expect(characterText(null, zh)).toBe('')
   })
 })
 
