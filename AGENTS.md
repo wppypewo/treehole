@@ -90,8 +90,9 @@ Neon 方案提供的為準，去 Neon console 看，不要假設。
   - 靜態的四個在 `next.config.ts` 的 `headers()`：`nosniff` / `X-Frame-Options: DENY` /
     `Referrer-Policy` / `Permissions-Policy`。
   - **CSP 在 `src/lib/csp.ts`，由 `src/proxy.ts` 掛上**。它每個 request 要換一次
-    nonce，是動態值，放不進 `next.config.ts`。`proxy.ts` 有四條回傳路徑
-    （OPEN_PATHS 放行、已解鎖、API 401、未解鎖 rewrite），**四條都要帶 CSP**，
+    nonce，是動態值，放不進 `next.config.ts`。`proxy.ts` 有六條回傳路徑
+    （解鎖 API 放行、解鎖頁：已解鎖轉回首頁／鎖著時帶 LOCK_HEADER 放行、已解鎖、
+    API 401、未解鎖 rewrite），**每一條都要帶 CSP**，
     漏掉哪一條那一條就沒有政策。
   - 目前是 **Report-Only**。翻成強制執行的開關是 `csp.ts` 的 `CSP_ENFORCE`，
     翻之前要做的事寫在那支檔案的註解裡。**翻之前一定要先讀那段註解。**

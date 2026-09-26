@@ -7,6 +7,7 @@ import {
   SESSION_MAX_AGE,
   issueToken,
 } from '@/lib/owner-session'
+import { CSP_RESPONSE_HEADER } from '@/lib/csp'
 
 /**
  * proxy.ts 是這個站唯一的存取控制。owner-session 的密碼學原語各自有測試，
@@ -65,6 +66,38 @@ describe('放行清單', () => {
     // /unlock-everything 這種路徑不該因為開頭像 /unlock 就放行
     const res = await proxy(request('/unlock-everything'))
     expect(isPassThrough(res)).toBe(false)
+  })
+})
+
+describe('解鎖頁', () => {
+  it('已解鎖的人打開 /unlock 會被送回首頁', async () => {
+    const token = await issueToken(SECRET)
+    const res = await proxy(request('/unlock', token))
+    expect(res.status).toBe(307)
+    expect(new URL(res.headers.get('location')!).pathname).toBe('/')
+  })
+
+  it('鎖著時直接打開 /unlock 也帶 LOCK_HEADER，layout 才不會查片數', async () => {
+    const res = await proxy(request('/unlock'))
+    const forwarded = res.headers.get('x-middleware-override-headers')
+    expect(forwarded ?? '').toContain(LOCK_HEADER)
+  })
+
+  it('憑證無效時 /unlock 照常顯示，不轉址', async () => {
+    const res = await proxy(request('/unlock', 'abc.def'))
+    expect(isPassThrough(res)).toBe(true)
+  })
+
+  it('設定缺漏時，帶著有效憑證也不會被當成已解鎖', async () => {
+    const token = await issueToken(SECRET)
+    delete process.env.OWNER_SECRET
+    expect(isPassThrough(await proxy(request('/unlock', token)))).toBe(true)
+  })
+
+  it('轉址那條也帶 CSP', async () => {
+    const token = await issueToken(SECRET)
+    const res = await proxy(request('/unlock', token))
+    expect(res.headers.get(CSP_RESPONSE_HEADER)).not.toBeNull()
   })
 })
 

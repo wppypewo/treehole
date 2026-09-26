@@ -14,15 +14,16 @@ import {
   NONCE_HEADER,
 } from "@/lib/csp";
 
-// 解鎖頁與解鎖端點本身必須放行，否則沒有人進得來
-const OPEN_PATHS = new Set(["/unlock", "/api/unlock"]);
+// 解鎖頁與解鎖端點：未解鎖也要進得來。比對完整路徑，不是前綴
+const UNLOCK_PAGE = "/unlock";
+const UNLOCK_API = "/api/unlock";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // nonce 必須在渲染前就進到 request 標頭裡：Next 從 request 上的
   // Content-Security-Policy 解析出 nonce，自動加到框架 script 與自家的
-  // inline script 上。四條回傳路徑都要帶，漏掉哪一條，那一條就沒有政策。
+  // inline script 上。每一條回傳路徑都要帶（目前六條），漏掉哪一條，那一條就沒有政策。
   const nonce = createNonce();
   const csp = buildCsp(nonce, process.env.NODE_ENV === "development");
   const requestHeaders = new Headers(request.headers);
@@ -34,7 +35,8 @@ export async function proxy(request: NextRequest) {
     return response;
   };
 
-  if (OPEN_PATHS.has(pathname)) {
+  // 解鎖端點本身必須放行，否則沒有人進得來
+  if (pathname === UNLOCK_API) {
     return withCsp(NextResponse.next({ request: { headers: requestHeaders } }));
   }
 
@@ -44,6 +46,19 @@ export async function proxy(request: NextRequest) {
     config !== null &&
     token !== undefined &&
     (await verifyToken(token, config.secret));
+
+  // 解鎖頁不論鎖著與否都要進得來，但兩種人要的東西不同：
+  // - 已解鎖的人停在這裡只會看到一張用不到的表單，送回首頁。
+  //   UnlockForm 成功後 reload，網址本來就是 /unlock 時也靠這條離開。
+  // - 鎖著的人直接打 /unlock 時，同樣帶上 LOCK_HEADER。少了它，layout 會畫出
+  //   導覽列並查片數，未解鎖的訪客就看得到片庫有幾部片。
+  if (pathname === UNLOCK_PAGE) {
+    if (unlocked) {
+      return withCsp(NextResponse.redirect(new URL("/", request.url)));
+    }
+    requestHeaders.set(LOCK_HEADER, "1");
+    return withCsp(NextResponse.next({ request: { headers: requestHeaders } }));
+  }
 
   if (unlocked) {
     return withCsp(NextResponse.next({ request: { headers: requestHeaders } }));
