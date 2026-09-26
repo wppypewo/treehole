@@ -14,6 +14,8 @@ import { TmdbError } from "@/lib/tmdb";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import { getMovieRecord } from "@/lib/db";
+import type { MovieRecord } from "@/lib/db.types";
+import { characterText } from "@/lib/filmography";
 import StatusNotice from "@/components/StatusNotice";
 import RefreshButton from "@/components/RefreshButton";
 import MovieActions from "@/components/MovieActions";
@@ -113,8 +115,15 @@ export default async function MoviePage({
     credits = null;
   }
 
-  // 四張表的狀態與日期一句查詢取回（原本是四次來回）
-  const record = await getMovieRecord(movie.id);
+  // 四張表的狀態與日期一句查詢取回（原本是四次來回）。
+  // 資料庫讀不到時片子照樣顯示，只有「我的紀錄」改成一行說明：
+  // 不拿空白狀態頂替，否則按一下就會蓋掉資料庫裡其實存在的紀錄
+  let record: MovieRecord | null = null;
+  try {
+    record = await getMovieRecord(movie.id);
+  } catch (error) {
+    console.error("[movie-record]", error);
+  }
 
   const savedMovie = {
     tmdb_id: movie.id,
@@ -155,7 +164,7 @@ export default async function MoviePage({
             {showOriginal && (
               <p
                 lang="und"
-                className="mt-2.5 font-display text-[clamp(1.125rem,2vw,1.375rem)] italic text-paper-dim"
+                className="t-original mt-2.5 text-[clamp(1.125rem,2vw,1.375rem)] text-paper-dim"
               >
                 {movie.original_title}
               </p>
@@ -213,28 +222,41 @@ export default async function MoviePage({
             <h2 id="ledger-title" className="font-display text-xl text-paper">
               {dict.movie.ledger}
             </h2>
-            <div className="mt-[1.375rem]">
-              <MovieActions
-                movie={savedMovie}
-                initial={{
-                  watchlist: record.watchlistAddedAt,
-                  watched: record.watchedAt,
-                  favorites: record.favoritedAt,
-                }}
-                locale={locale}
-                labels={{ ...dict.actions, saveError: dict.common.saveError }}
-              />
-            </div>
-            <RatingEditor
-              movie={savedMovie}
-              initialScore={record.rating?.score ?? null}
-              initialNote={record.rating?.note ?? ""}
-              labels={{
-                ...dict.rating,
-                saveError: dict.common.saveError,
-                removeError: dict.common.removeError,
-              }}
-            />
+            {record ? (
+              <>
+                <div className="mt-[1.375rem]">
+                  <MovieActions
+                    movie={savedMovie}
+                    initial={{
+                      watchlist: record.watchlistAddedAt,
+                      watched: record.watchedAt,
+                      favorites: record.favoritedAt,
+                    }}
+                    locale={locale}
+                    labels={{ ...dict.actions, saveError: dict.common.saveError }}
+                  />
+                </div>
+                <RatingEditor
+                  movie={savedMovie}
+                  initialScore={record.rating?.score ?? null}
+                  initialNote={record.rating?.note ?? ""}
+                  labels={{
+                    ...dict.rating,
+                    saveError: dict.common.saveError,
+                    removeError: dict.common.removeError,
+                  }}
+                />
+              </>
+            ) : (
+              <div className="mt-[1.375rem] border-l-2 border-curtain pl-4">
+                <p className="text-sm leading-relaxed text-paper-dim">
+                  {dict.movie.ledgerUnavailable}
+                </p>
+                <div className="mt-4">
+                  <RefreshButton label={dict.errors.reload} />
+                </div>
+              </div>
+            )}
           </aside>
 
           {(credits?.director || leads.length > 0) && (
@@ -296,7 +318,7 @@ export default async function MoviePage({
                 key={c.id}
                 id={c.id}
                 name={c.name}
-                sub={c.character}
+                sub={characterText(c.character, dict.person)}
                 profilePath={c.profile_path}
               />
             ))}

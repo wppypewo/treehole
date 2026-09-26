@@ -95,6 +95,8 @@ export interface Dictionary {
     castRail: string;
     /** 右欄「我的紀錄」 */
     ledger: string;
+    /** 資料庫讀不到時，「我的紀錄」裡唯一的一行 */
+    ledgerUnavailable: string;
   };
   person: {
     filmography: string;
@@ -330,6 +332,7 @@ const zhTW: Dictionary = {
     cast: "主演",
     castRail: "演員",
     ledger: "我的紀錄",
+    ledgerUnavailable: "片庫暫時讀不到，這部片的紀錄先不顯示，也先不能改。",
   },
   person: {
     filmography: "作品",
@@ -596,6 +599,7 @@ const en: Dictionary = {
     cast: "Starring",
     castRail: "Cast",
     ledger: "My record",
+    ledgerUnavailable: "Your library can't be reached right now, so this film's record is hidden and can't be edited yet.",
   },
   person: {
     filmography: "Filmography",
