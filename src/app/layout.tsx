@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Geist, Bodoni_Moda, Noto_Serif_TC } from "next/font/google";
 import "./globals.css";
+import { fontVariables } from "./fonts";
 import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
 import { getLocale } from "@/i18n/server";
@@ -10,29 +10,6 @@ import { htmlLang } from "@/i18n/config";
 import { LOCK_HEADER } from "@/lib/owner-session";
 import { listWatched, listWatchlist } from "@/lib/db";
 import type { NavCounts } from "@/components/NavCount";
-
-// 介面與內文：撐資訊層，不搶戲
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-// 片名與標題：高反差 didone，對應電影海報與影展主視覺的字體傳統
-const bodoni = Bodoni_Moda({
-  variable: "--font-bodoni",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
-});
-
-// 中文標題：明體。CJK 檔案大，關掉 preload 讓它在首屏之後才到位，
-// fallback 走系統宋體（Songti TC / PMingLiU），不會出現無字可用的空窗。
-const notoSerifTC = Noto_Serif_TC({
-  variable: "--font-noto-serif-tc",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  preload: false,
-});
 
 export const metadata: Metadata = {
   // template 讓每一頁只要回傳自己的名字，站名由這裡補上。
@@ -86,7 +63,7 @@ export default async function RootLayout({
     // 長到 10874px，observer 觸發 0 次。所以視窗高度由 body 的 min-h-dvh 負責。
     <html
       lang={htmlLang(locale)}
-      className={`${geistSans.variable} ${bodoni.variable} ${notoSerifTC.variable} dark antialiased`}
+      className={`${fontVariables} dark antialiased`}
     >
       <body className="flex min-h-dvh flex-col bg-ink text-paper">
         <a href="#main" className="skip-link">
