@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-> 最後更新：2026-09-27（階段 18，全面改版，已推送並快轉合進 `main`）。本檔上半部一律是**當下實測值**，
+> 最後更新：2026-09-27（階段 18 合進 `main`，CI 修復、升到 Next 16.3.6，部署與 CI 已確認成功）。本檔上半部一律是**當下實測值**，
 > 下半部「階段 N」是不再更動的歷史紀錄。兩者矛盾時以上半部為準。
 > git 狀態皆在本 repo 內判斷，不要拿工作區根的狀態套進來。
 
@@ -9,7 +9,7 @@
 * Repo path: `~/ClaudeCode/projects/movie-app`（2026-07-30 由 Windows 遷至 Mac）
 * Repo type: Next.js 16 全端 Web App（git repo，有 GitHub remote）
 * Primary purpose: Treehole——TMDB 電影導覽 + 私人片庫。**2026-08-27 起線上版即正式版**（Vercel + Neon Postgres，全站鎖給擁有者一人）
-* Current status: **階段 18 全面改版（放映表）完成，12 個 commit 已推送並快轉合進 `main`（2026-09-27）**。階段 1–18 完成。**階段 16–17（2026-09-03）已合進 `main` 並推送**，Vercel 會自動部署——部署結果請自己去 Vercel 看，本檔不代為宣稱已上線
+* Current status: **階段 18 全面改版（放映表）已合進 `main` 並上線（2026-09-27）**。階段 1–18 完成。`09a7219` 的 GitHub Actions CI 成功、Vercel Production 部署 success（`gh run watch` 與 GitHub deployments API 實測）。之後每次推送的結果仍要另外看，本檔只記到 `09a7219`
 
 ## Git Status
 
@@ -24,6 +24,7 @@
 * 同一批合進 dependabot #16、#17：next／eslint-config-next 16.3.5 → 16.3.6，合成一個 commit 以免 lockfile 衝突
 * 乾淨 clone 下 `npm ci` 後四道 gate 全綠（181 tests／14 files、26 條路由全 `ƒ`），`npm audit` 0；
   mock 重啟後為 Next 16.3.6，首頁正常、詳情頁想看的寫入與移除皆 200，console 與伺服器 0 錯誤
+* 推送 `09a7219` 後：CI 八個步驟全過（run 36296881030）、Vercel Production 部署 success；dependabot 自行關閉 #16 #17 並刪分支，遠端只剩 `main`（`ls-remote` 實測）
 
 ### 2026-09-27：相依升級與分支清理
 
@@ -46,7 +47,7 @@
   分支本身也推上遠端留作紀錄。對 `main`：98 files、+7,153 / −2,020（不含最後一個文件 commit）
 * 推送與合併的遠端狀態以 `git ls-remote` 實測為準，結果記在該次 session 的回報裡；
   本檔所在的 commit 寫成時還沒推送，無法寫進自己的 SHA
-* 合併等於上線：Vercel 會自動部署，GitHub Actions 的 CI 也會跑。**部署結果本檔不代為宣稱**，去 Vercel 看
+* 合併等於上線：Vercel 會自動部署，GitHub Actions 的 CI 也會跑。這一次的 CI 其實失敗了，後續修復與確認見「CI 修復與 16.3.6」
 
   | commit | 內容 |
   |---|---|
@@ -142,19 +143,20 @@
 * Phase: 階段 18「全面改版：放映表」（2026-09-26 起）完成，2026-09-27 推送並合進 `main`
 * Goal: UI／UX、互動、文案、動畫全面重做；資料模型（四張表）不變
 * Success criteria: 每階段四道 gate 全綠＋impeccable 偵測器 0 項＋mock 截圖桌機 1440／手機 375（皆已達成）；
-  **尚未達成**：真實資料下的逐頁檢查（見 Next 3 第 2 項）；使用者決定先合併、上線後再看
+  **尚未達成**：真實資料下的逐頁檢查（見 Next 3 第 1 項）；使用者決定先合併、上線後再看
 
 ## Next 3 Allowed Tasks
 
-1. **確認這次上線的部署結果**——Vercel 部署與 GitHub Actions CI 是否成功，由使用者去看。
-2. **用真實資料逐頁檢查**——目前只在 session scratchpad 的 mock Neon 上看過（port 3101，資料在記憶體）。
+1. **用真實資料逐頁檢查**（使用者做）——改版目前只在 session scratchpad 的 mock Neon 上看過（port 3101，資料在記憶體）。
    直接看線上版最簡單；要在本機看，`.env` 缺 `DATABASE_URL`／`OWNER_PASSCODE`／`OWNER_SECRET`，要使用者自己補，
    補了之後連的是 production 資料庫，檢查時不點會寫入的按鈕。
-3. **`AGENTS.md` 以外的舊文件**：工作區根 `~/ClaudeCode/CLAUDE.md` 對本 repo 的記載（70 commits、`9d34b7a`）已過時，
+   看的時候順便開 DevTools console 記下 CSP Report-Only 的違規：`csp.ts` 註解裡 2026-09-03 的「六頁零違規」
+   是改版前的頁面，改版後沒有在線上重看過；`/movie/[id]` 要按一次播放。
+2. **`CSP_ENFORCE` 翻成強制執行**——前提是第 1 項的 console 零違規。翻之前先讀 `src/lib/csp.ts` 開頭的註解。
+3. **工作區根的舊文件**：`~/ClaudeCode/CLAUDE.md` 對本 repo 的記載（70 commits、`9d34b7a`）已過時，
    在 repo 外，改之前要使用者同意。
 
-延後（沿用階段 17）：確認 CSP 帶上線後的部署結果、`CSP_ENFORCE` 翻強制執行、Neon 密碼 reset、
-route handler / proxy 整合測試盤點。
+延後（沿用階段 17）：Neon 密碼 reset、route handler / proxy 整合測試盤點。
 
 ## Deferred / Explicit Approval Required
 
