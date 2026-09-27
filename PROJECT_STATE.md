@@ -22,9 +22,9 @@
     @types/react／@types/react-dom → ^19.3.0、@types/node → ^26.6.3（比 PR 的 26.6.2 新一版，npm 解析結果）。
     react-dom 19.3.0 的 peer 要求 react ^19.3.0，#18 與 #20 不能分開合
   * 四道 gate 全綠（181 tests／14 files、26 條路由全 `ƒ`），`npm audit` 0；mock 上首頁、想看排序、詳情頁想看的寫入與移除都正常，console 與伺服器 0 錯誤
-* 刪除的分支：`redesign/2026-09-26`（已是 `main` 的祖先）、`optimize/2026-09-03`（本機殘留，已是 `main` 的祖先）、
+* **待刪的分支（自動模式擋下分支刪除，由使用者執行；執行前本段仍是現況）**：`redesign/2026-09-26`（已是 `main` 的祖先）、`optimize/2026-09-03`（本機殘留，已是 `main` 的祖先）、
   `chore/deps-minor-2026-09-12`（Codex 版；`bd65638` 已挑進 `main`，另一個 commit `77631a6` 是不採用的 Codex 改版，
-  刪掉後只能靠 SHA 從 GitHub 找，不保證找得回來）、五條 dependabot 分支（內容已在 `main`）
+  刪掉後只能靠 SHA 從 GitHub 找，不保證找得回來）、五條 dependabot 分支（內容已在 `main`，對應的 PR #16 #17 #18 #20 #21 仍開著）。另有本機的 `chore/deps-2026-09-27`（已是 `main` 的祖先）
 
 ### 2026-09-27：改版推送並合進 main
 

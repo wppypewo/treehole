@@ -181,7 +181,8 @@ Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）不動，也不當基�
   - gate：typecheck／lint／test（181）／build 全綠；impeccable 偵測器 0 項
 - [x] 推送 `redesign/2026-09-26` 並快轉合進 `main`（2026-09-27，使用者指示）
   - 使用者決定不等真實資料檢查就合併；真實資料檢查改成上線後由使用者看
-- [x] 相依升級合進 `main`、沒用的分支刪除（2026-09-27，使用者指示；細節在 `PROJECT_STATE.md` Git Status）
+- [x] 相依升級合進 `main`（2026-09-27，使用者指示；細節在 `PROJECT_STATE.md` Git Status）
+- [ ] 刪除沒用的分支、關閉被取代的 dependabot PR：自動模式擋下，由使用者執行
 
 ## 之後另外處理（需使用者決定）
 
