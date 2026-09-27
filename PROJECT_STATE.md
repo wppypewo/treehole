@@ -153,10 +153,14 @@
    看的時候順便開 DevTools console 記下 CSP Report-Only 的違規：`csp.ts` 註解裡 2026-09-03 的「六頁零違規」
    是改版前的頁面，改版後沒有在線上重看過；`/movie/[id]` 要按一次播放。
 2. **`CSP_ENFORCE` 翻成強制執行**——前提是第 1 項的 console 零違規。翻之前先讀 `src/lib/csp.ts` 開頭的註解。
-3. **工作區根的舊文件**：`~/ClaudeCode/CLAUDE.md` 對本 repo 的記載（70 commits、`9d34b7a`）已過時，
-   在 repo 外，改之前要使用者同意。
+3. **route handler / proxy 測試補缺**（自延後清單提上來）——2026-09-27 盤點：
+   `proxy.test.ts` 20 題已涵蓋放行清單、解鎖頁、未解鎖改寫與 API 401、憑證驗證、設定缺漏時關門，
+   但 CSP 標頭只在「已解鎖轉回首頁」那一條有斷言，其餘五條回傳路徑沒有；
+   `src/app/api/` 11 個 route handler 本體沒有直接測試，`db-route.test.ts` 只測輸入解析的 helper。
 
-延後（沿用階段 17）：Neon 密碼 reset、route handler / proxy 整合測試盤點。
+延後（沿用階段 17）：Neon 密碼 reset。
+
+已完成：工作區根 `~/ClaudeCode/CLAUDE.md` 的本 repo 條目，2026-09-27 經使用者同意更新到 91 commits、`c94c245`。
 
 ## Deferred / Explicit Approval Required
 
