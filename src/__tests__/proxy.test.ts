@@ -7,7 +7,7 @@ import {
   SESSION_MAX_AGE,
   issueToken,
 } from '@/lib/owner-session'
-import { CSP_RESPONSE_HEADER } from '@/lib/csp'
+import { CSP_REQUEST_HEADER, CSP_RESPONSE_HEADER, NONCE_HEADER } from '@/lib/csp'
 
 /**
  * proxy.ts 是這個站唯一的存取控制。owner-session 的密碼學原語各自有測試，
@@ -94,11 +94,6 @@ describe('解鎖頁', () => {
     expect(isPassThrough(await proxy(request('/unlock', token)))).toBe(true)
   })
 
-  it('轉址那條也帶 CSP', async () => {
-    const token = await issueToken(SECRET)
-    const res = await proxy(request('/unlock', token))
-    expect(res.headers.get(CSP_RESPONSE_HEADER)).not.toBeNull()
-  })
 })
 
 describe('未解鎖的請求', () => {
@@ -183,5 +178,99 @@ describe('環境變數缺失時必須關著', () => {
     delete process.env.OWNER_SECRET
     delete process.env.OWNER_PASSCODE
     expect((await proxy(request('/api/favorites'))).status).toBe(401)
+  })
+})
+
+describe('每一條回傳路徑都帶 CSP', () => {
+  // proxy.ts 有六條 return，CSP 靠每一條各自包 withCsp()。新增一條分支時漏包，
+  // 那條路徑就完全沒有政策，而且不會有任何錯誤——所以六條逐一列出來釘住。
+  // 每一列先驗「確實走到那條分支」，否則換了分支邏輯後這張表會默默測錯地方。
+  type Case = {
+    name: string
+    path: string
+    unlocked: boolean
+    // 這條路徑會不會把 request 轉交下游（next／rewrite），轉交的才有 nonce 要對
+    forwards: boolean
+    branch: (res: Response) => void
+  }
+
+  const cases: Case[] = [
+    {
+      name: '解鎖 API 放行',
+      path: '/api/unlock',
+      unlocked: false,
+      forwards: true,
+      branch: (res) => expect(isPassThrough(res)).toBe(true),
+    },
+    {
+      name: '解鎖頁：已解鎖轉回首頁',
+      path: '/unlock',
+      unlocked: true,
+      forwards: false,
+      branch: (res) => expect(res.status).toBe(307),
+    },
+    {
+      name: '解鎖頁：鎖著時放行',
+      path: '/unlock',
+      unlocked: false,
+      forwards: true,
+      branch: (res) => expect(isPassThrough(res)).toBe(true),
+    },
+    {
+      name: '已解鎖放行',
+      path: '/movie/550',
+      unlocked: true,
+      forwards: true,
+      branch: (res) => expect(isPassThrough(res)).toBe(true),
+    },
+    {
+      name: '未解鎖 API 401',
+      path: '/api/favorites',
+      unlocked: false,
+      forwards: false,
+      branch: (res) => expect(res.status).toBe(401),
+    },
+    {
+      name: '未解鎖頁面改寫',
+      path: '/movie/550',
+      unlocked: false,
+      forwards: true,
+      branch: (res) => expect(res.headers.get(REWRITE_HEADER)).not.toBeNull(),
+    },
+  ]
+
+  it.each(cases)('$name', async ({ path, unlocked, forwards, branch }) => {
+    const token = unlocked ? await issueToken(SECRET) : undefined
+    const res = await proxy(request(path, token))
+    branch(res)
+
+    const csp = res.headers.get(CSP_RESPONSE_HEADER)
+    expect(csp).toMatch(/script-src [^;]*'nonce-[^']+'/)
+
+    if (forwards) {
+      // Next 從轉交下游的 request 標頭解析 nonce 來蓋在框架 script 上。
+      // 回應標頭與 request 標頭的政策不一致，瀏覽器就會擋掉那些 script。
+      const forwardedCsp = res.headers.get(
+        `x-middleware-request-${CSP_REQUEST_HEADER.toLowerCase()}`,
+      )
+      expect(forwardedCsp).toBe(csp)
+      const nonce = res.headers.get(`x-middleware-request-${NONCE_HEADER}`)
+      expect(csp).toContain(`'nonce-${nonce}'`)
+    }
+  })
+
+  it('六條就是全部：proxy.ts 的 return 數沒變', async () => {
+    // 有人新增分支時這條會紅，提醒回來把新分支加進上面那張表
+    const { readFile } = await import('node:fs/promises')
+    const source = await readFile(new URL('../proxy.ts', import.meta.url), 'utf8')
+    const body = source.slice(source.indexOf('export async function proxy'), source.indexOf('export const config'))
+    expect(body.match(/\breturn withCsp\(/g)).toHaveLength(cases.length)
+    expect(body.match(/\breturn\b/g)).toHaveLength(cases.length + 1) // +1 是 withCsp 自己的 return
+  })
+
+  it('每個請求換一個 nonce', async () => {
+    const a = (await proxy(request('/unlock'))).headers.get(CSP_RESPONSE_HEADER)
+    const b = (await proxy(request('/unlock'))).headers.get(CSP_RESPONSE_HEADER)
+    expect(a).not.toBe(b)
   })
 })

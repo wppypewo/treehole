@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-> 最後更新：2026-09-27（階段 18 合進 `main`，CI 修復、升到 Next 16.3.6，部署與 CI 已確認成功）。本檔上半部一律是**當下實測值**，
+> 最後更新：2026-09-27（route handler／proxy 測試補缺；此前：階段 18 合進 `main`、CI 修復、升到 Next 16.3.6）。本檔上半部一律是**當下實測值**，
 > 下半部「階段 N」是不再更動的歷史紀錄。兩者矛盾時以上半部為準。
 > git 狀態皆在本 repo 內判斷，不要拿工作區根的狀態套進來。
 
@@ -12,6 +12,23 @@
 * Current status: **階段 18 全面改版（放映表）已合進 `main` 並上線（2026-09-27）**。階段 1–18 完成。`09a7219` 的 GitHub Actions CI 成功、Vercel Production 部署 success（`gh run watch` 與 GitHub deployments API 實測）。之後每次推送的結果仍要另外看，本檔只記到 `09a7219`
 
 ## Git Status
+
+### 2026-09-27：route handler／proxy 測試補缺（Next 3 第 3 項）
+
+* `proxy.test.ts` 19 → 26 題：六條回傳路徑逐條斷言帶 CSP，會往下傳的四條另驗 request header 的 CSP 與 nonce 一致；
+  另加一題數 `proxy.ts` 裡 `return withCsp(` 的次數，新增第七條回傳路徑卻沒進表時會紅。
+  原本只測「已解鎖轉回首頁」那條的題目併進表裡
+* 新增三個檔，直接呼叫 11 個 route handler，資料層、TMDB、推薦彙整、`getLocale` 全部 mock，**不碰正式資料庫**：
+  * `api-library-routes.test.ts`（35 題）：片庫四支。不合法輸入回 400 且沒呼叫資料層、合法輸入以正規化後的值交給資料層、
+    資料層丟錯回 503 且錯誤原文不進回應、`watched` 回應形狀、`ratings` 分數界限與短評截斷
+  * `api-tmdb-routes.test.ts`（21 題）：TMDB 六支。頁碼與篩選條件的清洗、`hasMore`、missing-key 500／其餘 502、錯誤原文不外洩
+  * `api-unlock.test.ts`（9 題）：沒設定 503、通行碼錯 401、cookie 屬性與 `verifyToken` 驗得過、正式環境才加 Secure、
+    固定 400 ms 延遲（399 ms 時尚未回應）、比對丟錯回 500 而不是 401
+* 突變測試（改完即還原，`git status` 確認原始碼未動）：拿掉 proxy 401 那條的 `withCsp`、unlock 延遲改 0、
+  watchlist 不檢查 `added_at`、popular 的 missing-key 改 502、ratings DELETE 不擋 id、cookie 改非 httpOnly、
+  watched 回應欄位改名——每一個都有測試轉紅
+* 四道 gate 全綠：253 tests／17 files（原 181／14）、26 條路由全 `ƒ`
+* README 的 Testing 一節原本停在「63 tests across 6 files」，一併改成實測的 17 個檔
 
 ### 2026-09-27：CI 修復與 16.3.6
 
@@ -96,9 +113,9 @@
 * Production / deployment: Vercel + Neon Postgres（`https://treehole-movie-app.vercel.app`，真實讀寫，通行碼保護）；本 repo **無 `vercel.json`**（部署設定在 Vercel 端，未進 repo），另有 `.vercelignore`。AGENTS.md：不動 Vercel 部署設定，除非明確指示
 * README status: Treehole 標題、部署連結（載明需通行碼）、features、Access 一節、設計決策、tech stack、architecture、testing、資料位置、future。**2026-08-23 移除截圖區**（階段 5）；**2026-08-27 移除 demo/local 對照表與備份說明**（階段 15）
 * CI status: 有 GitHub Actions `.github/workflows/ci.yml`，push / PR 到 main 觸發 `typecheck → lint → test → build`。**build 不再帶 `DEMO_MODE=1`**，也不需要 `DATABASE_URL`——DB client 是 lazy 的，建置期不連線。actions 為 `@v7`、Node 24。`.github/dependabot.yml` 同時監看 npm 與 github-actions
-* Test status: **181 tests / 14 files**（2026-09-27 實測通過，階段 18 合併後的 `main`）。階段 17 時為 107 tests / 9 files。lint 0 error 0 warning，`tsc --noEmit` 0 error，`next build` 通過。`npm audit`：**0 vulnerabilities**
+* Test status: **253 tests / 17 files**（2026-09-27 實測通過，測試補缺後）。階段 18 合併時為 181 / 14，階段 17 時為 107 / 9。lint 0 error 0 warning，`tsc --noEmit` 0 error，`next build` 通過。`npm audit`：**0 vulnerabilities**
 * Access control: `src/proxy.ts` 是唯一授權檢查點，擋在所有頁面與 route handler 之前。通行碼換 HMAC 簽章 cookie（`src/lib/owner-session.ts`）。`OWNER_PASSCODE` / `OWNER_SECRET` 缺任一則全站鎖死（fail closed）。**demo 模式已於階段 15 整套移除**
-* Known limitations: route handler 與 proxy 無整合測試（目前靠手動驗證）；DB 層無自動化測試（以真實 Neon 手動驗過）；通行碼無 rate limit，僅固定延遲——serverless 無可靠共享狀態
+* Known limitations: route handler 與 proxy 已有直接測試，但資料層是 mock 的；`src/lib/db.ts` 的 SQL 無自動化測試（以真實 Neon 手動驗過）；通行碼無 rate limit，僅固定延遲——serverless 無可靠共享狀態
 
 ## Tech Stack
 
@@ -153,7 +170,7 @@
    看的時候順便開 DevTools console 記下 CSP Report-Only 的違規：`csp.ts` 註解裡 2026-09-03 的「六頁零違規」
    是改版前的頁面，改版後沒有在線上重看過；`/movie/[id]` 要按一次播放。
 2. **`CSP_ENFORCE` 翻成強制執行**——前提是第 1 項的 console 零違規。翻之前先讀 `src/lib/csp.ts` 開頭的註解。
-3. **route handler / proxy 測試補缺**（自延後清單提上來）——2026-09-27 盤點：
+3. ~~**route handler / proxy 測試補缺**~~ **2026-09-27 完成**，見 Git Status 同日一節。以下是當時的盤點：
    `proxy.test.ts` 19 題已涵蓋放行清單、解鎖頁、未解鎖改寫與 API 401、憑證驗證、設定缺漏時關門，
    但 CSP 標頭只在「已解鎖轉回首頁」那一條有斷言，其餘五條回傳路徑沒有；
    `src/app/api/` 11 個 route handler 本體沒有直接測試，`db-route.test.ts` 只測輸入解析的 helper。

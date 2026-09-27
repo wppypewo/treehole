@@ -180,18 +180,29 @@ The dev and production servers bind to `0.0.0.0`, so other devices on the same n
 
 ## Testing
 
-63 tests across 6 files, covering utility functions and the owner lock:
+253 tests across 17 files. The route handlers and the proxy are tested directly; the data layer and TMDB are mocked in those tests, so the suite never touches the production database.
 
 | File | Coverage |
 |---|---|
+| `proxy.test.ts` | The owner lock as a whole — allow-list, unlock page, locked rewrite and API 401, token checks, fail-closed configuration, and a CSP header on each of the proxy's six return paths |
+| `api-library-routes.test.ts` | `favorites`, `watchlist`, `watched`, `ratings` handlers — invalid input returns 400 without touching the database, valid input reaches the data layer normalized, database failures return 503 without leaking the error |
+| `api-tmdb-routes.test.ts` | `popular`, `top-rated`, `highest-grossing`, `search`, `discover`, `recommendations` handlers — page and filter sanitizing, `hasMore`, 500 vs 502 by error kind |
+| `api-unlock.test.ts` | `/api/unlock` — not configured, wrong passcode, cookie attributes, the fixed 400 ms delay, internal failure returns 500 |
+| `owner-session.test.ts` | `issueToken`, `verifyToken`, `passcodeMatches`, `ownerConfig` — forged signatures, extended expiry, expired and malformed tokens, fail-closed configuration |
+| `csp.test.ts` | `buildCsp` — nonce, `style-src`, allowed external origins |
+| `db-route.test.ts` | `movieFromBody`, `tmdbIdFromQuery`, `addedAtFromBody` — request parsing for the library routes |
+| `library.test.ts` | Watchlist sorting, runtime totals, watched filters |
+| `browse-filters.test.ts` | `parseBrowseFilters` — browse page query parsing |
+| `dates.test.ts` | `todayInTaipei`, the shelf, diary and calendar date formatters, and release-schedule grouping |
+| `filmography.test.ts` | Credit merging, grouping by year and role text for the person and movie pages |
+| `error-boundaries.test.ts` | `global-error` and `error` render their own shell and copy |
 | `tmdb-utils.test.ts` | `pickTrailer` — trailer selection logic |
 | `tmdb-error.test.ts` | `tmdbErrorMessage`, `isV4Token` — API error classification and key format validation |
 | `images.test.ts` | `tmdbImage`, `tmdbSrcSet`, `IMAGE_SIZES` — image URL construction, srcset candidates, and sizes-string invariants |
 | `genres.test.ts` | `genreOptions` — locale-aware genre list construction |
 | `i18n-config.test.ts` | `normalizeLocale`, `tmdbLanguage`, `htmlLang` — locale mapping helpers |
-| `owner-session.test.ts` | `issueToken`, `verifyToken`, `passcodeMatches`, `ownerConfig` — forged signatures, extended expiry, expired and malformed tokens, fail-closed configuration |
 
-These cover the utility layer and the session-token logic. UI behavior, TMDB integration and the database layer are not covered by the suite — the database was verified by hand against a real Neon instance instead.
+UI behavior and the SQL in `src/lib/db.ts` are not covered — the database layer was verified by hand against a real Neon instance instead.
 
 ```bash
 npm run test       # run once
@@ -222,5 +233,5 @@ decision, not an oversight.
 
 ## Future Improvements
 
-- Integration tests for the route handlers and the proxy, which are currently verified by hand
+- Integration tests for `src/lib/db.ts` against a disposable Neon branch; the SQL is currently verified by hand
 - Optional: add a case study writeup for portfolio context
