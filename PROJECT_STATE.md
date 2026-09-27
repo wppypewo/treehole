@@ -13,6 +13,18 @@
 
 ## Git Status
 
+### 2026-09-27：CI 修復與 16.3.6
+
+* **`main` 的 CI 從 `e638c5b`（改版合進來那次）起全部失敗**，前一次綠燈是 `9d34b7a`（2026-09-03）。
+  失敗在 Type check：改版後頁面用了 Next 產生的全域型別 `PageProps`，它寫在 `.next/types`。
+  本機跑過 build 所以有，CI 先跑 typecheck、那時還沒產生，4 處 `TS2304`。
+  先前的 gate 都在本機跑，`.next/` 已存在，所以沒抓到。
+* 修法依 Next 16 CLI 文件（`node_modules/next/dist/docs/01-app/03-api-reference/06-cli/next.md`）：
+  `typecheck` 改成 `next typegen && tsc --noEmit`。在沒有 `.next/` 的乾淨 clone 重現錯誤、確認修正後消失
+* 同一批合進 dependabot #16、#17：next／eslint-config-next 16.3.5 → 16.3.6，合成一個 commit 以免 lockfile 衝突
+* 乾淨 clone 下 `npm ci` 後四道 gate 全綠（181 tests／14 files、26 條路由全 `ƒ`），`npm audit` 0；
+  mock 重啟後為 Next 16.3.6，首頁正常、詳情頁想看的寫入與移除皆 200，console 與伺服器 0 錯誤
+
 ### 2026-09-27：相依升級與分支清理
 
 * 在 `chore/deps-2026-09-27` 上做完再快轉合進 `main`，分支用完即刪：
@@ -26,7 +38,7 @@
   本機 `redesign/2026-09-26`、`optimize/2026-09-03`、`chore/deps-2026-09-27`（三者皆為 `main` 的祖先）與 `chore/deps-minor-2026-09-12`。
   Codex 分支上的 `77631a6` 是不採用的 Codex 改版，刪除後只能憑 SHA 從 GitHub 找，不保證找得回來。
   dependabot 在 `main` 推上去後自行關閉 #18 #20 #21 並刪掉分支；#16 #17 被它改寫成新的升級
-  （next／eslint-config-next 16.3.5 → 16.3.6），不是被取代的 PR，**保留未關**。遠端現在是 `main` 加這兩條 dependabot 分支
+  （next／eslint-config-next 16.3.5 → 16.3.6），不是被取代的 PR，當時保留；之後已合進 `main`，見上一節
 
 ### 2026-09-27：改版推送並合進 main
 
@@ -89,7 +101,7 @@
 
 ## Tech Stack
 
-* Framework: Next.js 16.3.5（App Router、Turbopack，port 3100）+ React 19.3.0 + TypeScript 6
+* Framework: Next.js 16.3.6（App Router、Turbopack，port 3100）+ React 19.3.0 + TypeScript 6
 * Data source: TMDB API（v3 key / v4 token，全部 server-side）
 * Database: Neon Postgres，`@neondatabase/serverless` ^1.1.0（HTTP driver，非 TCP pool）
 * Access control: 自建擁有者鎖（`src/proxy.ts` + `src/lib/owner-session.ts`，Web Crypto HMAC-SHA256）；TMDB key 為 server-side

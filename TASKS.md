@@ -183,6 +183,7 @@ Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）不動，也不當基�
   - 使用者決定不等真實資料檢查就合併；真實資料檢查改成上線後由使用者看
 - [x] 相依升級合進 `main`（2026-09-27，使用者指示；細節在 `PROJECT_STATE.md` Git Status）
 - [x] 刪除沒用的分支（遠端 2 條、本機 4 條）；dependabot 已自行關閉 #18 #20 #21。#16 #17 改寫成 16.3.6 的新升級，保留
+- [x] 修 CI：`e638c5b` 起 `main` 的 CI 在 Type check 失敗（`PageProps` 要先 `next typegen`），`typecheck` 腳本補上；同批合進 #16 #17（16.3.6）
 
 ## 之後另外處理（需使用者決定）
 
