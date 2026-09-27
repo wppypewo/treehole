@@ -154,7 +154,7 @@
    是改版前的頁面，改版後沒有在線上重看過；`/movie/[id]` 要按一次播放。
 2. **`CSP_ENFORCE` 翻成強制執行**——前提是第 1 項的 console 零違規。翻之前先讀 `src/lib/csp.ts` 開頭的註解。
 3. **route handler / proxy 測試補缺**（自延後清單提上來）——2026-09-27 盤點：
-   `proxy.test.ts` 20 題已涵蓋放行清單、解鎖頁、未解鎖改寫與 API 401、憑證驗證、設定缺漏時關門，
+   `proxy.test.ts` 19 題已涵蓋放行清單、解鎖頁、未解鎖改寫與 API 401、憑證驗證、設定缺漏時關門，
    但 CSP 標頭只在「已解鎖轉回首頁」那一條有斷言，其餘五條回傳路徑沒有；
    `src/app/api/` 11 個 route handler 本體沒有直接測試，`db-route.test.ts` 只測輸入解析的 helper。
 
