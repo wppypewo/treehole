@@ -177,7 +177,8 @@
 
 延後（沿用階段 17）：Neon 密碼 reset。
 
-已完成：工作區根 `~/ClaudeCode/CLAUDE.md` 的本 repo 條目，2026-09-27 經使用者同意更新到 91 commits、`c94c245`。
+已完成：工作區根 `~/ClaudeCode/CLAUDE.md` 的本 repo 條目，2026-09-27 經使用者同意更新。
+commit 數與 HEAD 以那份檔案（或 `git rev-list --count HEAD`）為準，這裡不抄數字，抄了每 commit 一次就過期。
 
 ## Deferred / Explicit Approval Required
 
