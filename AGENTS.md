@@ -27,13 +27,13 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 | 層 | 選擇 |
 |---|---|
-| 框架 | Next.js 16.3.4（port 3100） |
-| React | 19.2.8 |
+| 框架 | Next.js 16.3.5（port 3100） |
+| React | 19.3.0 |
 | 樣式 | Tailwind v4（@tailwindcss/postcss） |
 | 資料庫 | Neon Postgres，走 `@neondatabase/serverless` ^1.1.0（HTTP driver） |
 | 存取控制 | 自建擁有者鎖：`src/proxy.ts` + `src/lib/owner-session.ts`（Web Crypto HMAC） |
 | 型別 | TypeScript ^6 |
-| Lint | ESLint ^9（eslint-config-next 16.3.4） |
+| Lint | ESLint ^9（eslint-config-next 16.3.5） |
 | 動畫 | GSAP ^3.15 + ScrollTrigger（scroll 敘事）+ Flip（片庫格線重排）、Lenis ^1.3（捲動節奏） |
 | 字體 | Bodoni Moda + Noto Serif TC（標題）、Geist（介面），皆走 `next/font` |
 

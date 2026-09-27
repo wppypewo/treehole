@@ -13,6 +13,19 @@
 
 ## Git Status
 
+### 2026-09-27：相依升級與分支清理
+
+* 在 `chore/deps-2026-09-27` 上做完再快轉合進 `main`，分支用完即刪：
+  * `bd65638`（Codex 分支上 2026-09-12 的 lockfile minor/patch 更新）挑進來，無衝突
+  * dependabot 五個 PR（#16 next、#17 eslint-config-next、#18 react＋@types/react、#20 react-dom＋@types/react-dom、#21 @types/node）
+    併成一個 commit：next／eslint-config-next 16.3.4 → 16.3.5、react／react-dom 19.2.8 → 19.3.0、
+    @types/react／@types/react-dom → ^19.3.0、@types/node → ^26.6.3（比 PR 的 26.6.2 新一版，npm 解析結果）。
+    react-dom 19.3.0 的 peer 要求 react ^19.3.0，#18 與 #20 不能分開合
+  * 四道 gate 全綠（181 tests／14 files、26 條路由全 `ƒ`），`npm audit` 0；mock 上首頁、想看排序、詳情頁想看的寫入與移除都正常，console 與伺服器 0 錯誤
+* 刪除的分支：`redesign/2026-09-26`（已是 `main` 的祖先）、`optimize/2026-09-03`（本機殘留，已是 `main` 的祖先）、
+  `chore/deps-minor-2026-09-12`（Codex 版；`bd65638` 已挑進 `main`，另一個 commit `77631a6` 是不採用的 Codex 改版，
+  刪掉後只能靠 SHA 從 GitHub 找，不保證找得回來）、五條 dependabot 分支（內容已在 `main`）
+
 ### 2026-09-27：改版推送並合進 main
 
 * `redesign/2026-09-26` 從 `main` 的 `9d34b7a` 分出，12 個 commit，**快轉合進 `main`**（沒有 merge commit），
@@ -74,7 +87,7 @@
 
 ## Tech Stack
 
-* Framework: Next.js 16.3.4（App Router、Turbopack，port 3100）+ React 19.2.8 + TypeScript 6
+* Framework: Next.js 16.3.5（App Router、Turbopack，port 3100）+ React 19.3.0 + TypeScript 6
 * Data source: TMDB API（v3 key / v4 token，全部 server-side）
 * Database: Neon Postgres，`@neondatabase/serverless` ^1.1.0（HTTP driver，非 TCP pool）
 * Access control: 自建擁有者鎖（`src/proxy.ts` + `src/lib/owner-session.ts`，Web Crypto HMAC-SHA256）；TMDB key 為 server-side
