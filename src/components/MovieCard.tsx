@@ -18,11 +18,18 @@ export default function MovieCard({
   movie,
   size = "sm",
   sizes = IMAGE_SIZES.posterGrid,
+  eager = false,
+  first = false,
 }: {
   movie: MovieSummary;
   size?: "sm" | "lg";
   /** 這張卡在版面上實際佔多寬。橫列與格線差很多，所以由呼叫端指定。 */
   sizes?: string;
+  /** 格線首屏那幾張：不延遲載入、不淡入。淡入要等 hydration 才把 opacity 打開，
+   *  首屏海報會空白到 JS 跑完；lazy 則要等版面算完才發請求。這幾張就是 LCP */
+  eager?: boolean;
+  /** 整頁第一張：再提高抓取優先序 */
+  first?: boolean;
 }) {
   const poster = tmdbImage(movie.poster_path, size === "lg" ? "w500" : "w342");
   const posterSrcSet = tmdbSrcSet(movie.poster_path, "poster");
@@ -46,8 +53,9 @@ export default function MovieCard({
             srcSet={posterSrcSet}
             sizes={sizes}
             alt={movie.title}
-            loading="lazy"
-            fadeIn
+            loading={eager || first ? "eager" : "lazy"}
+            fetchPriority={first ? "high" : "auto"}
+            fadeIn={!(eager || first)}
             fallback={titleSlate}
             className="poster-img h-full w-full object-cover"
           />

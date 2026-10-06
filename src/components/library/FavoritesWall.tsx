@@ -126,7 +126,7 @@ export default function FavoritesWall({
         ref={containerRef}
         className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 sm:gap-x-7 lg:grid-cols-4 lg:gap-x-9 lg:gap-y-14"
       >
-        {shown.map((t) => {
+        {shown.map((t, i) => {
           const id = t.movie.tmdb_id;
           const poster = tmdbImage(t.movie.poster_path, "w342");
           return (
@@ -139,7 +139,9 @@ export default function FavoritesWall({
                       srcSet={tmdbSrcSet(t.movie.poster_path, "poster")}
                       sizes={IMAGE_SIZES.favoritesWall}
                       alt={t.movie.title}
-                      loading="lazy"
+                      // 最寬四欄，1440×900 首屏排得下兩列：這八張不延遲載入
+                      loading={i < 8 ? "eager" : "lazy"}
+                      fetchPriority={i === 0 ? "high" : "auto"}
                       fallback={<TitleSlate title={t.movie.title} />}
                       className="poster-img h-full w-full object-cover"
                     />

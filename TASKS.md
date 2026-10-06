@@ -260,6 +260,21 @@ Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）不動，也不當基�
     儲存後鍵上一次顯示「儲存」而非「已儲存」，之後連跑六次都是「已儲存」，重現不了
   - gate：typecheck／lint／test（257）／build（26 條路由）全綠
 
+- [x] 細修第 8 輪（2026-10-06，同分支；production build，1440 與 375 寬量 LCP、各類資源體積與圖片尺寸）
+  - 熱門、找片、搜尋、收藏的首屏海報全是 `loading="lazy"`，而 LCP 就是其中一張。
+    片卡另外有 `fadeIn`：SSR 時帶 `opacity-0`，要等 hydration 跑完才打開，首屏海報會空白到 JS 載完。
+    `MovieCard` 加 `eager`／`first`：頁首格線前 10 張（五欄 × 兩列）不延遲、不淡入，第 1 張 `fetchPriority="high"`；
+    榜單前 10 列縮圖不延遲；收藏前 8 張（四欄 × 兩列）不延遲、第 1 張 high
+  - 結果（1440，mock 後端）：熱門 LCP 1080 → 540ms、找片 1240 → 228ms、搜尋 1236 → 544ms、收藏 548 → 約 600ms（同一量級，雜訊內）。
+    首頁與詳情頁原本就由劇照帶 `fetchpriority=high`，700ms／492ms，未動
+  - 圖片尺寸：srcset 挑的檔案與實際寬度相符（w342 對 251／307px、w780 對 747px、w1280 對 892px）
+  - 看過、未改：
+    - 看過清單縮圖 56px 抓 w185。w92 在兩倍螢幕只有 92px，小於所需 112px，會糊，維持 w185
+    - 字體：首頁約 1.27 MB，大部分是 Noto Serif TC 400 的 unicode-range 切片（14 片）。
+      已是 `preload: false`、不擋首次繪製，檔案以 immutable 快取；要再減就得動字體鎖，不在這一輪處理
+    - JS 每頁 193–204 KB、CSS 86 KB，本輪沒有增加
+  - gate：typecheck／lint／test（257）／build（26 條路由）全綠
+
 ## 之後另外處理（需使用者決定）
 
 - 上線後用真實資料逐頁看一次（本機要補 `.env`，或直接看線上版）

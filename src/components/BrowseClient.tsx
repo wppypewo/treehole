@@ -5,7 +5,7 @@ import MovieCard from "./MovieCard";
 import MovieGridSkeleton from "./MovieGridSkeleton";
 import ListStatus from "./ListStatus";
 import Segmented from "./Segmented";
-import { POSTER_GRID } from "./MovieGrid";
+import { POSTER_GRID, POSTER_GRID_ABOVE_FOLD } from "./MovieGrid";
 import type { MovieSummary } from "@/lib/tmdb";
 import { BROWSE_RATINGS, type BrowseFilters } from "@/lib/browse-filters";
 
@@ -357,8 +357,13 @@ export default function BrowseClient({
       ) : (
         results.length > 0 && (
           <div className={`mt-10 ${POSTER_GRID}`}>
-            {results.map((m) => (
-              <MovieCard key={m.id} movie={m} />
+            {results.map((m, i) => (
+              <MovieCard
+                key={m.id}
+                movie={m}
+                eager={i < POSTER_GRID_ABOVE_FOLD}
+                first={i === 0}
+              />
             ))}
           </div>
         )

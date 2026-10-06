@@ -6,6 +6,9 @@ import type { MovieSummary } from "@/lib/tmdb";
 export const POSTER_GRID =
   "grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5";
 
+/** 放在頁首的 POSTER_GRID，前幾張不延遲載入：最寬五欄，1440×900 首屏排得下兩列 */
+export const POSTER_GRID_ABOVE_FOLD = 10;
+
 export default function MovieGrid({
   movies,
   emptyText,

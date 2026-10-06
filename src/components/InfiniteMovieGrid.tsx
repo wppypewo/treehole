@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import MovieCard from "./MovieCard";
 import ListStatus from "./ListStatus";
-import { POSTER_GRID } from "./MovieGrid";
+import { POSTER_GRID, POSTER_GRID_ABOVE_FOLD } from "./MovieGrid";
 import type { MovieSummary } from "@/lib/tmdb";
 import { tmdbImage } from "@/lib/images";
 import FallbackImg from "@/components/FallbackImg";
@@ -112,8 +112,13 @@ export default function InfiniteMovieGrid({
           <RankedList movies={movies} labels={rankedLabels} />
         ) : (
           <div className={POSTER_GRID}>
-            {movies.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
+            {movies.map((movie, i) => (
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+                eager={i < POSTER_GRID_ABOVE_FOLD}
+                first={i === 0}
+              />
             ))}
           </div>
         ))}
@@ -133,6 +138,9 @@ export default function InfiniteMovieGrid({
     </div>
   );
 }
+
+// 1440×900 的榜單首屏約排得下十列；縮圖是 w185，先抓不貴
+const RANKED_ABOVE_FOLD = 10;
 
 // 名次、海報、片名、年份、分數。手機收成三欄，年份與分數併到片名底下
 const RANK_COLS =
@@ -160,7 +168,13 @@ function RankedList({
 
       <ol className="border-t border-hairline-strong sm:border-t-0">
         {movies.map((movie, i) => (
-          <RankedRow key={movie.id} movie={movie} rank={i + 1} labels={labels} />
+          <RankedRow
+            key={movie.id}
+            movie={movie}
+            rank={i + 1}
+            labels={labels}
+            eager={i < RANKED_ABOVE_FOLD}
+          />
         ))}
       </ol>
     </div>
@@ -171,10 +185,12 @@ function RankedRow({
   movie,
   rank,
   labels,
+  eager,
 }: {
   movie: MovieSummary;
   rank: number;
   labels: RankedLabels;
+  eager: boolean;
 }) {
   const poster = tmdbImage(movie.poster_path, "w185");
   const year = movie.release_date ? movie.release_date.slice(0, 4) : null;
@@ -200,7 +216,7 @@ function RankedRow({
           <FallbackImg
             src={poster}
             alt=""
-            loading="lazy"
+            loading={eager ? "eager" : "lazy"}
             className="h-full w-full object-cover"
           />
         )}
