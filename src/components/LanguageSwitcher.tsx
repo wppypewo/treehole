@@ -42,7 +42,7 @@ export default function LanguageSwitcher({
             type="button"
             onClick={() => switchTo(locale)}
             aria-pressed={active}
-            className={`tap-safe px-1 text-[0.6875rem] tracking-[0.12em] uppercase transition-colors ${
+            className={`tap-safe px-1 text-[0.6875rem] tracking-[0.12em] whitespace-nowrap uppercase transition-colors ${
               active
                 ? "text-paper underline decoration-curtain decoration-1 underline-offset-4"
                 : "text-paper-faint hover:text-paper-dim"

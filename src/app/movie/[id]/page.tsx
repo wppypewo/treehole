@@ -309,7 +309,11 @@ export default async function MoviePage({
             >
               <SectionHead id="trailer-title" title={dict.movie.trailer} />
               <div className="mt-[1.125rem]">
-                <TrailerPlayer youTubeKey={trailerKey} label={movie.title} />
+                <TrailerPlayer
+                  youTubeKey={trailerKey}
+                  title={movie.title}
+                  playLabel={dict.movie.playTrailer.replace("{title}", movie.title)}
+                />
               </div>
             </section>
           )}

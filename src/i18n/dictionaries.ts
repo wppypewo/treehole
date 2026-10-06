@@ -88,6 +88,8 @@ export interface Dictionary {
     /** TMDB 分數與票數。{score}／{n} 由呼叫端代入 */
     tmdbScore: string;
     trailer: string;
+    /** 預告片播放鍵的報讀名稱。{title} 由呼叫端代入 */
+    playTrailer: string;
     /** 片名下方演職員表的欄名，不帶冒號 */
     director: string;
     cast: string;
@@ -335,6 +337,7 @@ const zhTW: Dictionary = {
     minutes: "分鐘",
     tmdbScore: "TMDB {score}（{n} 人評分）",
     trailer: "預告片",
+    playTrailer: "播放預告片：{title}",
     director: "導演",
     cast: "主演",
     castRail: "演員",
@@ -607,6 +610,7 @@ const en: Dictionary = {
     minutes: "min",
     tmdbScore: "TMDB {score} ({n} votes)",
     trailer: "Trailer",
+    playTrailer: "Play trailer: {title}",
     director: "Director",
     cast: "Starring",
     castRail: "Cast",
@@ -698,7 +702,7 @@ const en: Dictionary = {
       all: "Full list",
       added: "Added {date}",
     },
-    diary: { title: "Recently watched", score: "I gave it {n}", all: "Everything watched" },
+    diary: { title: "Recently watched", score: "I gave it {n}", all: "All watched" },
     out: { title: "Out there", source: "TMDB popular" },
     schedule: { title: "Coming soon", source: "Taiwan release dates" },
     lists: "More lists",

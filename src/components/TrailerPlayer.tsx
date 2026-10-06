@@ -6,10 +6,14 @@ import FallbackImg from "@/components/FallbackImg";
 // 預告片：先顯示 YouTube 縮圖與播放鈕，點擊後才嵌入播放器（避免一進頁面就載入 YouTube）
 export default function TrailerPlayer({
   youTubeKey,
-  label,
+  title,
+  playLabel,
 }: {
   youTubeKey: string;
-  label: string;
+  /** 播放器 iframe 的名稱（片名） */
+  title: string;
+  /** 播放鍵的報讀名稱，要說出按下會做什麼（「播放預告片：片名」） */
+  playLabel: string;
 }) {
   const [play, setPlay] = useState(false);
 
@@ -18,7 +22,7 @@ export default function TrailerPlayer({
       {play ? (
         <iframe
           src={`https://www.youtube.com/embed/${youTubeKey}?autoplay=1`}
-          title={label}
+          title={title}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
           className="h-full w-full"
@@ -27,7 +31,7 @@ export default function TrailerPlayer({
         <button
           type="button"
           onClick={() => setPlay(true)}
-          aria-label={label}
+          aria-label={playLabel}
           className="group relative block h-full w-full"
         >
           {/* 名字已在按鈕的 aria-label 上，alt 留空，報讀不念兩次 */}

@@ -203,6 +203,19 @@ Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）不動，也不當基�
     `.rail` 上下各墊 4px 補回，上方從 `mt` 扣掉、下方負 margin 收回，版面不動
   - 英文介面 1440／375 無溢出
   - gate：typecheck／lint／test（257）／build 全綠
+- [x] 細修第 4 輪（2026-10-06，同分支；mock 資料，平板寬度、320、鍵盤、減少動態）
+  - 平板 768／1024：首頁、詳情、想看、收藏、外面在放無破版
+  - 段落標題列（`SectionHead`）改成與 `MovieRow` 同一個結構：放不下時換行的是旁註，
+    「看全部」留在標題那一行右邊。原本 375 英文的 See all 會被擠到第二行左邊
+  - 英文首頁「Everything watched」改「All watched」，375 標題列不再換行（320 仍換，接受）
+  - 320：語言鍵「繁體中文」原本折成兩行，加 `whitespace-nowrap`；全站各頁 320 無橫向溢出
+  - 報讀名稱：預告片播放鍵原本只念片名，改「播放預告片：片名」（iframe 仍用片名）；
+    首頁「打開這部」用 `aria-describedby` 掛上片名，離開段落（讀屏連結清單）也知道是哪部
+  - 鍵盤：想看／看過／收藏／搜尋／瀏覽 1440 與首頁／詳情 375 走過，每站有焦點框；
+    排序與篩選是 radiogroup，一組只佔一個 Tab 站
+  - 減少動態（`prefers-reduced-motion: reduce`）：首頁與詳情整頁截圖，沒有停在透明的內容；
+    Lenis、劇照下沉、Flip、CSS 四處都有守門
+  - gate：typecheck／lint／test（257）／build 全綠
 
 ## 之後另外處理（需使用者決定）
 
