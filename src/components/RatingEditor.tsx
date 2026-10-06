@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { SavedMovie } from "@/lib/db";
 import RatingRuler from "./RatingRuler";
 
@@ -35,6 +35,7 @@ export default function RatingEditor({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const rulerRef = useRef<HTMLDivElement>(null);
 
   async function save() {
     if (!score || saving) return;
@@ -70,6 +71,9 @@ export default function RatingEditor({
       setScore(null);
       setNote("");
       setSaved(false);
+      // 清除鍵在分數歸零後就不畫了，焦點會掉回 <body>。交給刻度的第一格，
+      // 也就是清除後整組唯一可 Tab 到的那一格：要重新評分從這裡開始
+      rulerRef.current?.querySelector<HTMLElement>('[data-score="1"]')?.focus();
     } catch {
       setError(labels.removeError);
     } finally {
@@ -89,7 +93,7 @@ export default function RatingEditor({
         <p id="rating-scale-label" className="t-label">
           {labels.scorePrompt}
         </p>
-        <div className="mt-2.5">
+        <div ref={rulerRef} className="mt-2.5">
           <RatingRuler
             value={score}
             onChange={pick}
@@ -121,8 +125,8 @@ export default function RatingEditor({
           <button
             type="button"
             onClick={clearRating}
-            disabled={saving}
-            className="tap-safe text-[0.8125rem] tracking-[0.04em] text-paper-faint transition-colors hover:text-paper disabled:opacity-50"
+            aria-disabled={saving || undefined}
+            className="tap-safe text-[0.8125rem] tracking-[0.04em] text-paper-faint transition-colors hover:text-paper aria-disabled:opacity-50"
           >
             {labels.clear}
           </button>
@@ -132,7 +136,9 @@ export default function RatingEditor({
         <button
           type="button"
           onClick={save}
-          disabled={!score || saving}
+          // 沒選分數是真的不能按；送出中只標 aria-disabled，焦點才不會掉回 <body>
+          disabled={!score}
+          aria-disabled={saving || undefined}
           className="btn-line"
         >
           {saved ? labels.saved : labels.save}

@@ -19,6 +19,9 @@ export interface RemoveLabels {
  *
  * 沒有倒數自動還原。確認狀態會一直停在那裡，直到按取消、按 Esc，
  * 或焦點離開這一組——計時器會在人還在讀字的時候把按鈕換掉。
+ *
+ * 送出中用 aria-disabled，不用 disabled：「確定拿掉」被停用的那一刻焦點會掉回
+ * <body>，這一組跟著因為失焦收起來；寫入失敗時人就停在頁首，看不到重試的鍵。
  */
 export default function ConfirmRemove({
   title,
@@ -55,15 +58,15 @@ export default function ConfirmRemove({
 
   const named = labels.removeNamed.replace("{title}", title);
   const base =
-    "tap-safe text-[0.8125rem] tracking-[0.02em] transition-colors disabled:opacity-40";
+    "tap-safe text-[0.8125rem] tracking-[0.02em] transition-colors aria-disabled:opacity-40";
 
   if (!asking) {
     return (
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setAsking(true)}
-        disabled={busy}
+        onClick={() => !busy && setAsking(true)}
+        aria-disabled={busy || undefined}
         aria-label={named}
         className={`${base} text-paper-faint hover:text-paper ${className}`}
       >
@@ -93,16 +96,16 @@ export default function ConfirmRemove({
       <button
         ref={confirmRef}
         type="button"
-        onClick={onConfirm}
-        disabled={busy}
+        onClick={() => !busy && onConfirm()}
+        aria-disabled={busy || undefined}
         className={`${base} text-paper underline decoration-paper-dim decoration-1 underline-offset-4`}
       >
         {labels.confirmRemove}
       </button>
       <button
         type="button"
-        onClick={() => cancel(true)}
-        disabled={busy}
+        onClick={() => !busy && cancel(true)}
+        aria-disabled={busy || undefined}
         className={`${base} text-paper-faint hover:text-paper`}
       >
         {labels.cancel}

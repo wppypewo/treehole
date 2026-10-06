@@ -14,6 +14,7 @@ import Segmented from "@/components/Segmented";
 import ConfirmRemove, { type RemoveLabels } from "./ConfirmRemove";
 import LibraryEmpty from "./LibraryEmpty";
 import { useFlip } from "./useFlip";
+import { useRefocus } from "./useRefocus";
 import FallbackImg from "@/components/FallbackImg";
 
 export interface DiaryRow {
@@ -71,10 +72,12 @@ export default function WatchedDiary({
   const [failed, setFailed] = useState(false);
   const router = useRouter();
   const { containerRef, capture } = useFlip<HTMLDivElement>();
+  const { leave, emptyRef } = useRefocus(containerRef);
 
   const groups = groupByMonth(filterWatched(list, filter));
 
   async function remove(row: DiaryRow) {
+    if (busy !== null) return;
     setBusy(row.movie.tmdb_id);
     setFailed(false);
     try {
@@ -83,6 +86,7 @@ export default function WatchedDiary({
       });
       if (!res.ok) throw new Error(`watched responded ${res.status}`);
       capture();
+      leave(row.movie.tmdb_id);
       setList((prev) => prev.filter((r) => r.movie.tmdb_id !== row.movie.tmdb_id));
       router.refresh();
     } catch {
@@ -93,7 +97,9 @@ export default function WatchedDiary({
   }
 
   if (list.length === 0) {
-    return <LibraryEmpty text={labels.empty} browse={labels.browse} />;
+    return (
+      <LibraryEmpty text={labels.empty} browse={labels.browse} linkRef={emptyRef} />
+    );
   }
 
   return (
@@ -124,7 +130,12 @@ export default function WatchedDiary({
       )}
 
       {groups.length === 0 ? (
-        <p className="py-20 text-center text-sm text-paper-faint">
+        // 篩選中拿掉最後一部時焦點落在這句話上（tabIndex -1：可被聚焦，不進 Tab 順序）
+        <p
+          ref={emptyRef}
+          tabIndex={-1}
+          className="py-20 text-center text-sm text-paper-faint"
+        >
           {labels.filteredEmpty}
         </p>
       ) : (

@@ -282,14 +282,16 @@ body {
     background-color 200ms ease,
     color 200ms ease;
 }
-.btn-line:hover:not(:disabled) {
+.btn-line:hover:not(:disabled, [aria-disabled="true"]) {
   border-color: var(--paper);
   background: rgb(255 255 255 / 0.05);
 }
-.btn-line:active:not(:disabled) {
+.btn-line:active:not(:disabled, [aria-disabled="true"]) {
   transform: translateY(1px);
 }
-.btn-line:disabled {
+/* 送出中的鍵用 aria-disabled 而不是 disabled：被停用的元素會把焦點丟回 <body>，
+   鍵盤使用者按完一下就回到頁首。外觀與真的停用一樣 */
+.btn-line:is(:disabled, [aria-disabled="true"]) {
   cursor: not-allowed;
   color: var(--paper-faint);
   border-color: var(--hairline);
@@ -585,7 +587,7 @@ body {
 .ledger-keys > button + button {
   border-left: 1px solid var(--hairline-strong);
 }
-.ledger-keys > button:hover:not(:disabled):not([data-on="true"]) {
+.ledger-keys > button:hover:not(:disabled, [aria-disabled="true"], [data-on="true"]) {
   color: var(--paper);
   background: rgb(255 255 255 / 0.05);
 }
@@ -593,10 +595,10 @@ body {
   background: var(--curtain-fill);
   color: var(--paper);
 }
-.ledger-keys > button[data-on="true"]:hover:not(:disabled) {
+.ledger-keys > button[data-on="true"]:hover:not(:disabled, [aria-disabled="true"]) {
   background: var(--curtain-fill-hover);
 }
-.ledger-keys > button:disabled {
+.ledger-keys > button[aria-disabled="true"] {
   cursor: progress;
 }
 .ledger-keys > button:focus-visible {

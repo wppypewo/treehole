@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SavedMovie } from "@/lib/db";
 import type { Locale } from "@/i18n/config";
@@ -35,6 +35,9 @@ type Kind = "favorites" | "watchlist" | "watched";
 // 標記看過會把同一部片移出想看（資料層的 markWatched 在一句 SQL 裡做完），
 // 所以這裡要把「想看」一起關掉，並且講出來、給一個復原。
 //
+// 送出中用 aria-disabled 擋重複按，不用 disabled：按下的那顆鍵若被停用，
+// 焦點會掉回 <body>，鍵盤使用者每按一次就被送回頁首。toggle 自己會擋 busy。
+//
 // 狀態存的是日期而不是布林：鍵底下那一行「9/12 加入」「9/21 看過」
 // 就是從這裡讀的。開的時候記下現在，關的時候清掉。
 export default function MovieActions({
@@ -56,6 +59,7 @@ export default function MovieActions({
   // 被移出想看的那一筆原本的加入時間；有值時顯示復原
   const [undoAt, setUndoAt] = useState<string | null>(null);
   const router = useRouter();
+  const keysRef = useRef<HTMLDivElement>(null);
   const fmt = useMemo(
     () => shelfDateFormatter(locale, todayInTaipei().slice(0, 4)),
     [locale],
@@ -128,6 +132,10 @@ export default function MovieActions({
       if (!res.ok) throw new Error(`watchlist responded ${res.status}`);
       setWant(undoAt);
       setUndoAt(null);
+      // 復原鍵接著就不畫了；焦點交給剛被放回去的「想看」，報讀器會唸出它已按下
+      keysRef.current
+        ?.querySelector<HTMLElement>('[data-kind="watchlist"]')
+        ?.focus();
       router.refresh();
     } catch {
       setFailed(true);
@@ -152,13 +160,19 @@ export default function MovieActions({
       <p id="ledger-state-label" className="t-label">
         {labels.group}
       </p>
-      <div role="group" aria-labelledby="ledger-state-label" className="ledger-keys mt-2.5">
+      <div
+        ref={keysRef}
+        role="group"
+        aria-labelledby="ledger-state-label"
+        className="ledger-keys mt-2.5"
+      >
         {buttons.map((b) => (
           <button
             key={b.kind}
             type="button"
-            disabled={busy}
+            aria-disabled={busy || undefined}
             aria-pressed={b.date !== null}
+            data-kind={b.kind}
             data-on={b.date !== null}
             onClick={() => toggle(b.kind, b.date, b.set)}
           >
@@ -191,8 +205,8 @@ export default function MovieActions({
             <button
               type="button"
               onClick={restoreWatchlist}
-              disabled={busy}
-              className="tap-safe link-hair shrink-0 text-paper disabled:opacity-50"
+              aria-disabled={busy || undefined}
+              className="tap-safe link-hair shrink-0 text-paper aria-disabled:opacity-50"
             >
               {labels.undo}
             </button>

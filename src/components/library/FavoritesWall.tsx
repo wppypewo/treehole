@@ -11,6 +11,7 @@ import Segmented from "@/components/Segmented";
 import ConfirmRemove, { type RemoveLabels } from "./ConfirmRemove";
 import LibraryEmpty from "./LibraryEmpty";
 import { useFlip } from "./useFlip";
+import { useRefocus } from "./useRefocus";
 
 export interface FavoriteTile {
   movie: SavedMovie;
@@ -57,6 +58,7 @@ export default function FavoritesWall({
   const [busy, setBusy] = useState<number | null>(null);
   const [failed, setFailed] = useState(false);
   const { containerRef, capture } = useFlip<HTMLOListElement>();
+  const { leave, emptyRef } = useRefocus(containerRef);
 
   const shown = sortFavorites(
     list.map((t) => ({ ...t, title: t.movie.title })),
@@ -66,6 +68,7 @@ export default function FavoritesWall({
 
   // 收藏沒有導覽列計數，拿掉之後不必 router.refresh
   async function remove(tile: FavoriteTile) {
+    if (busy !== null) return;
     setBusy(tile.movie.tmdb_id);
     setFailed(false);
     try {
@@ -74,6 +77,7 @@ export default function FavoritesWall({
       });
       if (!res.ok) throw new Error(`favorites responded ${res.status}`);
       capture();
+      leave(tile.movie.tmdb_id);
       setList((prev) => prev.filter((t) => t.movie.tmdb_id !== tile.movie.tmdb_id));
     } catch {
       setFailed(true);
@@ -83,7 +87,9 @@ export default function FavoritesWall({
   }
 
   if (list.length === 0) {
-    return <LibraryEmpty text={labels.empty} browse={labels.browse} />;
+    return (
+      <LibraryEmpty text={labels.empty} browse={labels.browse} linkRef={emptyRef} />
+    );
   }
 
   // 全部都沒評分時，「我的評分」排出來跟「最近收藏」一樣，不給這個選項

@@ -1,3 +1,4 @@
+import type { Ref } from "react";
 import Link from "next/link";
 
 /**
@@ -7,13 +8,17 @@ import Link from "next/link";
  * 欄寬跟想看清單的序號欄一樣，片放進來之後第一列就長在同一個位置。
  * 不置中：全站的表、刊頭、狀態頁都靠左，空的時候也一樣。
  * 不畫上框線：刊頭底下已經有一條，再畫一條會變成兩條並排。
+ *
+ * linkRef：拿掉最後一部時，焦點交給「去探索」（見 useRefocus）。
  */
 export default function LibraryEmpty({
   text,
   browse,
+  linkRef,
 }: {
   text: string;
   browse: string;
+  linkRef?: Ref<HTMLAnchorElement>;
 }) {
   return (
     <div className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-baseline gap-x-4 border-b border-hairline pt-8 pb-10 min-[900px]:grid-cols-[3.5rem_minmax(0,1fr)]">
@@ -24,7 +29,7 @@ export default function LibraryEmpty({
         <p className="max-w-[44ch] text-pretty text-[0.9375rem] leading-relaxed text-paper-dim">
           {text}
         </p>
-        <Link href="/browse" className="btn-line mt-6">
+        <Link ref={linkRef} href="/browse" className="btn-line mt-6">
           {browse}
         </Link>
       </div>

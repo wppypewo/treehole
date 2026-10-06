@@ -10,6 +10,7 @@ import Segmented from "@/components/Segmented";
 import ConfirmRemove, { type RemoveLabels } from "./ConfirmRemove";
 import LibraryEmpty from "./LibraryEmpty";
 import { useFlip } from "./useFlip";
+import { useRefocus } from "./useRefocus";
 
 export interface WatchlistRow {
   movie: SavedMovie;
@@ -74,6 +75,7 @@ export default function WatchlistTable({
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { containerRef, capture } = useFlip<HTMLOListElement>();
+  const { leave, arrive, emptyRef } = useRefocus(containerRef);
 
   const shown = sortWatchlist(list, sort, locale);
   // 畫面上的序號照「目前還在清單上的」加入先後重排：記為看過或拿掉一部之後，
@@ -82,7 +84,9 @@ export default function WatchlistTable({
     sortWatchlist(list, "queue", locale).map((r, i) => [r.movie.tmdb_id, i + 1]),
   );
 
+  // 送出中的鍵只標 aria-disabled（見 ConfirmRemove），這裡自己擋重複送出
   async function markWatched(row: WatchlistRow) {
+    if (busy !== null) return;
     setBusy(row.movie.tmdb_id);
     setError(null);
     try {
@@ -97,6 +101,7 @@ export default function WatchlistTable({
         watchedAdded: boolean;
       };
       capture();
+      leave(row.movie.tmdb_id);
       setList((prev) => prev.filter((r) => r.movie.tmdb_id !== row.movie.tmdb_id));
       setPending({
         row,
@@ -128,6 +133,8 @@ export default function WatchlistTable({
       });
       if (!put.ok) throw new Error(`watchlist responded ${put.status}`);
       capture();
+      // 「復原」這顆鍵跟著消失，焦點回到放回來的那一列
+      arrive(row.movie.tmdb_id);
       setList((prev) => [...prev, row]);
       setPending(null);
       if (watchedAdded) {
@@ -146,6 +153,7 @@ export default function WatchlistTable({
   }
 
   async function remove(row: WatchlistRow) {
+    if (busy !== null) return;
     setBusy(row.movie.tmdb_id);
     setError(null);
     try {
@@ -154,6 +162,7 @@ export default function WatchlistTable({
       });
       if (!res.ok) throw new Error(`watchlist responded ${res.status}`);
       capture();
+      leave(row.movie.tmdb_id);
       setList((prev) => prev.filter((r) => r.movie.tmdb_id !== row.movie.tmdb_id));
       // 拿掉之後，上一次「看過了」的復原還有效，不清掉
       router.refresh();
@@ -203,8 +212,8 @@ export default function WatchlistTable({
               <button
                 type="button"
                 onClick={undo}
-                disabled={busy !== null}
-                className="link-hair tap-safe text-paper disabled:opacity-40"
+                aria-disabled={busy !== null || undefined}
+                className="link-hair tap-safe text-paper aria-disabled:opacity-40"
               >
                 {labels.undo}
               </button>
@@ -223,7 +232,7 @@ export default function WatchlistTable({
       )}
 
       {list.length === 0 ? (
-        <LibraryEmpty text={labels.empty} browse={labels.browse} />
+        <LibraryEmpty text={labels.empty} browse={labels.browse} linkRef={emptyRef} />
       ) : (
       <ol ref={containerRef} className="mt-5 border-t border-hairline-strong">
         {shown.map((row) => {
@@ -277,9 +286,9 @@ export default function WatchlistTable({
                 <button
                   type="button"
                   onClick={() => markWatched(row)}
-                  disabled={busy !== null}
+                  aria-disabled={busy !== null || undefined}
                   aria-label={labels.markWatchedNamed.replace("{title}", row.title)}
-                  className="tap-safe text-[0.8125rem] tracking-[0.02em] text-paper-dim transition-colors hover:text-paper disabled:opacity-40"
+                  className="tap-safe text-[0.8125rem] tracking-[0.02em] text-paper-dim transition-colors hover:text-paper aria-disabled:opacity-40"
                 >
                   {labels.markWatched}
                 </button>
