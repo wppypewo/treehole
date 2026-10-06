@@ -102,6 +102,10 @@ body {
   font-family: var(--font-sans);
   /* 中文西文混排時，讓標點與英數之間有呼吸 */
   text-spacing-trim: space-first;
+  /* 片名、人名、短評都是外來資料，可能是一個沒有空格的長字
+     （威爾斯地名、網址、連續英數）。沒有這條，長字會撐出欄外疊到隔壁欄。
+     break-word 只在放不下時才斷，不影響欄寬計算，一般片名照常排 */
+  overflow-wrap: break-word;
 }
 
 ::selection {
@@ -205,6 +209,31 @@ body {
     font-weight: 500;
     letter-spacing: 0.2em;
     text-transform: uppercase;
+    color: var(--paper-faint);
+  }
+
+  /* 一串用「·」隔開的小字（分數 · 收藏日）。窄欄換行時，行首不該留一個孤零零的點：
+     每一段前面都放點，內層往左縮一個點寬，外層把縮出去的部分裁掉，
+     於是每一行開頭那個點都落在框外，行中的點照常看得到。
+     用法：<p class="dot-run"><span><span>…</span><span>…</span></span></p> */
+  .dot-run {
+    overflow: hidden;
+  }
+  .dot-run > span {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    margin-inline-start: -0.875rem;
+  }
+  .dot-run > span > * {
+    white-space: nowrap;
+  }
+  .dot-run > span > *::before {
+    content: "·";
+    content: "·" / "";
+    display: inline-block;
+    width: 0.875rem;
+    text-align: center;
     color: var(--paper-faint);
   }
 }

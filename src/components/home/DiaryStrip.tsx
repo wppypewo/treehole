@@ -44,8 +44,9 @@ export default function DiaryStrip({ entries }: { entries: DiaryEntry[] }) {
                 {e.score}
               </span>
             )}
+            {/* line-clamp 自己會設 display，不能再加 block，否則 block 蓋掉它、整段短評全攤開 */}
             {e.note && (
-              <span className="mt-2 line-clamp-3 block text-[0.8125rem] leading-relaxed text-paper-faint">
+              <span className="mt-2 line-clamp-3 text-[0.8125rem] leading-relaxed text-paper-faint">
                 {e.note}
               </span>
             )}

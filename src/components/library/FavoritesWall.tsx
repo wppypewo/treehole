@@ -146,20 +146,19 @@ export default function FavoritesWall({
                 </p>
               </Link>
               {/* 手機兩欄時一欄約 165px，分數、日期、拿掉擠不下一行。
-                  每段各自不斷行，擠不下時「拿掉」整顆換到下一行，不把「收藏」拆成兩半 */}
+                  手機上「拿掉」一律自成一行：有的卡擠得下、有的擠不下時，
+                  同一排兩張卡的「拿掉」會一高一低。
+                  分數與日期之間的點交給 dot-run，日期換行時行首不留點 */}
               <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-[0.8125rem]">
-                <p className="tabular-nums">
-                  {t.score !== null && (
-                    <span className="whitespace-nowrap text-curtain-ink">
-                      {labels.score.replace("{n}", String(t.score))}
-                    </span>
-                  )}
-                  {t.score !== null && t.added && (
-                    <span aria-hidden className="text-paper-faint"> · </span>
-                  )}
-                  {t.added && (
-                    <span className="whitespace-nowrap text-paper-faint">{t.added}</span>
-                  )}
+                <p className="dot-run basis-full tabular-nums sm:basis-auto">
+                  <span>
+                    {t.score !== null && (
+                      <span className="text-curtain-ink">
+                        {labels.score.replace("{n}", String(t.score))}
+                      </span>
+                    )}
+                    {t.added && <span className="text-paper-faint">{t.added}</span>}
+                  </span>
                 </p>
                 <ConfirmRemove
                   title={t.movie.title}

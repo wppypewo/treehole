@@ -72,9 +72,13 @@ export default function Tonight({
   return (
     <section
       aria-labelledby="tonight-title"
-      className="grid gap-7 pt-9 min-[900px]:grid-cols-[5fr_7fr] min-[900px]:items-end min-[900px]:gap-14 min-[900px]:pt-16"
+      className={`grid gap-7 pt-9 min-[900px]:items-end min-[900px]:gap-14 min-[900px]:pt-16 ${
+        still ? "min-[900px]:grid-cols-[5fr_7fr]" : ""
+      }`}
     >
-      <div className="animate-rise">
+      {/* 沒有劇照時不留右欄：留著是一大塊空白，看起來像圖沒載入。
+          文字欄改成單欄，但限制行長，片名不會拉成一整條 */}
+      <div className={`animate-rise ${still ? "" : "max-w-[46rem]"}`}>
         <p className="t-reason">{reason}</p>
         <h1
           id="tonight-title"
