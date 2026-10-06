@@ -126,6 +126,7 @@ export default function InfiniteMovieGrid({
         loading={loading}
         done={done}
         isEmpty={!loading && !error && movies.length === 0}
+        hasItems={movies.length > 0}
         labels={labels}
         onRetry={loadMore}
       />

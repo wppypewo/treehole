@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@/i18n/dictionaries";
 import { genreOptions } from "@/lib/genres";
 import { discoverMovies } from "@/lib/tmdb";
+import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import type { MovieSummary } from "@/lib/tmdb";
 import {
   BROWSE_FIRST_YEAR,
@@ -42,7 +43,7 @@ export default async function BrowsePage({ searchParams }: PageProps<"/browse">)
 
   let initialMovies: MovieSummary[] = [];
   let initialHasMore = false;
-  let initialFailed = false;
+  let initialError: string | null = null;
   try {
     const data = await discoverMovies(locale, {
       genre: initial.genre ? Number(initial.genre) : undefined,
@@ -53,8 +54,8 @@ export default async function BrowsePage({ searchParams }: PageProps<"/browse">)
     });
     initialMovies = data.results;
     initialHasMore = data.page < data.total_pages;
-  } catch {
-    initialFailed = true;
+  } catch (error) {
+    initialError = tmdbErrorMessage(error, dict);
   }
 
   return (
@@ -71,7 +72,7 @@ export default async function BrowsePage({ searchParams }: PageProps<"/browse">)
           initial={initial}
           initialMovies={initialMovies}
           initialHasMore={initialHasMore}
-          initialFailed={initialFailed}
+          initialError={initialError}
           labels={{
             genre: dict.browse.genre,
             year: dict.browse.year,

@@ -1,10 +1,11 @@
 // 人物頁載入骨架。形狀對齊 page.tsx：
 // 左欄 2:3 照片、右欄姓名、基本資料一行、簡介；底下是依年份排的作品年表。
+// 外層 min-h-dvh：頁尾在內容到之前留在視窗外，不會被推走算成版面位移。
 const bar = "animate-pulse bg-ink-raised";
 
 export default function Loading() {
   return (
-    <div className="page-shell">
+    <div className="page-shell min-h-dvh">
       <div className="grid gap-8 md:grid-cols-[minmax(0,220px)_minmax(0,1fr)] md:gap-16">
         <div className={`aspect-[2/3] w-32 md:w-full ${bar}`} />
         <div>

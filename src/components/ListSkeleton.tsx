@@ -10,6 +10,9 @@ import MovieGridSkeleton from "./MovieGridSkeleton";
  *
  * 標題條用 1.02em 配 h1 的字級：t-film 的行高就是 1.02，兩邊吃同一組字級，
  * 改刊頭字級時骨架不必跟著改數字。
+ *
+ * 外層至少一個視窗高（min-h-dvh）：骨架比真內容短的話，頁尾會先露在視窗裡，
+ * 內容一到又被推出去，算成一次版面位移（詳情頁實測 CLS 0.094）。
  * ranked／schedule／browse 的內容以粗線開頭，刊頭不畫細線（同 PageHeader 的 rule={false}）；
  * grid 的刊頭有細線（PageHeader 預設）。
  */
@@ -21,7 +24,7 @@ export default function ListSkeleton({
   if (variant === "search") return <SearchSkeleton />;
   if (variant === "grid") {
     return (
-      <div className="page-shell">
+      <div className="page-shell min-h-dvh">
         <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2 border-b border-hairline pb-7">
           <div className="h-[1.02em] w-[5em] max-w-full animate-pulse bg-ink-raised text-[2.125rem] sm:text-[3rem]" />
         </div>
@@ -32,7 +35,7 @@ export default function ListSkeleton({
     );
   }
   return (
-    <div className="page-shell">
+    <div className="page-shell min-h-dvh">
       <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2">
         <div className="h-[1.02em] w-[5em] max-w-full animate-pulse bg-ink-raised text-[2.125rem] sm:text-[3rem]" />
         {variant === "schedule" && (
@@ -130,7 +133,7 @@ function BrowseSkeleton() {
  */
 function SearchSkeleton() {
   return (
-    <div className="page-shell">
+    <div className="page-shell min-h-dvh">
       <div className="max-w-2xl border-b border-hairline pb-8">
         <div className={`h-[1.02em] w-[2.5em] text-[2.125rem] sm:text-[3rem] ${bar}`} />
       </div>

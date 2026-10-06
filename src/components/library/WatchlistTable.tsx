@@ -189,8 +189,14 @@ export default function WatchlistTable({
           <span />
         )}
 
-        {/* 狀態列固定存在，讓報讀器接得到變化；沒事時是空的 */}
-        <p role="status" className="flex min-h-11 flex-wrap items-center gap-x-4 text-[0.8125rem] text-paper-dim">
+        {/* 狀態列固定存在，讓報讀器接得到變化；沒事時是空的。
+            清單空了又沒有待復原時不佔高度，空狀態那一列才貼得住刊頭 */}
+        <p
+          role="status"
+          className={`flex flex-wrap items-center gap-x-4 text-[0.8125rem] text-paper-dim ${
+            list.length > 0 || pending ? "min-h-11" : ""
+          }`}
+        >
           {pending && (
             <>
               <span>{labels.markedWatched.replace("{title}", pending.row.title)}</span>

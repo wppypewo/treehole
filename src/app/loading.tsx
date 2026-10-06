@@ -6,12 +6,15 @@
  * 原本這裡是清單頁的刊頭加海報牆，首頁載入時會先閃一個不存在的版面。
  *
  * 手機跟正式頁一樣是文字一段、影像一段，不疊。
+ *
+ * 外層至少一個視窗高（min-h-dvh）：骨架比真內容短的話，頁尾會先露在視窗裡，
+ * 內容一到又被推出去，算成一次版面位移（詳情頁實測 CLS 0.094）。
  */
 const bar = "animate-pulse bg-ink-raised";
 
 export default function Loading() {
   return (
-    <div className="pb-28">
+    <div className="min-h-dvh pb-28">
       <div className="mx-auto max-w-[1400px] px-5 sm:px-8">
         <div className="grid gap-7 pt-9 min-[900px]:grid-cols-[5fr_7fr] min-[900px]:items-end min-[900px]:gap-14 min-[900px]:pt-16">
           <div>

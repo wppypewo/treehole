@@ -85,7 +85,7 @@ export default function BrowseClient({
   initial,
   initialMovies,
   initialHasMore,
-  initialFailed,
+  initialError,
 }: {
   genres: { id: number; name: string }[];
   years: number[];
@@ -94,18 +94,19 @@ export default function BrowseClient({
   initial: BrowseFilters;
   initialMovies: MovieSummary[];
   initialHasMore: boolean;
-  /** 伺服器取第一頁就失敗了。前端直接顯示錯誤與重試，不要假裝「沒有片」 */
-  initialFailed: boolean;
+  /**
+   * 伺服器取第一頁就失敗時的訊息（說得出是 TMDB 哪裡出錯），沒失敗是 null。
+   * 前端直接顯示錯誤與重試，不要假裝「沒有片」
+   */
+  initialError: string | null;
 }) {
   const defaultSort = sorts[0]?.value ?? "popularity.desc";
   const [filters, setFilters] = useState<BrowseFilters>(initial);
   const [results, setResults] = useState<MovieSummary[]>(initialMovies);
-  const [page, setPage] = useState(initialFailed ? 0 : 1);
+  const [page, setPage] = useState(initialError ? 0 : 1);
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(!initialFailed && !initialHasMore);
-  const [error, setError] = useState<string | null>(
-    initialFailed ? labels.loadError : null,
-  );
+  const [done, setDone] = useState(!initialError && !initialHasMore);
+  const [error, setError] = useState<string | null>(initialError);
   const [stuck, setStuck] = useState(false);
 
   const seen = useRef<Set<number>>(new Set(initialMovies.map((m) => m.id)));
@@ -370,6 +371,7 @@ export default function BrowseClient({
         loading={loading}
         done={done}
         isEmpty={!loading && !error && results.length === 0}
+        hasItems={results.length > 0}
         labels={labels}
         onRetry={retry}
       />

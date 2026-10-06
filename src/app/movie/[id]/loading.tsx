@@ -1,8 +1,10 @@
 // 電影詳情頁載入骨架。形狀對齊 page.tsx 的 .detail-grid：
 // 左欄片名、事實行、21:9 劇照、簡介；右欄（手機在簡介之後）「我的紀錄」外框。
+// 外層 min-h-dvh：骨架只有半個視窗高時，頁尾會先露出來，內容一到又被推走，
+// 那一下是這頁唯一的版面位移（實測 CLS 0.094）。其他骨架同一個理由。
 export default function Loading() {
   return (
-    <div className="mx-auto max-w-[1400px] px-5 sm:px-8">
+    <div className="mx-auto min-h-dvh max-w-[1400px] px-5 sm:px-8">
       <div className="detail-grid pt-9 sm:pt-12 min-[1000px]:pt-16">
         <div className="detail-head">
           <div className="h-12 w-2/3 max-w-md animate-pulse bg-ink-raised" />
