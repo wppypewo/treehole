@@ -122,7 +122,7 @@ export default function MovieRow({
           右側刻意不留白，讓最後一張被裁切，暗示這列還有內容。 */}
       <div
         ref={ref}
-        className={`rail scrollbar-hide mt-6 flex overflow-x-auto scroll-smooth ${
+        className={`rail scrollbar-hide mt-5 flex overflow-x-auto scroll-smooth ${
           size === "lg" ? "[--rail-gap:1.25rem]" : "[--rail-gap:1rem]"
         }`}
       >

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import FallbackImg from "@/components/FallbackImg";
 import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import type { MovieSummary } from "@/lib/tmdb";
 
@@ -29,36 +29,30 @@ export default function MovieCard({
   const year = movie.release_date ? movie.release_date.slice(0, 4) : null;
   const rating = movie.vote_average > 0 ? movie.vote_average.toFixed(1) : null;
 
-  // 海報載入後才淡入，避免 decode 完成瞬間「跳出」
-  const imgRef = useRef<HTMLImageElement>(null);
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    // 圖片若在 React 掛載前已從快取載完，onLoad 不會觸發，於此補判斷
-    if (imgRef.current?.complete) setLoaded(true);
-  }, []);
+  // 沒有海報、或海報載不出來，都在框裡排片名
+  const titleSlate = (
+    <div className="flex h-full w-full items-center justify-center px-3 text-center text-[0.6875rem] tracking-wide text-paper-dim">
+      {movie.title}
+    </div>
+  );
 
   return (
     <Link href={`/movie/${movie.id}`} className="hov-poster group/card block">
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-ink-raised">
         {poster ? (
           // 原生 img：避免 next/image 對 TMDB 遠端網域的額外設定
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            ref={imgRef}
+          <FallbackImg
             src={poster}
             srcSet={posterSrcSet}
             sizes={sizes}
             alt={movie.title}
             loading="lazy"
-            onLoad={() => setLoaded(true)}
-            className={`poster-img h-full w-full object-cover ${
-              loaded ? "opacity-100" : "opacity-0"
-            }`}
+            fadeIn
+            fallback={titleSlate}
+            className="poster-img h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center px-3 text-center text-[0.6875rem] tracking-wide text-paper-dim">
-            {movie.title}
-          </div>
+          titleSlate
         )}
 
       </div>

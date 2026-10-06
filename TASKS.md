@@ -195,6 +195,14 @@ Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）不動，也不當基�
   - 手機：想看表的原文片名獨立一行並截斷；瀏覽頁類型列改橫向捲動（`.pick-scroll`，寫在 `globals.css`
     是因為 `.pick` 不在 layer 內，Tailwind 的 `max-sm:` 蓋不過）
   - gate：typecheck／lint／test（257）／build 全綠
+- [x] 細修第 3 輪（2026-10-06，同分支；mock 資料，另用「TMDB 圖全部回 404」的模式截圖）
+  - 圖片載入失敗：新增 `FallbackImg`，站上 12 處 `<img>` 全改走它。原本 TMDB 撤檔或斷網時，
+    有 alt 的圖露出破圖示加 alt 字，`alt=""` 的劇照在 Chrome 也會沿框畫一圈淺灰細線。
+    現在海報框改排片名、人像框改排姓名首字，其餘留空框
+  - 鍵盤焦點：首頁 Tab 走 28 站，每站都有 2px 簾幕紅框；橫向片列的框原本被 `overflow-x: auto` 裁掉上下兩條，
+    `.rail` 上下各墊 4px 補回，上方從 `mt` 扣掉、下方負 margin 收回，版面不動
+  - 英文介面 1440／375 無溢出
+  - gate：typecheck／lint／test（257）／build 全綠
 
 ## 之後另外處理（需使用者決定）
 

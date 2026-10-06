@@ -25,6 +25,7 @@ import PersonCard from "@/components/PersonCard";
 import RatingEditor from "@/components/RatingEditor";
 import ParallaxImage from "@/components/ParallaxImage";
 import SectionHead from "@/components/SectionHead";
+import FallbackImg from "@/components/FallbackImg";
 
 // 這頁本來就是動態的：getLocale() 讀 cookie，片庫狀態每次請求直接查資料庫。
 // 不用 force-dynamic，是因為那個旗標等同 fetchCache = "force-no-store"，
@@ -204,8 +205,7 @@ export default async function MoviePage({
           ) : (
             poster && (
               <div className="detail-still mt-8 aspect-[2/3] w-40 overflow-hidden bg-ink-raised sm:w-52">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <FallbackImg
                   src={poster}
                   srcSet={tmdbSrcSet(movie.poster_path, "poster")}
                   sizes={IMAGE_SIZES.detailPoster}
@@ -321,7 +321,7 @@ export default async function MoviePage({
           <div className="mx-auto max-w-[1400px] px-5 sm:px-8">
             <SectionHead id="cast-title" title={dict.movie.castRail} />
           </div>
-          <div className="rail scrollbar-hide mt-[1.125rem] flex overflow-x-auto [--rail-gap:1.25rem]">
+          <div className="rail scrollbar-hide mt-[0.875rem] flex overflow-x-auto [--rail-gap:1.25rem]">
             <div aria-hidden className="rail-gutter" />
             {credits.cast.slice(0, 15).map((c) => (
               <PersonCard

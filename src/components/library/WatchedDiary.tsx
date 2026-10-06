@@ -14,6 +14,7 @@ import Segmented from "@/components/Segmented";
 import ConfirmRemove, { type RemoveLabels } from "./ConfirmRemove";
 import LibraryEmpty from "./LibraryEmpty";
 import { useFlip } from "./useFlip";
+import FallbackImg from "@/components/FallbackImg";
 
 export interface DiaryRow {
   movie: SavedMovie;
@@ -196,8 +197,7 @@ function DiaryItem({
 
       <div className="aspect-[2/3] w-full overflow-hidden bg-ink-raised">
         {poster && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <FallbackImg
             src={poster}
             alt=""
             loading="lazy"

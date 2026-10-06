@@ -1,4 +1,5 @@
 import Link from "next/link";
+import FallbackImg from "@/components/FallbackImg";
 import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import type { SavedMovie } from "@/lib/db";
 
@@ -51,19 +52,17 @@ export default function LibraryPicks({
                 <div className="relative aspect-[2/3] w-full overflow-hidden bg-ink-raised">
                   {poster ? (
                     // 原生 img：與站上其他海報一致，不走 next/image
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <FallbackImg
                       src={poster}
                       srcSet={tmdbSrcSet(movie.poster_path, "poster")}
                       sizes={IMAGE_SIZES.libraryPicks}
                       alt={movie.title}
                       loading="lazy"
+                      fallback={<TitleSlate title={movie.title} />}
                       className="poster-img h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center px-2 text-center text-[0.625rem] text-paper-dim">
-                      {movie.title}
-                    </div>
+                    <TitleSlate title={movie.title} />
                   )}
                 </div>
                 <h3 className="poster-cap mt-2 line-clamp-2 text-[0.75rem] leading-snug">
@@ -75,5 +74,14 @@ export default function LibraryPicks({
         })}
       </ul>
     </section>
+  );
+}
+
+// 沒有海報、或海報載不出來，都在框裡排片名
+function TitleSlate({ title }: { title: string }) {
+  return (
+    <div className="flex h-full w-full items-center justify-center px-2 text-center text-[0.625rem] text-paper-dim">
+      {title}
+    </div>
   );
 }

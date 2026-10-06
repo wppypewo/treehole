@@ -7,6 +7,7 @@ import ListStatus from "./ListStatus";
 import { POSTER_GRID } from "./MovieGrid";
 import type { MovieSummary } from "@/lib/tmdb";
 import { tmdbImage } from "@/lib/images";
+import FallbackImg from "@/components/FallbackImg";
 
 interface Labels {
   loading: string;
@@ -195,8 +196,7 @@ function RankedRow({
       <div className="aspect-[2/3] w-full overflow-hidden bg-ink-raised">
         {poster && (
           // 海報是裝飾，片名就在旁邊，報讀不必再念一次
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <FallbackImg
             src={poster}
             alt=""
             loading="lazy"

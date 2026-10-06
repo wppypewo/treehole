@@ -598,6 +598,10 @@ body {
    所以捲動列用 .rail 宣告 --rail-gap，這裡把它扣回來。 */
 .rail {
   column-gap: var(--rail-gap);
+  /* overflow-x: auto 連帶把 y 軸也裁掉，卡片的焦點框（2px 線 + 2px 間距）上下兩條會不見。
+     上下各墊 4px 讓它露出來；上方從各處的 mt 扣掉，下方用負 margin 收回，版面不動。 */
+  padding-block: 4px;
+  margin-bottom: -4px;
 }
 .rail-gutter {
   flex-shrink: 0;

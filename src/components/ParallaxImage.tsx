@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import FallbackImg from "@/components/FallbackImg";
 
 /**
  * 隨捲動緩慢下沉的影像層。
@@ -65,8 +66,7 @@ export default function ParallaxImage({
     <div ref={wrapRef} className="absolute inset-0 overflow-hidden">
       {/* 影像本體比框高一截，位移時才不會露出邊 */}
       <div ref={layerRef} className="absolute inset-x-0 -top-[8%] h-[116%]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <FallbackImg
           src={src}
           srcSet={srcSet}
           sizes={sizes}

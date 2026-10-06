@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Segmented from "./Segmented";
+import FallbackImg from "@/components/FallbackImg";
 
 export interface FilmographyRow {
   id: number;
@@ -150,8 +151,7 @@ function CreditRow({
       <div className="aspect-[2/3] w-full overflow-hidden bg-ink-raised">
         {row.poster && (
           // 海報是裝飾，片名就在旁邊
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <FallbackImg
             src={row.poster}
             alt=""
             loading="lazy"

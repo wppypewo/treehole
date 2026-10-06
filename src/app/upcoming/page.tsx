@@ -9,6 +9,7 @@ import { groupReleaseSchedule, todayInTaipei } from "@/lib/dates";
 import { tmdbImage } from "@/lib/images";
 import ErrorNotice from "@/components/ErrorNotice";
 import PageHeader from "@/components/PageHeader";
+import FallbackImg from "@/components/FallbackImg";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dict = getDictionary(await getLocale());
@@ -102,8 +103,7 @@ function ScheduleFilm({ movie }: { movie: MovieSummary }) {
       <div className="aspect-[2/3] w-full overflow-hidden bg-ink-raised">
         {poster && (
           // 海報是裝飾，片名就在旁邊
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <FallbackImg
             src={poster}
             alt=""
             loading="lazy"

@@ -17,6 +17,7 @@ import {
   type RoleLabels,
 } from "@/lib/filmography";
 import Link from "next/link";
+import FallbackImg from "@/components/FallbackImg";
 import StatusNotice from "@/components/StatusNotice";
 import RefreshButton from "@/components/RefreshButton";
 import Biography from "@/components/Biography";
@@ -156,6 +157,14 @@ export default async function PersonPage({ params }: PageProps<"/person/[id]">) 
   if (person.place_of_birth) facts.push(person.place_of_birth);
 
   const photo = tmdbImage(person.profile_path, "w342");
+  const initial = (
+    <div
+      aria-hidden
+      className="t-film flex h-full w-full items-center justify-center text-5xl text-paper-faint"
+    >
+      {person.name.slice(0, 1)}
+    </div>
+  );
 
   return (
     <article className="page-shell">
@@ -164,22 +173,17 @@ export default async function PersonPage({ params }: PageProps<"/person/[id]">) 
         <div className="w-32 md:w-full">
           <div className="aspect-[2/3] overflow-hidden bg-ink-raised">
             {photo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <FallbackImg
                 src={photo}
                 srcSet={tmdbSrcSet(person.profile_path, "profile")}
                 sizes={IMAGE_SIZES.personPhoto}
                 alt={person.name}
                 loading="eager"
+                fallback={initial}
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div
-                aria-hidden
-                className="t-film flex h-full w-full items-center justify-center text-5xl text-paper-faint"
-              >
-                {person.name.slice(0, 1)}
-              </div>
+              initial
             )}
           </div>
         </div>

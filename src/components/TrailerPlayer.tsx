@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import FallbackImg from "@/components/FallbackImg";
 
 // 預告片：先顯示 YouTube 縮圖與播放鈕，點擊後才嵌入播放器（避免一進頁面就載入 YouTube）
 export default function TrailerPlayer({
@@ -29,10 +30,10 @@ export default function TrailerPlayer({
           aria-label={label}
           className="group relative block h-full w-full"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          {/* 名字已在按鈕的 aria-label 上，alt 留空，報讀不念兩次 */}
+          <FallbackImg
             src={`https://img.youtube.com/vi/${youTubeKey}/hqdefault.jpg`}
-            alt={label}
+            alt=""
             className="h-full w-full object-cover"
           />
           <span className="absolute inset-0 flex items-center justify-center bg-ink/35 transition-colors group-hover:bg-ink/20">

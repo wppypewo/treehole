@@ -6,6 +6,7 @@ import type { Locale } from "@/i18n/config";
 import type { SavedMovie } from "@/lib/db.types";
 import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import { sortFavorites, type FavoritesSort } from "@/lib/library";
+import FallbackImg from "@/components/FallbackImg";
 import Segmented from "@/components/Segmented";
 import ConfirmRemove, { type RemoveLabels } from "./ConfirmRemove";
 import LibraryEmpty from "./LibraryEmpty";
@@ -127,19 +128,17 @@ export default function FavoritesWall({
               <Link href={`/movie/${id}`} className="hov-poster block">
                 <div className="aspect-[2/3] w-full overflow-hidden bg-ink-raised">
                   {poster ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <FallbackImg
                       src={poster}
                       srcSet={tmdbSrcSet(t.movie.poster_path, "poster")}
                       sizes={IMAGE_SIZES.favoritesWall}
                       alt={t.movie.title}
                       loading="lazy"
+                      fallback={<TitleSlate title={t.movie.title} />}
                       className="poster-img h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center px-3 text-center text-[0.6875rem] tracking-wide text-paper-dim">
-                      {t.movie.title}
-                    </div>
+                    <TitleSlate title={t.movie.title} />
                   )}
                 </div>
                 <p className="poster-cap mt-3 font-display text-[1.0625rem] leading-snug">
@@ -174,6 +173,15 @@ export default function FavoritesWall({
           );
         })}
       </ol>
+    </div>
+  );
+}
+
+// 沒有海報、或海報載不出來，都在框裡排片名
+function TitleSlate({ title }: { title: string }) {
+  return (
+    <div className="flex h-full w-full items-center justify-center px-3 text-center text-[0.6875rem] tracking-wide text-paper-dim">
+      {title}
     </div>
   );
 }
