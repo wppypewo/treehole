@@ -52,12 +52,14 @@ export default function ProgramTable({
               {String(i + 1).padStart(2, "0")}
             </span>
 
+            {/* 手機上原文片名換到第二行並截斷：接在譯名後面的話，
+                常常只剩一兩個字掉到下一行 */}
             <span className="min-w-0 font-display text-xl leading-snug text-paper">
               {row.title}
               {row.originalTitle && row.originalTitle !== row.title && (
                 <small
                   lang="und"
-                  className="t-original ml-2.5 text-sm text-paper-faint"
+                  className="t-original ml-2.5 text-sm text-paper-faint max-sm:mt-0.5 max-sm:ml-0 max-sm:block max-sm:truncate"
                 >
                   {row.originalTitle}
                 </small>

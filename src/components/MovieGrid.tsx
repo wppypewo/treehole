@@ -9,9 +9,12 @@ export const POSTER_GRID =
 export default function MovieGrid({
   movies,
   emptyText,
+  className = "",
 }: {
   movies: MovieSummary[];
   emptyText: string;
+  /** 補在格線上的 class，例如依欄數藏掉會落單的最後一列 */
+  className?: string;
 }) {
   if (movies.length === 0) {
     return (
@@ -22,7 +25,7 @@ export default function MovieGrid({
   }
 
   return (
-    <div className={POSTER_GRID}>
+    <div className={`${POSTER_GRID} ${className}`}>
       {movies.map((movie) => (
         <MovieCard key={movie.id} movie={movie} />
       ))}

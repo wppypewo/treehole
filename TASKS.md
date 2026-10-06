@@ -184,6 +184,17 @@ Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）不動，也不當基�
 - [x] 相依升級合進 `main`（2026-09-27，使用者指示；細節在 `PROJECT_STATE.md` Git Status）
 - [x] 刪除沒用的分支（遠端 2 條、本機 4 條）；dependabot 已自行關閉 #18 #20 #21。#16 #17 改寫成 16.3.6 的新升級，保留
 - [x] 修 CI：`e638c5b` 起 `main` 的 CI 在 Type check 失敗（`PageProps` 要先 `next typegen`），`typecheck` 腳本補上；同批合進 #16 #17（16.3.6）
+- [x] 細修一輪（2026-10-06，分支 `claude/optimistic-ride-s7tgpz`；mock 資料，1440／375 截圖逐頁對照）
+  - 橫向片列（首頁兩條、詳情頁演員）：`.rail-gutter` 扣掉捲動容器的 `--rail-gap`，第一張海報與段落標題對齊（原本右偏 16–20px）；
+    左右箭頭由 `paper-faint` 提到 `paper-dim`
+  - 新增頁尾 `SiteFooter`：TMDB 資料來源連結與 TMDB 使用條款要求的免責聲明；解鎖頁不畫
+  - 詳情頁：預告片移進 `detail-grid` 左欄（「我的紀錄」右欄不再空著一大段）；
+    相關推薦在 5 欄時藏掉第 11、12 部，不留只有 2 部的最後一列；
+    片名下事實列每項不斷行，手機上「劇情、愛情」不再拆成兩行
+  - 首頁「今晚」片名依字寬分三級字級（`src/lib/title-size.ts`，附測試），兩字片名放大、長片名不擠出五欄
+  - 手機：想看表的原文片名獨立一行並截斷；瀏覽頁類型列改橫向捲動（`.pick-scroll`，寫在 `globals.css`
+    是因為 `.pick` 不在 layer 內，Tailwind 的 `max-sm:` 蓋不過）
+  - gate：typecheck／lint／test（257）／build 全綠
 
 ## 之後另外處理（需使用者決定）
 

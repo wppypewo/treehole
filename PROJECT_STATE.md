@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-> 最後更新：2026-09-27（route handler／proxy 測試補缺；此前：階段 18 合進 `main`、CI 修復、升到 Next 16.3.6）。本檔上半部一律是**當下實測值**，
+> 最後更新：2026-10-06（細修一輪，分支 `claude/optimistic-ride-s7tgpz`，未合併；此前：route handler／proxy 測試補缺、階段 18 合進 `main`、CI 修復、升到 Next 16.3.6）。本檔上半部一律是**當下實測值**，
 > 下半部「階段 N」是不再更動的歷史紀錄。兩者矛盾時以上半部為準。
 > git 狀態皆在本 repo 內判斷，不要拿工作區根的狀態套進來。
 
@@ -12,6 +12,12 @@
 * Current status: **階段 18 全面改版（放映表）已合進 `main` 並上線（2026-09-27）**。階段 1–18 完成。`09a7219` 的 GitHub Actions CI 成功、Vercel Production 部署 success（`gh run watch` 與 GitHub deployments API 實測）。之後每次推送的結果仍要另外看，本檔只記到 `09a7219`
 
 ## Git Status
+
+### 2026-10-06：細修一輪（分支 `claude/optimistic-ride-s7tgpz`，未合進 `main`）
+
+* 片列對齊、TMDB 頁尾、詳情頁預告片移進左欄與相關推薦落單列、「今晚」片名分級字級、手機想看表與瀏覽頁類型列。逐項見 `TASKS.md`
+* 只在 mock 資料上以 1440／375 截圖檢查過，真實資料仍未逐頁看
+* 四道 gate 全綠：257 tests／18 files、26 條路由全 `ƒ`
 
 ### 2026-09-27：route handler／proxy 測試補缺（Next 3 第 3 項）
 

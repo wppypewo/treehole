@@ -447,6 +447,22 @@ body {
   color: var(--paper);
   text-decoration-color: var(--paper);
 }
+/* 手機上十九個類型會折成三行，篩選面板吃掉整個首屏。
+   改成一行橫捲並出血到螢幕邊（-mx 對齊 .page-shell 的 1.25rem），
+   右緣被切掉的那個字就是「還有」的提示。
+   .pick 不在 layer 裡，Tailwind 的 max-sm:flex-nowrap 蓋不過它，所以寫在這裡 */
+@media (max-width: 639px) {
+  .pick-scroll {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-inline: -1.25rem;
+    padding-inline: 1.25rem;
+    scrollbar-width: none;
+  }
+  .pick-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}
 
 /* ── 評分刻度：十格平分整條寬度 ────────────────────────────
    原本是十顆 44px 的方塊加 flex-wrap，375px 手機會斷成 7＋3 兩排。
@@ -491,22 +507,25 @@ body {
 .detail-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "head" "still" "prose" "ledger" "credits";
+  grid-template-areas: "head" "still" "prose" "ledger" "credits" "trailer";
 }
 .detail-head { grid-area: head; }
 .detail-still { grid-area: still; }
 .detail-prose { grid-area: prose; }
 .detail-ledger { grid-area: ledger; }
 .detail-credits { grid-area: credits; }
+.detail-trailer { grid-area: trailer; }
 @media (min-width: 1000px) {
   .detail-grid {
     grid-template-columns: minmax(0, 1fr) 380px;
-    grid-template-rows: auto auto auto 1fr;
+    /* 最後一列吃掉剩餘高度：左欄比帳本短時，空白留在最底下，不撐開中間的列 */
+    grid-template-rows: auto auto auto auto 1fr;
     grid-template-areas:
       "head    ledger"
       "still   ledger"
       "prose   ledger"
-      "credits ledger";
+      "credits ledger"
+      "trailer ledger";
     column-gap: 4rem;
   }
   .detail-ledger {
@@ -573,14 +592,20 @@ body {
 }
 
 /* 策展列的左右墊片：讓出血的捲動列，第一張卡仍與 Container 的內距切齊。
-   用 % 而非 vw，避免捲軸寬度造成偏移。 */
+   用 % 而非 vw，避免捲軸寬度造成偏移。
+   墊片本身也是 flex 子項，捲動列的 gap 會再加在它後面——
+   沒扣掉的話第一張卡比標題往右多推一個 gap（實測 1440 寬時差 16–20px）。
+   所以捲動列用 .rail 宣告 --rail-gap，這裡把它扣回來。 */
+.rail {
+  column-gap: var(--rail-gap);
+}
 .rail-gutter {
   flex-shrink: 0;
-  width: max(1.25rem, calc((100% - 1400px) / 2 + 1.25rem));
+  width: calc(max(1.25rem, calc((100% - 1400px) / 2 + 1.25rem)) - var(--rail-gap, 0px));
 }
 @media (min-width: 640px) {
   .rail-gutter {
-    width: max(2rem, calc((100% - 1400px) / 2 + 2rem));
+    width: calc(max(2rem, calc((100% - 1400px) / 2 + 2rem)) - var(--rail-gap, 0px));
   }
 }
 

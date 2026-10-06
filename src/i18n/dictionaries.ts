@@ -204,6 +204,13 @@ export interface Dictionary {
     schedule: { title: string; source: string };
     lists: string;
   };
+  /** 全站頁尾。TMDB 的使用條款要求標示資料來源，並註明未經 TMDB 背書 */
+  footer: {
+    /** 頁尾的地標名稱 */
+    label: string;
+    notice: string;
+    source: string;
+  };
   common: {
     empty: string;
     loading: string;
@@ -472,6 +479,11 @@ const zhTW: Dictionary = {
     schedule: { title: "即將上映", source: "台灣院線" },
     lists: "其他片單",
   },
+  footer: {
+    label: "頁尾",
+    notice: "本站使用 TMDB API，但未經 TMDB 背書或認證。",
+    source: "片目、劇照與評分來自 TMDB",
+  },
   common: {
     empty: "TMDB 沒有回傳任何片。",
     loading: "載入中…",
@@ -690,6 +702,11 @@ const en: Dictionary = {
     out: { title: "Out there", source: "TMDB popular" },
     schedule: { title: "Coming soon", source: "Taiwan release dates" },
     lists: "More lists",
+  },
+  footer: {
+    label: "Footer",
+    notice: "This product uses the TMDB API but is not endorsed or certified by TMDB.",
+    source: "Film data, stills and scores from TMDB",
   },
   common: {
     empty: "TMDB returned no films.",

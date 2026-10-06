@@ -101,7 +101,7 @@ export default function MovieRow({
               aria-label={prevLabel}
               disabled={atStart}
               onClick={() => scrollByDir(-1)}
-              className="flex h-11 w-11 items-center justify-center text-paper-faint transition-colors hover:text-paper disabled:pointer-events-none disabled:opacity-25"
+              className="flex h-11 w-11 items-center justify-center text-paper-dim transition-colors hover:text-paper disabled:pointer-events-none disabled:opacity-30"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
             </button>
@@ -110,7 +110,7 @@ export default function MovieRow({
               aria-label={nextLabel}
               disabled={atEnd}
               onClick={() => scrollByDir(1)}
-              className="flex h-11 w-11 items-center justify-center text-paper-faint transition-colors hover:text-paper disabled:pointer-events-none disabled:opacity-25"
+              className="flex h-11 w-11 items-center justify-center text-paper-dim transition-colors hover:text-paper disabled:pointer-events-none disabled:opacity-30"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
             </button>
@@ -122,8 +122,8 @@ export default function MovieRow({
           右側刻意不留白，讓最後一張被裁切，暗示這列還有內容。 */}
       <div
         ref={ref}
-        className={`scrollbar-hide mt-6 flex overflow-x-auto scroll-smooth ${
-          size === "lg" ? "gap-5" : "gap-4"
+        className={`rail scrollbar-hide mt-6 flex overflow-x-auto scroll-smooth ${
+          size === "lg" ? "[--rail-gap:1.25rem]" : "[--rail-gap:1rem]"
         }`}
       >
         {/* 左側墊片：對齊 Container 的內距 */}

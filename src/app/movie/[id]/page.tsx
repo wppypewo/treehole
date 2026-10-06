@@ -171,14 +171,19 @@ export default async function MoviePage({
             )}
             {facts.length > 0 && (
               <p className="t-meta mt-5">
+                {/* 每項事實自己不斷行，只在分隔點之後換行：
+                    手機上「劇情、」與「愛情」不會被拆到兩行 */}
                 {facts.map((f, i) => (
                   <span key={f}>
                     {i > 0 && (
-                      <span aria-hidden className="px-2 text-paper-faint">
-                        ·
-                      </span>
+                      <>
+                        <span aria-hidden className="px-2 text-paper-faint">
+                          ·
+                        </span>
+                        <wbr />
+                      </>
                     )}
-                    {f}
+                    <span className="whitespace-nowrap">{f}</span>
                   </span>
                 ))}
               </p>
@@ -294,16 +299,21 @@ export default async function MoviePage({
               )}
             </dl>
           )}
-        </div>
 
-        {trailerKey && (
-          <section aria-labelledby="trailer-title" className="mt-24">
-            <SectionHead id="trailer-title" title={dict.movie.trailer} />
-            <div className="mt-[1.125rem] max-w-4xl">
-              <TrailerPlayer youTubeKey={trailerKey} label={movie.title} />
-            </div>
-          </section>
-        )}
+          {/* 預告放在左欄、演職員底下：寬度跟劇照一致，右邊的「我的紀錄」
+              繼續黏著。原本放在格線外、限寬 4xl，桌機上右側空出一大塊 */}
+          {trailerKey && (
+            <section
+              aria-labelledby="trailer-title"
+              className="detail-trailer mt-16"
+            >
+              <SectionHead id="trailer-title" title={dict.movie.trailer} />
+              <div className="mt-[1.125rem]">
+                <TrailerPlayer youTubeKey={trailerKey} label={movie.title} />
+              </div>
+            </section>
+          )}
+        </div>
       </div>
 
       {credits && credits.cast.length > 0 && (
@@ -311,7 +321,7 @@ export default async function MoviePage({
           <div className="mx-auto max-w-[1400px] px-5 sm:px-8">
             <SectionHead id="cast-title" title={dict.movie.castRail} />
           </div>
-          <div className="scrollbar-hide mt-[1.125rem] flex gap-5 overflow-x-auto">
+          <div className="rail scrollbar-hide mt-[1.125rem] flex overflow-x-auto [--rail-gap:1.25rem]">
             <div aria-hidden className="rail-gutter" />
             {credits.cast.slice(0, 15).map((c) => (
               <PersonCard
@@ -334,9 +344,11 @@ export default async function MoviePage({
         >
           <SectionHead id="related-title" title={dict.recommendations.related} />
           <div className="mt-[1.125rem]">
+            {/* 12 部在 2／3／4 欄都排得滿；5 欄時最後一列只剩 2 部，藏掉 */}
             <MovieGrid
               movies={related}
               emptyText={dict.recommendations.relatedEmpty}
+              className="xl:[&>*:nth-child(n+11)]:hidden"
             />
           </div>
         </section>

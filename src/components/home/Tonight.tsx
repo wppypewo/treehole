@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ParallaxImage from "../ParallaxImage";
 import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
+import { tonightTitleSize } from "@/lib/title-size";
 
 export interface TonightFilm {
   id: number;
@@ -77,7 +78,7 @@ export default function Tonight({
         <p className="t-reason">{reason}</p>
         <h1
           id="tonight-title"
-          className="t-film mt-3.5 text-[clamp(2.5rem,6vw,4.75rem)] text-paper"
+          className={`t-film mt-3.5 ${tonightTitleSize(film.title)} text-paper`}
         >
           {film.title}
         </h1>

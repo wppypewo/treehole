@@ -279,6 +279,7 @@ export default function BrowseClient({
             value={filters.genre}
             onChange={(v) => change({ genre: v })}
             label={labels.genre}
+            className="pick-scroll"
           />
         </FilterRow>
         <FilterRow label={labels.year} htmlFor="browse-year">

@@ -4,6 +4,7 @@ import "./globals.css";
 import { fontVariables } from "./fonts";
 import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
+import SiteFooter from "@/components/SiteFooter";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { htmlLang } from "@/i18n/config";
@@ -76,6 +77,8 @@ export default async function RootLayout({
         <main id="main" tabIndex={-1} className="flex-1 outline-none">
           {children}
         </main>
+        {/* 解鎖頁不畫：跟導覽列同一個理由，鎖著時頁面只該有那一個表單 */}
+        {!locked && <SiteFooter dict={dict} />}
       </body>
     </html>
   );
