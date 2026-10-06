@@ -51,7 +51,8 @@ export default function Navbar({
 
   return (
     <header className="sticky top-0 z-30 border-b border-hairline bg-ink">
-      <nav className="mx-auto flex h-16 max-w-[1400px] items-center gap-8 px-5 sm:px-8">
+      {/* min-h 而不是 h：手機系統字級調大時，語言鍵與選單鍵折到第二行，不撐出橫捲 */}
+      <nav className="mx-auto flex min-h-16 max-w-[1400px] flex-wrap items-center gap-x-8 px-5 sm:px-8">
         <Link
           href="/"
           className="t-film tap-safe shrink-0 text-xl whitespace-nowrap text-paper"
@@ -84,8 +85,10 @@ export default function Navbar({
             aria-label={menuOpen ? dict.nav.closeMenu : dict.nav.openMenu}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((o) => !o)}
-            className="-mr-2 flex h-11 w-11 items-center justify-center text-paper-dim transition-colors hover:text-paper"
+            className="-mr-2 flex size-[44px] items-center justify-center text-paper-dim transition-colors hover:text-paper"
           >
+            {/* 觸控範圍是手指的大小，用 px 寫，不跟著系統字級放大；
+                放大的話，字級調到兩倍時這顆鍵會被擠出螢幕右緣 */}
             {/* 兩條線 ↔ 叉：交叉淡出，讓開關狀態有回饋 */}
             <span className="relative h-4 w-4" aria-hidden="true">
               <svg

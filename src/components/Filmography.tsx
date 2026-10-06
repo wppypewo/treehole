@@ -147,7 +147,8 @@ function CreditRow({
   libraryLabels: Record<LibraryMark, string>;
 }) {
   return (
-    <li className="hov-row grid grid-cols-[2.5rem_minmax(0,1fr)] items-center gap-x-4 py-2.5 max-sm:pl-3 sm:grid-cols-[2.75rem_minmax(0,1fr)]">
+    // 縮圖欄用 px：圖不必跟著系統字級放大，字級調到兩倍時片名欄才排得下字
+    <li className="hov-row grid grid-cols-[40px_minmax(0,1fr)] items-center gap-x-4 py-2.5 max-sm:pl-3 sm:grid-cols-[44px_minmax(0,1fr)]">
       <div className="aspect-[2/3] w-full overflow-hidden bg-ink-raised">
         {row.poster && (
           // 海報是裝飾，片名就在旁邊

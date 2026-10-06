@@ -64,11 +64,13 @@ export default async function UpcomingPage() {
             {days.map((d) => (
               <li
                 key={d.date}
-                className="grid grid-cols-[4.25rem_minmax(0,1fr)] gap-x-4 border-b border-hairline py-5 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-x-8"
+                className="grid grid-cols-[5rem_minmax(0,1fr)] gap-x-4 border-b border-hairline py-5 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-x-8"
               >
-                {/* 日期欄貼著捲動：同一天片多時，往下捲還看得到是哪一天 */}
+                {/* 日期欄貼著捲動：同一天片多時，往下捲還看得到是哪一天。
+                    欄寬要放得下最寬的「10/17」（手機 28px 字約 78px），
+                    否則全站的 overflow-wrap 會把它斷成「10/1」「7」兩行 */}
                 <p className="self-start leading-none sm:sticky sm:top-24">
-                  <span aria-hidden className="t-num block text-[1.75rem] text-paper sm:text-[2.25rem]">
+                  <span aria-hidden className="t-num block whitespace-nowrap text-[1.75rem] text-paper sm:text-[2.25rem]">
                     {d.md}
                   </span>
                   <span aria-hidden className="mt-1.5 block text-[0.6875rem] tracking-[0.06em] text-paper-faint">
@@ -99,7 +101,8 @@ function ScheduleFilm({ movie }: { movie: MovieSummary }) {
       : null;
 
   return (
-    <li className="hov-row grid grid-cols-[2.5rem_minmax(0,1fr)] items-center gap-x-4 py-2.5 max-sm:pl-3 sm:grid-cols-[2.75rem_minmax(0,1fr)]">
+    // 縮圖欄用 px：圖不必跟著系統字級放大，字級調到兩倍時片名欄才排得下字
+    <li className="hov-row grid grid-cols-[40px_minmax(0,1fr)] items-center gap-x-4 py-2.5 max-sm:pl-3 sm:grid-cols-[44px_minmax(0,1fr)]">
       <div className="aspect-[2/3] w-full overflow-hidden bg-ink-raised">
         {poster && (
           // 海報是裝飾，片名就在旁邊

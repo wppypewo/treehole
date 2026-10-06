@@ -162,7 +162,7 @@ async function ResultCount({
   // 計數報 TMDB 的總筆數而不是這一頁的 20 筆——使用者要知道的是「有多少」，
   // 不是「現在畫面上有多少」。
   return (
-    <p className="t-meta shrink-0 text-paper-faint">
+    <p className="t-meta min-w-0 text-paper-faint">
       {dict.common.filmCount.replace("{n}", String(result.found.total_results))}
     </p>
   );

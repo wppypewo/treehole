@@ -28,7 +28,7 @@ export default function PageHeader({
       <h1 className="t-film text-[2.125rem] text-paper sm:text-[3rem]">
         {title}
       </h1>
-      {meta && <p className="t-meta shrink-0 text-paper-faint">{meta}</p>}
+      {meta && <p className="t-meta min-w-0 text-paper-faint">{meta}</p>}
     </header>
   );
 }

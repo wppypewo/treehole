@@ -225,8 +225,10 @@ body {
     align-items: baseline;
     margin-inline-start: -0.875rem;
   }
+  /* 每段照內容寬排，放不下就整段換到下一行；只有一段本身比整欄還寬時
+     （手機系統字級調到兩倍）才在段內折行，不被外層的 overflow 裁掉 */
   .dot-run > span > * {
-    white-space: nowrap;
+    min-width: 0;
   }
   .dot-run > span > *::before {
     content: "·";
@@ -423,6 +425,9 @@ body {
    選中的那段反白。不用簾幕紅——排序不是使用者留下的痕跡。 */
 .seg {
   display: inline-flex;
+  /* 一般字級一行放得下。手機系統字級調到兩倍時三顆鍵比螢幕寬，折行而不是撐出橫捲 */
+  flex-wrap: wrap;
+  max-width: 100%;
   border: 1px solid var(--hairline-strong);
 }
 .seg > button {
@@ -734,5 +739,24 @@ body {
   .btn-line:active,
   .btn-solid:active {
     transform: none;
+  }
+}
+
+/* 強制色彩（Windows 高對比）：系統把背景色換成 Canvas、字換成 CanvasText，
+   靠填色表示的狀態會整個消失——排序選了哪個、這部在不在想看、評幾分、
+   導覽在哪一頁，四樣都只剩一樣的黑底白框。這裡改用系統的 SelectedItem 色對，
+   由使用者的配色決定實際顏色，不寫死。 */
+@media (forced-colors: active) {
+  .seg > button[aria-checked="true"],
+  .ledger-keys > button[data-on="true"],
+  .btn-line[data-on="true"],
+  .ruler > button[data-filled="true"] {
+    forced-color-adjust: none;
+    background: SelectedItem;
+    color: SelectedItemText;
+  }
+  .nav-mark {
+    forced-color-adjust: none;
+    background: CanvasText;
   }
 }
