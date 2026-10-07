@@ -39,7 +39,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const movieId = Number(id);
-  if (!Number.isInteger(movieId) || movieId <= 0) return {};
+  // 不存在的片在這裡就喊 notFound()，404 頁的分頁標題才接得上；
+  // 等到頁面本體才喊的話，<head> 已經用預設的「Treehole」送出去了。
+  // 判斷條件跟下方頁面本體一致。
+  if (!Number.isInteger(movieId) || movieId <= 0) notFound();
   try {
     const locale = await getLocale();
     const movie = await getMovieDetails(locale, movieId);
@@ -48,8 +51,9 @@ export async function generateMetadata({
       title: year ? `${movie.title}（${year}）` : movie.title,
       description: movie.overview || undefined,
     };
-  } catch {
-    // 抓不到就讓 layout 的預設標題接手；分頁標題不值得讓整頁掛掉
+  } catch (error) {
+    if (error instanceof TmdbError && error.kind === "not-found") notFound();
+    // 其他錯誤讓 layout 的預設標題接手；分頁標題不值得讓整頁掛掉
     return {};
   }
 }

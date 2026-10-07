@@ -32,11 +32,13 @@ export async function generateMetadata({
 }: PageProps<"/person/[id]">): Promise<Metadata> {
   const { id } = await params;
   const personId = Number(id);
-  if (!Number.isInteger(personId) || personId <= 0) return {};
+  // 同詳情頁：不存在的人在這裡就喊 notFound()，404 的分頁標題才接得上
+  if (!Number.isInteger(personId) || personId <= 0) notFound();
   try {
     const person = await getPerson(await getLocale(), personId);
     return { title: person.name };
-  } catch {
+  } catch (error) {
+    if (error instanceof TmdbError && error.kind === "not-found") notFound();
     return {};
   }
 }

@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import StatusNotice from "@/components/StatusNotice";
+
+// 分頁標題：沒有這段的話 404 只顯示根版面的預設「Treehole」，
+// 分頁列上分不出這是錯誤頁。
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = getDictionary(await getLocale());
+  return { title: dict.errors.pageNotFound };
+}
 
 // 404 頁：語系由 cookie 決定，與全站一致。
 // 文案用 pageNotFound 而不是 notFound——這頁也會接到人物頁的 404，

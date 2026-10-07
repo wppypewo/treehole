@@ -15,6 +15,11 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  /* 只有暗色一套：原生捲軸、核取方塊、date picker 跟著走暗色。
+     layout.tsx 的 viewport.colorScheme 是同一件事的 meta 版本，
+     在 CSS 載入前就生效。 */
+  color-scheme: dark;
+
   /* ── 底色 ────────────────────────────────────────────────
      近黑帶一點暖，不用純黑（純黑會讓海報邊緣失去深度）。 */
   --ink: #0a0a0b;

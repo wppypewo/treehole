@@ -300,6 +300,23 @@ Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）不動，也不當基�
   - 其餘頁面截圖與第 8 輪一致，沒有新問題
   - gate：typecheck／lint／test（257）／build（26 條路由）全綠
 
+- [x] 細修第 11 輪（2026-10-07，同分支；head 與站台中介資料總檢：18 頁的 title／lang／meta／圖示／地標）
+  - 分頁圖示原本是 create-next-app 的 Vercel 三角形。換成導覽列字標的「T」：Bodoni Moda Bold、
+    `--paper` 字壓 `--ink` 方塊、直角。字標本身是 400，但 400 的髮絲線在 16px 會斷，
+    比過 400／500／600／700 只有 700 在 16px 還認得出橫筆與襯線。
+    試過字腳下加一條簾幕紅（導覽列目前位置那條），16px 糊成一團，不加。
+    `icon.svg`（向量）＋ `favicon.ico`（16／32／48）＋ `apple-icon.png`（180）
+  - `apple-icon.png` 鎖著時會被 proxy 改寫成解鎖頁 HTML。matcher 照 `favicon.ico` 的做法排除，
+    用 `$` 錨定整個檔名；`proxy.test.ts` 加兩條 matcher 測試（圖示不經過、長得像的路徑照樣要過）
+  - 加 `viewport`：`themeColor #0a0a0b`（手機網址列跟頁面同色）、`colorScheme: dark`；
+    `:root` 補 `color-scheme: dark`。原生捲軸與年份下拉的選單跟著變暗，頁面上看得到的樣式不變
+  - 404 的分頁標題原本是「Treehole」。`not-found.tsx` 加 `generateMetadata`；
+    詳情頁／人物頁在 `generateMetadata` 就判斷不存在並呼叫 `notFound()`，
+    否則 `<head>` 已用預設標題送出。條件跟頁面本體一致
+  - 狀態碼：打錯網址回 404；詳情頁的 404 仍是 200＋noindex（metadata 串流的既定行為，Next 文件有寫，不動）
+  - 刪掉 `public/` 裡五個沒人引用的 create-next-app 範例 svg
+  - gate：typecheck／lint／test（259）／build（26 條路由）全綠
+
 ## 之後另外處理（需使用者決定）
 
 - 上線後用真實資料逐頁看一次（本機要補 `.env`，或直接看線上版）

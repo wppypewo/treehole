@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
 import { fontVariables } from "./fonts";
@@ -11,6 +11,14 @@ import { htmlLang } from "@/i18n/config";
 import { LOCK_HEADER } from "@/lib/owner-session";
 import { listWatched, listWatchlist } from "@/lib/db";
 import type { NavCounts } from "@/components/NavCount";
+
+// 全站只有暗色一套。themeColor 讓手機瀏覽器的網址列跟頁面同一塊 --ink，
+// 不會在頂上留一條白邊；colorScheme 讓原生捲軸、表單控制項、
+// 自動填入底色都走暗色版本。
+export const viewport: Viewport = {
+  themeColor: "#0a0a0b",
+  colorScheme: "dark",
+};
 
 export const metadata: Metadata = {
   // template 讓每一頁只要回傳自己的名字，站名由這裡補上。

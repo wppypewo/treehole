@@ -84,6 +84,9 @@ export const config = {
     // 排除靜態資產。漏掉這條的話連 CSS 和 JS 都會被鎖，解鎖頁自己會先壞掉。
     // 這些路徑同時也拿不到 CSP 標頭——它們不是文件，沒有腳本執行環境，
     // 由 script-src / style-src 在載入它們的那份文件上管即可。
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.svg$).*)",
+    // apple-icon.png 是 app/apple-icon.png 產生的主畫面圖示，跟 favicon 一樣
+    // 不帶任何片庫資料；不排除的話鎖著時它會被改寫成解鎖頁的 HTML。
+    // 用 $ 錨定整個檔名，別讓它變成前綴放行。
+    "/((?!_next/static|_next/image|favicon.ico|apple-icon\\.png$|.*\\.svg$).*)",
   ],
 };

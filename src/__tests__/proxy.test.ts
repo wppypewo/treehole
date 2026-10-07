@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { NextRequest } from 'next/server'
-import { proxy } from '@/proxy'
+import { proxy, config } from '@/proxy'
 import {
   OWNER_COOKIE,
   LOCK_HEADER,
@@ -66,6 +66,26 @@ describe('放行清單', () => {
     // /unlock-everything 這種路徑不該因為開頭像 /unlock 就放行
     const res = await proxy(request('/unlock-everything'))
     expect(isPassThrough(res)).toBe(false)
+  })
+})
+
+describe('matcher 排除的路徑', () => {
+  // matcher 排除＝那條路徑完全不經過 proxy，等於沒有授權檢查。
+  // 這裡釘住「只排除不帶資料的靜態檔」，日後放寬時測試會先叫。
+  // Next 用 path-to-regexp 編譯 matcher；這裡用等價的錨定 RegExp 近似。
+  const matched = (path: string) =>
+    config.matcher.some((m) => new RegExp(`^${m}$`).test(path))
+
+  it('站台圖示不經過 proxy', () => {
+    for (const p of ['/favicon.ico', '/icon.svg', '/apple-icon.png']) {
+      expect(matched(p), p).toBe(false)
+    }
+  })
+
+  it('長得像圖示的其他路徑照樣要過 proxy', () => {
+    for (const p of ['/apple-icon.png/x', '/apple-icon.pngx', '/api/apple-icon.png.json', '/', '/movie/1', '/api/library']) {
+      expect(matched(p), p).toBe(true)
+    }
   })
 })
 
