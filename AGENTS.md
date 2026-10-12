@@ -56,6 +56,14 @@ Schema 由 `src/lib/db.ts` 的 `createSchema()` 在**第一次查詢時**自動�
 > 上面那段描述的是「有設 `DATABASE_URL` 時」的行為。要在本機動片庫，
 > 得自己把 `.env.example` 那五個 key 補齊——**這件事由使用者做，AGENTS.md 禁止 AI 改 `.env`**。
 
+**`npm run dev`（Turbopack）第一次啟動可能整站 500**（2026-10-12 實測）。錯誤是
+`Can't resolve '@vercel/turbopack-next/internal/font/google/font'`，log 前面一長串
+`Connection timed out when requesting https://fonts.gstatic.com/...`。Noto Serif TC 在
+Google Fonts 切成 108 個 unicode-range 檔，冷啟動同時抓，這台機器並行時平均一個 6 秒，
+超過 dev 的逾時；失敗會留在這個行程裡，重新整理沒用。**停掉再啟動一次**就好：抓到的已存在
+`.next/dev`，重啟只補缺的。`next dev --webpack` 不受影響（抓不到時退回 fallback 字型）。
+`next build` 偶爾也會因單一字檔逾時失敗，重跑即可。上游回報見 vercel/next.js discussions #81721
+
 **這個 repo 沒有備份指令。** 雲端轉本機的備份已評估過並決定不做。備援範圍以
 Neon 方案提供的為準，去 Neon console 看，不要假設。
 
