@@ -317,6 +317,22 @@ Codex 版（`chore/deps-minor-2026-09-12` 的 `77631a6`）不動，也不當基�
   - 刪掉 `public/` 裡五個沒人引用的 create-next-app 範例 svg
   - gate：typecheck／lint／test（259）／build（26 條路由）全綠
 
+- [x] 細修第 12 輪（2026-10-12，分支 `polish/2026-10-05`；收尾 10-05 那輪沒提交的改動）
+  - `polish/2026-10-05` 從改版前的舊 main 開出，之後 main 已合進第 1–11 輪。分支先快轉到 main，
+    原本的未提交改動逐項比對，只留 main 沒有的兩項
+  - 即將上映：同一天的列不重印日期。單欄留白；兩欄時第二欄開頭可能正好是重複的那列，
+    改成 `--paper-faint` 轉淡，讓那欄還有日期可依。螢幕閱讀器每列照樣讀到日期
+  - 詳情頁：推薦、預告、演職員、我的紀錄跟片子詳情同時發出（`Promise.allSettled`），
+    等待時間從五段相加變成最慢那一段。各段失敗的處理與原本逐一 try/catch 相同
+  - 沒留的：`Colophon` 頁尾（main 的 `SiteFooter` 已做）、橫列 rail-gutter 負邊距
+    （main 改用寬度扣 `--rail-gap`）、只有 Prettier 重排的差異。原始改動存在 `git stash` 的
+    「polish/2026-10-05 原始未提交改動」那一筆
+  - 驗證：本機 `next dev --webpack`、沒設 `DATABASE_URL`，看真實 TMDB 資料（片庫段落走降級路徑）。
+    1024 寬兩欄：右欄第一列是重複日期，轉淡可見；375 寬單欄：重複日期留白、無橫捲。
+    詳情頁我的紀錄／預告片／演員／相關推薦四段都出現，`[movie-record]` 記錄 DB 未設定，與改前相同
+  - gate：typecheck／lint／test（259）／build（28 條路由）全綠。build 第一次因 fonts.gstatic.com
+    單一字檔逾時失敗，重跑通過
+
 ## 之後另外處理（需使用者決定）
 
 - 上線後用真實資料逐頁看一次（本機要補 `.env`，或直接看線上版）

@@ -74,6 +74,17 @@ export default async function MoviePage({
     notFound();
   }
 
+  // 推薦、預告、演職員、我的紀錄都只靠網址的 id，不必等片子詳情回來。
+  // 跟詳情同時發出，頁面等待時間從五段相加變成最慢那一段。
+  // allSettled 一建立就接住每個 promise 的失敗，詳情 404 提早返回也不會留下
+  // 未處理的 rejection；各自失敗的語意與原本逐一 try/catch 相同
+  const extras = Promise.allSettled([
+    getRecommendations(locale, movieId),
+    getTrailerKey(locale, movieId),
+    getMovieCredits(locale, movieId),
+    getMovieRecord(movieId),
+  ]);
+
   let movie;
   try {
     movie = await getMovieDetails(locale, movieId);
@@ -96,38 +107,26 @@ export default async function MoviePage({
     );
   }
 
-  // 相關推薦失敗不應拖垮整頁，故獨立取得並吞掉錯誤
-  let related: MovieSummary[] = [];
-  try {
-    related = (await getRecommendations(locale, movieId)).results.slice(0, 12);
-  } catch {
-    related = [];
-  }
+  const [relatedRes, trailerRes, creditsRes, recordRes] = await extras;
 
-  // 預告片同樣獨立取得，失敗則不顯示
-  let trailerKey: string | null = null;
-  try {
-    trailerKey = await getTrailerKey(locale, movieId);
-  } catch {
-    trailerKey = null;
-  }
-
-  // 演職員同樣獨立取得，失敗則不顯示
-  let credits: MovieCredits | null = null;
-  try {
-    credits = await getMovieCredits(locale, movieId);
-  } catch {
-    credits = null;
-  }
+  // 相關推薦、預告片、演職員任一失敗都不拖垮整頁，只是那一段不顯示
+  const related: MovieSummary[] =
+    relatedRes.status === "fulfilled"
+      ? relatedRes.value.results.slice(0, 12)
+      : [];
+  const trailerKey: string | null =
+    trailerRes.status === "fulfilled" ? trailerRes.value : null;
+  const credits: MovieCredits | null =
+    creditsRes.status === "fulfilled" ? creditsRes.value : null;
 
   // 四張表的狀態與日期一句查詢取回（原本是四次來回）。
   // 資料庫讀不到時片子照樣顯示，只有「我的紀錄」改成一行說明：
   // 不拿空白狀態頂替，否則按一下就會蓋掉資料庫裡其實存在的紀錄
   let record: MovieRecord | null = null;
-  try {
-    record = await getMovieRecord(movie.id);
-  } catch (error) {
-    console.error("[movie-record]", error);
+  if (recordRes.status === "fulfilled") {
+    record = recordRes.value;
+  } else {
+    console.error("[movie-record]", recordRes.reason);
   }
 
   const savedMovie = {
