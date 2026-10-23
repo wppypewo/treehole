@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import {
-  LOCK_HEADER,
-  OWNER_COOKIE,
-  ownerConfig,
-  verifyToken,
-} from "@/lib/owner-session";
+import { LOCK_HEADER, OWNER_COOKIE, tokenUnlocks } from "@/lib/owner-session";
 import {
   buildCsp,
   createNonce,
@@ -40,12 +35,7 @@ export async function proxy(request: NextRequest) {
     return withCsp(NextResponse.next({ request: { headers: requestHeaders } }));
   }
 
-  const config = ownerConfig();
-  const token = request.cookies.get(OWNER_COOKIE)?.value;
-  const unlocked =
-    config !== null &&
-    token !== undefined &&
-    (await verifyToken(token, config.secret));
+  const unlocked = await tokenUnlocks(request.cookies.get(OWNER_COOKIE)?.value);
 
   // 解鎖頁不論鎖著與否都要進得來，但兩種人要的東西不同：
   // - 已解鎖的人停在這裡只會看到一張用不到的表單，送回首頁。
@@ -84,9 +74,17 @@ export const config = {
     // 排除靜態資產。漏掉這條的話連 CSS 和 JS 都會被鎖，解鎖頁自己會先壞掉。
     // 這些路徑同時也拿不到 CSP 標頭——它們不是文件，沒有腳本執行環境，
     // 由 script-src / style-src 在載入它們的那份文件上管即可。
-    // apple-icon.png 是 app/apple-icon.png 產生的主畫面圖示，跟 favicon 一樣
-    // 不帶任何片庫資料；不排除的話鎖著時它會被改寫成解鎖頁的 HTML。
-    // 用 $ 錨定整個檔名，別讓它變成前綴放行。
-    "/((?!_next/static|_next/image|favicon.ico|apple-icon\\.png$|.*\\.svg$).*)",
+    //
+    // 只放行確切的東西，每一項都要錨定：
+    // - `_next/static/` 帶結尾斜線，只放行那個目錄底下的檔案；
+    //   沒有斜線時 `/_next/staticX` 也會被當成前綴放行。
+    // - 三個站台圖示（app/favicon.ico、app/icon.svg、app/apple-icon.png）
+    //   用 `$` 錨定整個檔名、`.` 要跳脫。不帶任何片庫資料；不排除的話
+    //   鎖著時它們會被改寫成解鎖頁的 HTML。
+    // 以前的 `.*\.svg$` 會讓任何 .svg 結尾的路徑（`/movie/550.svg`）繞過鎖，
+    // Next 用根 layout 畫 404 時就會查片數。
+    // `/_next/image` 不再排除：站上全用原生 <img>，圖片最佳化已在
+    // next.config.ts 關掉，這條路徑沒有理由對未解鎖的人開放。
+    "/((?!_next/static/|favicon\\.ico$|icon\\.svg$|apple-icon\\.png$).*)",
   ],
 };

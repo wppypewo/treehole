@@ -20,7 +20,9 @@ export async function POST(request: Request) {
   const passcode = typeof body?.passcode === "string" ? body.passcode : "";
 
   // 這裡沒有共享狀態可以做真正的 rate limit（serverless 每個實例各自獨立），
-  // 固定延遲至少讓線上暴力嘗試變慢。真正的防線是通行碼本身要夠長。
+  // 固定延遲至少讓線上暴力嘗試變慢。真正的防線是通行碼本身要夠長：
+  // ownerConfig() 對短於 MIN_PASSCODE_LENGTH 的通行碼一律回 null，走到這裡的都夠長。
+  // 要真正限制次數，得在 Vercel Firewall 對這條路徑設 rate limit。
   await new Promise((resolve) => setTimeout(resolve, 400));
 
   try {

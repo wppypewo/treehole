@@ -1,15 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "image.tmdb.org",
-        pathname: "/t/p/**",
-      },
-    ],
-  },
+  // 不設 images.remotePatterns：全站都用原生 <img>（見 MovieCard、csp.ts），
+  // 沒有用到 next/image。設了的話任何人都能透過 /_next/image 讓本站代抓、
+  // 轉檔 image.tmdb.org 的圖，白白消耗 Vercel 的圖片最佳化額度。
 
   // 全站安全標頭。這四個都是靜態值，放在這裡就夠了。
   //

@@ -510,7 +510,7 @@ const zhTW: Dictionary = {
     wrong: "通行碼不對。",
     failed: "伺服器出了問題，請再試一次。",
     notConfigured:
-      "站台還沒設定通行碼，現在沒有人進得來。請設定 OWNER_PASSCODE 與 OWNER_SECRET 兩個環境變數。",
+      "站台還沒設定通行碼，或通行碼短於 16 個字元，現在沒有人進得來。請設定 OWNER_PASSCODE（至少 16 個字元）與 OWNER_SECRET 兩個環境變數。",
   },
   errors: {
     missingKey: "尚未設定 TMDB 金鑰，請在 .env 填入 TMDB_API_KEY 後重新整理。",
@@ -735,7 +735,7 @@ const en: Dictionary = {
     wrong: "Wrong passcode.",
     failed: "Something went wrong on the server. Please try again.",
     notConfigured:
-      "No passcode is configured, so nobody can get in. Set the OWNER_PASSCODE and OWNER_SECRET environment variables.",
+      "No passcode is configured, or it is shorter than 16 characters, so nobody can get in. Set OWNER_PASSCODE (at least 16 characters) and OWNER_SECRET.",
   },
   errors: {
     missingKey:
