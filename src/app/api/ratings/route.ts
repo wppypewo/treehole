@@ -5,6 +5,7 @@ import {
   movieFromBody,
   tmdbIdFromQuery,
 } from "@/lib/db-route";
+import { NOTE_MAX_LENGTH, noteLength } from "@/lib/library";
 
 export const runtime = "nodejs";
 
@@ -20,7 +21,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid-score" }, { status: 400 });
   }
   const rawNote = (body as Record<string, unknown> | null)?.note;
-  const note = typeof rawNote === "string" ? rawNote.slice(0, 1000) : "";
+  const note = typeof rawNote === "string" ? rawNote : "";
+  // 超長就拒絕，不截斷：以前靜默截到 1000 個 code unit 再回 200，畫面顯示
+  // 「已儲存」，重新整理才發現後半段不見，截點落在 emoji 中間還會存進半個字。
+  // 輸入框有 maxLength，正常操作走不到這裡。
+  if (noteLength(note) > NOTE_MAX_LENGTH) {
+    return NextResponse.json({ error: "note-too-long" }, { status: 400 });
+  }
   try {
     await upsertRating(movie, score, note);
     return NextResponse.json({ ok: true });

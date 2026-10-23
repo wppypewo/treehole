@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { SavedMovie } from "@/lib/db";
+import { NOTE_MAX_LENGTH } from "@/lib/library";
 import RatingRuler from "./RatingRuler";
 
 interface Labels {
@@ -114,6 +115,7 @@ export default function RatingEditor({
             setSaved(false);
           }}
           placeholder={labels.notePlaceholder}
+          maxLength={NOTE_MAX_LENGTH}
           rows={3}
           className="mt-2.5 min-h-[5.75rem] w-full resize-y border border-hairline bg-ink-raised px-3.5 py-3 text-sm leading-relaxed text-paper outline-none transition-colors placeholder:text-paper-dim focus:border-paper-dim"
         />
