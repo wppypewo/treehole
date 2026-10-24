@@ -138,8 +138,8 @@ Browser
 ### Installation
 
 ```bash
-git clone https://github.com/zhuang060329-bit/treehole-movie-app.git
-cd treehole-movie-app
+git clone https://github.com/zhuang060329-bit/treehole.git
+cd treehole
 
 npm install
 

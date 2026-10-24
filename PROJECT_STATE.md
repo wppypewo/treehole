@@ -101,7 +101,7 @@
 ### 2026-09-03 實測：main
 
 * Branch: `main`
-* Remote: `origin` → `https://github.com/zhuang060329-bit/treehole-movie-app.git`（private）
+* Remote: `origin` → `https://github.com/zhuang060329-bit/treehole.git`（public；2026-10-24 由 treehole-movie-app 改名）
 * 工作區乾淨，沒有未提交的檔案。
 * 2026-09-03：`optimize/2026-09-03` 的 9 個 commit 已**快轉合併**進 `main`（沒有 merge commit）
   並推送。`main` 由 `05fecc7` 前進到這 9 個之後。分支本身也推上去了，留著當紀錄。
