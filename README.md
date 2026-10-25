@@ -138,7 +138,7 @@ Browser
 ### Installation
 
 ```bash
-git clone https://github.com/zhuang060329-bit/treehole.git
+git clone https://github.com/wppypewo/treehole.git
 cd treehole
 
 npm install
