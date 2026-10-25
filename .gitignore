@@ -62,5 +62,14 @@ next-env.d.ts
 # Local Windows launcher
 啟動Treehole.bat
 
-# local dev preview config
-.claude/launch.json
+# AI 代理人的本機工作檔（2026-10-25 移出版控，只留在本機）
+# AGENTS.md 開頭那段會被 `next dev` 自動重建，所以一定要忽略。
+/AGENTS.md
+/CLAUDE.md
+/.claude/
+/.agents/
+/skills-lock.json
+/PROJECT_STATE.md
+/TASKS.md
+/docs/prompts/
+/docs/redesign-audit-2026-09-26.md
