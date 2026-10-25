@@ -11,6 +11,18 @@ function collatorFor(locale: Locale): Intl.Collator {
   });
 }
 
+// ── 評分 ─────────────────────────────────────────────────
+
+// 短評上限，以字元（code point）計。輸入框的 maxLength 用同一個數：
+// 瀏覽器的 maxLength 數的是 UTF-16 code unit，比字元數嚴，
+// 從畫面送出的短評一定不會超過伺服器的上限。
+export const NOTE_MAX_LENGTH = 1000;
+
+/** 短評的字元數。emoji 這類 surrogate pair 算一個字，不是兩個。 */
+export function noteLength(note: string): number {
+  return Array.from(note).length;
+}
+
 // ── 想看 ─────────────────────────────────────────────────
 
 export type WatchlistSort = "queue" | "runtime" | "title";
