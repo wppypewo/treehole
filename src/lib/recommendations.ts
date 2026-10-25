@@ -35,11 +35,12 @@ interface Aggregate {
 const globalForRec = globalThis as unknown as { __recAgg?: Aggregate };
 
 // 以使用者片庫為種子，抓多部種子的多頁推薦，彙整去重後依「被推薦次數」排序
+// complete=false 代表有呼叫失敗，結果不完整，呼叫端不該快取。
 async function buildAggregate(
   locale: Locale,
   ids: number[],
-): Promise<{ hasSeeds: boolean; movies: MovieSummary[] }> {
-  if (ids.length === 0) return { hasSeeds: false, movies: [] };
+): Promise<{ hasSeeds: boolean; movies: MovieSummary[]; complete: boolean }> {
+  if (ids.length === 0) return { hasSeeds: false, movies: [], complete: true };
 
   const seeds = ids.slice(0, SEED_LIMIT);
   const owned = new Set(ids); // 已在片庫的片不再推薦
@@ -51,6 +52,13 @@ async function buildAggregate(
     }
   }
   const settled = await Promise.allSettled(calls);
+
+  // 全部失敗（TMDB 斷線、金鑰失效）時丟出第一個錯誤，讓頁面與 API 顯示
+  // 「TMDB 連不上」而不是「沒有相關推薦」——後者會被當成正常結果快取 10 分鐘。
+  const failures = settled.filter(
+    (outcome): outcome is PromiseRejectedResult => outcome.status === "rejected",
+  );
+  if (failures.length === settled.length) throw failures[0].reason;
 
   // 以「被幾部種子（或第幾頁）推薦到」累計分數，越高排越前；同分用 TMDB 評分
   const scored = new Map<number, { movie: MovieSummary; score: number }>();
@@ -70,7 +78,7 @@ async function buildAggregate(
     )
     .map((s) => s.movie);
 
-  return { hasSeeds: true, movies };
+  return { hasSeeds: true, movies, complete: failures.length === 0 };
 }
 
 async function getAggregate(
@@ -82,8 +90,9 @@ async function getAggregate(
   if (cached && cached.key === key && Date.now() - cached.at < AGG_TTL) {
     return { hasSeeds: cached.hasSeeds, movies: cached.movies };
   }
-  const built = await buildAggregate(locale, ids);
-  globalForRec.__recAgg = { key, at: Date.now(), ...built };
+  const { complete, ...built } = await buildAggregate(locale, ids);
+  // 部分失敗的殘缺結果照樣回給這一次請求，但不快取：下一次重新整理再試一次
+  if (complete) globalForRec.__recAgg = { key, at: Date.now(), ...built };
   return built;
 }
 
