@@ -14,7 +14,7 @@ vi.mock('@/lib/owner-session', async (importOriginal) => {
 })
 
 import { POST } from '@/app/api/unlock/route'
-import { OWNER_COOKIE, SESSION_MAX_AGE, passcodeMatches, verifyToken } from '@/lib/owner-session'
+import { OWNER_COOKIE, SESSION_MAX_AGE, ownerConfig, passcodeMatches, verifyToken } from '@/lib/owner-session'
 
 const SECRET = 'unlock-test-secret-not-used-anywhere-real'
 const PASSCODE = 'unlock-test-passcode'
@@ -85,7 +85,7 @@ describe('通行碼正確', () => {
 
     const token = res.headers.get('set-cookie')?.match(new RegExp(`^${OWNER_COOKIE}=([^;]+)`))?.[1]
     expect(token).toBeDefined()
-    expect(await verifyToken(decodeURIComponent(token!), SECRET)).toBe(true)
+    expect(await verifyToken(decodeURIComponent(token!), ownerConfig()!.secret)).toBe(true)
   })
 
   it('cookie 屬性：HttpOnly、SameSite=Lax、Path=/、半年期限；非正式環境不加 Secure', async () => {

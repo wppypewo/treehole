@@ -4,10 +4,12 @@ import {
   verifyToken,
   passcodeMatches,
   ownerConfig,
+  tokenUnlocks,
   SESSION_MAX_AGE,
 } from '@/lib/owner-session'
 
 const SECRET = 'test-secret-not-used-anywhere-real'
+const LONG_PASSCODE = 'sixteen-chars-ok'
 
 describe('ownerConfig', () => {
   // 缺任何一個變數都要回 null，呼叫端才會把整站當成鎖住
@@ -18,15 +20,31 @@ describe('ownerConfig', () => {
   })
 
   it('returns null when OWNER_SECRET is missing', () => {
-    process.env.OWNER_PASSCODE = 'something'
+    process.env.OWNER_PASSCODE = LONG_PASSCODE
     process.env.OWNER_SECRET = ''
     expect(ownerConfig()).toBeNull()
   })
 
-  it('returns both values when set', () => {
-    process.env.OWNER_PASSCODE = 'something'
+  it('returns the passcode and a signing key bound to both values', () => {
+    process.env.OWNER_PASSCODE = LONG_PASSCODE
     process.env.OWNER_SECRET = SECRET
-    expect(ownerConfig()).toEqual({ passcode: 'something', secret: SECRET })
+    const config = ownerConfig()
+    expect(config?.passcode).toBe(LONG_PASSCODE)
+    // 金鑰連通行碼一起：換掉任一個，舊 cookie 都驗不過
+    expect(config?.secret).not.toBe(SECRET)
+    process.env.OWNER_PASSCODE = 'another-sixteen-chars'
+    expect(ownerConfig()?.secret).not.toBe(config?.secret)
+  })
+
+  it('returns null when OWNER_PASSCODE is shorter than 16 characters', () => {
+    process.env.OWNER_SECRET = SECRET
+    process.env.OWNER_PASSCODE = '123456789012345'
+    expect(ownerConfig()).toBeNull()
+    // 以字元計：15 個 emoji 是 30 個 UTF-16 code unit，仍然太短
+    process.env.OWNER_PASSCODE = '🎬'.repeat(15)
+    expect(ownerConfig()).toBeNull()
+    process.env.OWNER_PASSCODE = '1234567890123456'
+    expect(ownerConfig()).not.toBeNull()
   })
 })
 
@@ -86,5 +104,30 @@ describe('passcodeMatches', () => {
 
   it('is case sensitive', async () => {
     expect(await passcodeMatches('Open-Sesame', 'open-sesame')).toBe(false)
+  })
+})
+
+describe('tokenUnlocks', () => {
+  // proxy 與根 layout 共用的判斷：layout 不能把「沒有 LOCK_HEADER」當成已解鎖
+  it('accepts a valid token when config is set', async () => {
+    process.env.OWNER_PASSCODE = LONG_PASSCODE
+    process.env.OWNER_SECRET = SECRET
+    expect(await tokenUnlocks(await issueToken(ownerConfig()!.secret))).toBe(true)
+  })
+
+  it('rejects a missing or forged cookie', async () => {
+    process.env.OWNER_PASSCODE = LONG_PASSCODE
+    process.env.OWNER_SECRET = SECRET
+    expect(await tokenUnlocks(undefined)).toBe(false)
+    expect(await tokenUnlocks('9999999999.forged')).toBe(false)
+  })
+
+  it('stays locked when config is missing, even with a previously valid token', async () => {
+    process.env.OWNER_PASSCODE = LONG_PASSCODE
+    process.env.OWNER_SECRET = SECRET
+    const token = await issueToken(ownerConfig()!.secret)
+    process.env.OWNER_PASSCODE = ''
+    process.env.OWNER_SECRET = SECRET
+    expect(await tokenUnlocks(token)).toBe(false)
   })
 })

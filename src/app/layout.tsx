@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import "./globals.css";
 import { fontVariables } from "./fonts";
 import Navbar from "@/components/Navbar";
@@ -8,7 +8,7 @@ import SiteFooter from "@/components/SiteFooter";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { htmlLang } from "@/i18n/config";
-import { LOCK_HEADER } from "@/lib/owner-session";
+import { LOCK_HEADER, OWNER_COOKIE, tokenUnlocks } from "@/lib/owner-session";
 import { listWatched, listWatchlist } from "@/lib/db";
 import type { NavCounts } from "@/components/NavCount";
 
@@ -60,7 +60,12 @@ export default async function RootLayout({
 
   // proxy 把未解鎖的請求改寫到 /unlock 時會帶上這個 header。
   // 鎖著的時候不畫導覽列——那些連結一個都點不進去，擺著只是誤導。
-  const locked = (await headers()).get(LOCK_HEADER) === "1";
+  // 沒有 header 不代表已解鎖：matcher 排除的路徑（或日後漏排的路徑）不經過
+  // proxy，照樣會由這個 layout 畫 404。所以這裡自己再驗一次 cookie，
+  // 驗不過就當鎖著，不查片數。
+  const locked =
+    (await headers()).get(LOCK_HEADER) === "1" ||
+    !(await tokenUnlocks((await cookies()).get(OWNER_COOKIE)?.value));
   // 不 await：導覽列先畫，數字由 NavCount 在 Suspense 裡補上。
   // 鎖著時根本不查——未解鎖的請求不該碰資料庫。
   const navCounts = locked ? null : loadNavCounts();

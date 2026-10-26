@@ -21,20 +21,34 @@ export const SESSION_MAX_AGE = 60 * 60 * 24 * 180;
 
 const encoder = new TextEncoder();
 
+// 通行碼最短長度（以字元計，不是 UTF-16 code unit）。/api/unlock 沒有共享狀態
+// 做 rate limit，同時送 N 個請求就是每 400 ms 試 N 組；六位數字 PIN 幾小時內
+// 就試得完。16 個字元以上，暴力嘗試在合理時間內試不完。
+export const MIN_PASSCODE_LENGTH = 16;
+
 export interface OwnerConfig {
   passcode: string;
+  /**
+   * cookie 的 HMAC 金鑰：OWNER_SECRET 與通行碼串起來，不是 OWNER_SECRET 原值。
+   * 這樣換掉兩者任何一個，所有舊 cookie 都會失效——通行碼外洩後改掉它，
+   * 不必另外記得也要換 OWNER_SECRET。
+   */
   secret: string;
 }
 
 /**
- * 兩個環境變數缺任何一個就回 null，呼叫端一律當成「鎖住」處理。
+ * 兩個環境變數缺任何一個、或通行碼太短，就回 null，呼叫端一律當成「鎖住」處理。
  * 這裡刻意不給預設值——設定漏掉時整站進不去，比預設放行安全。
  */
 export function ownerConfig(): OwnerConfig | null {
   const passcode = process.env.OWNER_PASSCODE;
   const secret = process.env.OWNER_SECRET;
   if (!passcode || !secret) return null;
-  return { passcode, secret };
+  // 不在這裡記 log：proxy 每個請求都會呼叫，設定錯時會洗版。
+  // 解鎖頁的「還沒設定」提示已經寫了長度要求。
+  if (Array.from(passcode).length < MIN_PASSCODE_LENGTH) return null;
+  // \u0000 當分隔：環境變數裡放不進 NUL，兩段不會拼出同一個字串
+  return { passcode, secret: `${secret}\u0000${passcode}` };
 }
 
 function toBase64Url(bytes: ArrayBuffer): string {
@@ -89,6 +103,20 @@ export async function verifyToken(
   if (Number(expiresAt) <= Math.floor(Date.now() / 1000)) return false;
 
   return timingSafeEqual(signature, await hmac(expiresAt, secret));
+}
+
+/**
+ * 這張 cookie 能不能解鎖。設定缺漏或沒帶 cookie 一律算鎖著。
+ * proxy 與根 layout 共用：layout 不能只看 proxy 有沒有帶 LOCK_HEADER，
+ * 繞過 proxy 的請求不會帶那個 header，卻也沒有解鎖。
+ */
+export async function tokenUnlocks(token: string | undefined): Promise<boolean> {
+  const config = ownerConfig();
+  return (
+    config !== null &&
+    token !== undefined &&
+    (await verifyToken(token, config.secret))
+  );
 }
 
 /**

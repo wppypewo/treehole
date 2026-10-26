@@ -1,11 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { NextRequest } from 'next/server'
 import { proxy, config } from '@/proxy'
+// Next 沒有公開這個函式的型別；build 時就是用它把 matcher 編成 RegExp
+// @ts-expect-error 內部模組沒有型別宣告
+import { getMiddlewareMatchers } from 'next/dist/build/analysis/get-page-static-info.js'
 import {
   OWNER_COOKIE,
   LOCK_HEADER,
   SESSION_MAX_AGE,
   issueToken,
+  ownerConfig,
 } from '@/lib/owner-session'
 import { CSP_REQUEST_HEADER, CSP_RESPONSE_HEADER, NONCE_HEADER } from '@/lib/csp'
 
@@ -22,6 +26,9 @@ const PASSCODE = 'proxy-test-passcode'
 
 // rewrite 的目的地藏在這個 header 裡，NextResponse 沒有公開的讀取介面
 const REWRITE_HEADER = 'x-middleware-rewrite'
+
+/** 用目前環境變數推出的金鑰簽一張有效憑證 */
+const ownerToken = () => issueToken(ownerConfig()!.secret)
 
 function request(path: string, cookie?: string): NextRequest {
   const req = new NextRequest(new URL(path, 'https://example.test'))
@@ -72,18 +79,26 @@ describe('放行清單', () => {
 describe('matcher 排除的路徑', () => {
   // matcher 排除＝那條路徑完全不經過 proxy，等於沒有授權檢查。
   // 這裡釘住「只排除不帶資料的靜態檔」，日後放寬時測試會先叫。
-  // Next 用 path-to-regexp 編譯 matcher；這裡用等價的錨定 RegExp 近似。
-  const matched = (path: string) =>
-    config.matcher.some((m) => new RegExp(`^${m}$`).test(path))
+  // 用 Next 自己編譯 matcher 的函式，不自己拼近似的 RegExp：
+  // 以前的近似式沒抓到 `.*\.svg$` 讓 /movie/550.svg 繞過鎖。
+  const compiled = getMiddlewareMatchers(config.matcher, {}).map(
+    (m: { regexp: string }) => new RegExp(m.regexp),
+  )
+  const matched = (path: string) => compiled.some((re: RegExp) => re.test(path))
 
-  it('站台圖示不經過 proxy', () => {
-    for (const p of ['/favicon.ico', '/icon.svg', '/apple-icon.png']) {
+  it('站台圖示與 build 產物不經過 proxy', () => {
+    for (const p of ['/favicon.ico', '/icon.svg', '/apple-icon.png', '/_next/static/chunks/main.js']) {
       expect(matched(p), p).toBe(false)
     }
   })
 
-  it('長得像圖示的其他路徑照樣要過 proxy', () => {
-    for (const p of ['/apple-icon.png/x', '/apple-icon.pngx', '/api/apple-icon.png.json', '/', '/movie/1', '/api/library']) {
+  it('長得像圖示或靜態檔的其他路徑照樣要過 proxy', () => {
+    for (const p of [
+      '/apple-icon.png/x', '/apple-icon.pngx', '/api/apple-icon.png.json',
+      '/x.svg', '/movie/550.svg', '/watchlist/a.svg', '/x/icon.svg',
+      '/favicon.icoX', '/faviconXico', '/_next/staticX', '/_next/image',
+      '/', '/movie/1', '/api/library',
+    ]) {
       expect(matched(p), p).toBe(true)
     }
   })
@@ -91,7 +106,7 @@ describe('matcher 排除的路徑', () => {
 
 describe('解鎖頁', () => {
   it('已解鎖的人打開 /unlock 會被送回首頁', async () => {
-    const token = await issueToken(SECRET)
+    const token = await ownerToken()
     const res = await proxy(request('/unlock', token))
     expect(res.status).toBe(307)
     expect(new URL(res.headers.get('location')!).pathname).toBe('/')
@@ -109,7 +124,7 @@ describe('解鎖頁', () => {
   })
 
   it('設定缺漏時，帶著有效憑證也不會被當成已解鎖', async () => {
-    const token = await issueToken(SECRET)
+    const token = await ownerToken()
     delete process.env.OWNER_SECRET
     expect(isPassThrough(await proxy(request('/unlock', token)))).toBe(true)
   })
@@ -144,7 +159,7 @@ describe('未解鎖的請求', () => {
 
 describe('憑證驗證', () => {
   it('有效憑證放行', async () => {
-    const token = await issueToken(SECRET)
+    const token = await ownerToken()
     expect(isPassThrough(await proxy(request('/movie/550', token)))).toBe(true)
   })
 
@@ -154,7 +169,7 @@ describe('憑證驗證', () => {
   })
 
   it('過期憑證擋下來', async () => {
-    const fresh = await issueToken(SECRET)
+    const fresh = await ownerToken()
     const signature = fresh.slice(fresh.indexOf('.') + 1)
     const past = Math.floor(Date.now() / 1000) - 1
     expect(
@@ -169,8 +184,19 @@ describe('憑證驗證', () => {
     }
   })
 
-  it('把到期時間往後改也沒用', async () => {
+  it('換掉通行碼之後，舊通行碼時期發的憑證失效', async () => {
+    const token = await ownerToken()
+    process.env.OWNER_PASSCODE = 'a-brand-new-passcode-after-leak'
+    expect(isPassThrough(await proxy(request('/movie/550', token)))).toBe(false)
+  })
+
+  it('只用 OWNER_SECRET 簽的憑證不算數（金鑰要連通行碼一起）', async () => {
     const token = await issueToken(SECRET)
+    expect(isPassThrough(await proxy(request('/movie/550', token)))).toBe(false)
+  })
+
+  it('把到期時間往後改也沒用', async () => {
+    const token = await ownerToken()
     const signature = token.slice(token.indexOf('.') + 1)
     const far = Math.floor(Date.now() / 1000) + SESSION_MAX_AGE * 10
     expect(
@@ -183,14 +209,20 @@ describe('環境變數缺失時必須關著', () => {
   // ownerConfig() 回 null 時如果放行，等於設定漏掉就全站公開。
   // 這是這個檔案最重要的一條。
   it('缺 OWNER_SECRET 時，連有效憑證也不放行', async () => {
-    const token = await issueToken(SECRET)
+    const token = await ownerToken()
     delete process.env.OWNER_SECRET
     expect(isPassThrough(await proxy(request('/movie/550', token)))).toBe(false)
   })
 
   it('缺 OWNER_PASSCODE 時，連有效憑證也不放行', async () => {
-    const token = await issueToken(SECRET)
+    const token = await ownerToken()
     delete process.env.OWNER_PASSCODE
+    expect(isPassThrough(await proxy(request('/movie/550', token)))).toBe(false)
+  })
+
+  it('通行碼短於 16 個字元時，連有效憑證也不放行', async () => {
+    const token = await ownerToken()
+    process.env.OWNER_PASSCODE = '123456'
     expect(isPassThrough(await proxy(request('/movie/550', token)))).toBe(false)
   })
 
@@ -260,7 +292,7 @@ describe('每一條回傳路徑都帶 CSP', () => {
   ]
 
   it.each(cases)('$name', async ({ path, unlocked, forwards, branch }) => {
-    const token = unlocked ? await issueToken(SECRET) : undefined
+    const token = unlocked ? await ownerToken() : undefined
     const res = await proxy(request(path, token))
     branch(res)
 
