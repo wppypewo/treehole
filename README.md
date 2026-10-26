@@ -107,7 +107,7 @@ More decisions, trade-offs and maintenance rules, with measurements, are in [doc
 
 | Layer | Choice |
 |---|---|
-| Framework | Next.js 16.3.8 (App Router, Turbopack) |
+| Framework | Next.js 16.4.2 (App Router, Turbopack) |
 | UI | React 19.3, TypeScript 6 |
 | Type | Bodoni Moda + Noto Serif TC (display), Geist (interface), via `next/font` |
 | Styling | Tailwind CSS 4.3, design tokens in `globals.css` |
