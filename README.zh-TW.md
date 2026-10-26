@@ -107,7 +107,7 @@ proxy 以下不再檢查授權。資料層和 route handler 都假設請求已�
 
 | 層 | 選擇 |
 |---|---|
-| 框架 | Next.js 16.3.6（App Router、Turbopack） |
+| 框架 | Next.js 16.3.8（App Router、Turbopack） |
 | UI | React 19.3、TypeScript 6 |
 | 字體 | Bodoni Moda + Noto Serif TC（標題）、Geist（介面），走 `next/font` |
 | 樣式 | Tailwind CSS 4.3，設計 token 在 `globals.css` |
