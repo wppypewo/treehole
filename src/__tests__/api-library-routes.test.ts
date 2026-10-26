@@ -242,12 +242,28 @@ describe('POST /api/ratings', () => {
     expect(db.upsertRating).not.toHaveBeenCalled()
   })
 
-  it('短評截到 1000 字，不是字串就存空字串', async () => {
+  it('短評超過 1000 字回 400、不寫入；剛好 1000 字照存', async () => {
     vi.mocked(db.upsertRating).mockResolvedValue(undefined)
 
-    await ratings.POST(post('/api/ratings', { ...MOVIE_BODY, score: 8, note: 'a'.repeat(1500) }))
-    expect(vi.mocked(db.upsertRating).mock.lastCall?.[2]).toHaveLength(1000)
+    const tooLong = await ratings.POST(post('/api/ratings', { ...MOVIE_BODY, score: 8, note: 'a'.repeat(1001) }))
+    expect(tooLong.status).toBe(400)
+    expect(await tooLong.json()).toEqual({ error: 'note-too-long' })
+    expect(db.upsertRating).not.toHaveBeenCalled()
 
+    await ratings.POST(post('/api/ratings', { ...MOVIE_BODY, score: 8, note: 'a'.repeat(1000) }))
+    expect(vi.mocked(db.upsertRating).mock.lastCall?.[2]).toHaveLength(1000)
+  })
+
+  it('短評以字元計：1000 個 emoji 是 2000 個 code unit，照存不截斷', async () => {
+    vi.mocked(db.upsertRating).mockResolvedValue(undefined)
+    const note = '🎬'.repeat(1000)
+    const res = await ratings.POST(post('/api/ratings', { ...MOVIE_BODY, score: 8, note }))
+    expect(res.status).toBe(200)
+    expect(db.upsertRating).toHaveBeenLastCalledWith(MOVIE, 8, note)
+  })
+
+  it('短評不是字串就存空字串', async () => {
+    vi.mocked(db.upsertRating).mockResolvedValue(undefined)
     for (const note of [{ text: 'x' }, 42, null, undefined]) {
       await ratings.POST(post('/api/ratings', { ...MOVIE_BODY, score: 8, note }))
       expect(db.upsertRating).toHaveBeenLastCalledWith(MOVIE, 8, '')
