@@ -63,13 +63,13 @@ The site has one user. Rather than build accounts, roles and a password reset fl
 | Locked page request | Rewritten to `/unlock`; the address bar keeps the URL you asked for, so unlocking lands you where you were going |
 | Locked API request | `401 {"error":"locked"}`: JSON, not an HTML page a `fetch()` cannot parse |
 | Session | An HMAC-SHA256 signed cookie, `HttpOnly` + `Secure` + `SameSite=lax`, valid 180 days |
-| Missing configuration | Everything is locked, including the owner |
+| Missing configuration | Everything is locked, including the owner. A passcode shorter than 16 characters counts as missing |
 
 That last row is deliberate. If `OWNER_PASSCODE` or `OWNER_SECRET` is unset the site closes rather than opens; a deployment that forgets the variables is recoverable, a deployment that defaults to open is not.
 
-The passcode is the only defense. Serverless functions have no shared state to rate-limit against, so `/api/unlock` adds a fixed 400 ms delay and nothing more; use a long passphrase, not a four-digit PIN. Changing `OWNER_SECRET` invalidates every existing session immediately.
+The passcode is the only defense. Serverless functions have no shared state to rate-limit against, so `/api/unlock` adds a fixed 400 ms delay and nothing more; the passcode must be at least 16 characters, and a long passphrase is better. The cookie is signed with a key derived from both `OWNER_SECRET` and the passcode, so changing either one invalidates every existing session immediately.
 
-Nothing below the proxy checks authorization. The database layer and the route handlers assume the request already got past the lock, which keeps the rule in one file.
+Nothing below the proxy checks authorization. The database layer and the route handlers assume the request already got past the lock, which keeps the rule in one file. The one exception is defensive: the root layout verifies the cookie itself before querying the navigation counts, so a path that bypasses the proxy (for example a 404 rendered for an excluded path) never reads the library.
 
 Security headers are split in two: four static headers in `next.config.ts`, and a per-request nonce-based Content Security Policy built in `src/lib/csp.ts` and attached by the proxy on all six of its return paths. The CSP currently runs in Report-Only mode, with `style-src 'self'` and no inline styles anywhere in the app.
 
@@ -174,7 +174,7 @@ If the first `npm run dev` returns 500 with Google Fonts timeouts in the log, st
 |---|---|---|
 | `TMDB_API_KEY` | Yes | TMDB v3 api_key or v4 read access token |
 | `DATABASE_URL` | Yes | Neon Postgres connection string. The Vercel–Neon integration injects it under exactly this name |
-| `OWNER_PASSCODE` | Yes | The passcode. Make it long; it is the only thing between the internet and the library |
+| `OWNER_PASSCODE` | Yes | The passcode, at least 16 characters; shorter values keep the site locked. It is the only thing between the internet and the library |
 | `OWNER_SECRET` | Yes | Random string used to sign the session cookie |
 
 Generate `OWNER_SECRET` with:
@@ -191,7 +191,7 @@ The dev and production servers bind to `0.0.0.0`, so other devices on the same n
 
 ## Testing
 
-266 tests across 19 files. The route handlers and the proxy are tested directly; the data layer and TMDB are mocked in those tests, so the suite never touches a real database.
+273 tests across 19 files. The route handlers and the proxy are tested directly; the data layer and TMDB are mocked in those tests, so the suite never touches a real database.
 
 | File | Coverage |
 |---|---|
@@ -199,7 +199,7 @@ The dev and production servers bind to `0.0.0.0`, so other devices on the same n
 | `api-library-routes.test.ts` | `favorites`, `watchlist`, `watched`, `ratings` handlers: invalid input returns 400 without touching the database, valid input reaches the data layer normalized, database failures return 503 without leaking the error, note length limit |
 | `api-tmdb-routes.test.ts` | `popular`, `top-rated`, `highest-grossing`, `search`, `discover`, `recommendations` handlers: page and filter sanitizing, `hasMore`, 500 vs 502 by error kind |
 | `api-unlock.test.ts` | `/api/unlock`: not configured, wrong passcode, cookie attributes, the fixed 400 ms delay, internal failure returns 500 |
-| `owner-session.test.ts` | `issueToken`, `verifyToken`, `passcodeMatches`, `ownerConfig`: forged signatures, extended expiry, expired and malformed tokens, fail-closed configuration |
+| `owner-session.test.ts` | `issueToken`, `verifyToken`, `passcodeMatches`, `ownerConfig`: forged signatures, extended expiry, expired and malformed tokens, fail-closed configuration, minimum passcode length, sessions invalidated by a passcode change |
 | `recommendations.test.ts` | Aggregation when TMDB fails entirely or partly, caching only complete results, empty library |
 | `csp.test.ts` | `buildCsp`: nonce, `style-src`, allowed external origins |
 | `db-route.test.ts` | `movieFromBody`, `tmdbIdFromQuery`, `addedAtFromBody`: request parsing for the library routes |

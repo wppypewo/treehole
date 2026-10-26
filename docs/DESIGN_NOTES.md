@@ -42,6 +42,10 @@ Google Fonts 切成 108 個 unicode-range 檔，冷啟動同時抓，當時那�
 - 未解鎖的 `/api/*` → `401 {"error":"locked"}` JSON，不是 HTML
 - `OWNER_PASSCODE` / `OWNER_SECRET` 任一沒設 → **整站鎖死，連擁有者也進不去**。
   這是刻意的，設定漏掉時關門比預設開門安全
+- 通行碼短於 16 個字元（`MIN_PASSCODE_LENGTH`，以字元計）也當成沒設，整站鎖住。
+  cookie 的 HMAC 金鑰是 `OWNER_SECRET` 加通行碼，換掉任一個，舊 cookie 都會失效
+- 根 layout 查導覽列片數前會自己驗一次 cookie（`tokenUnlocks()`，和 proxy 共用），
+  不只看 proxy 帶的 header：matcher 排除的路徑不經過 proxy，照樣會由根 layout 畫 404
 - matcher 必須排除 `_next/static` 等靜態資產，否則解鎖頁自己的 CSS/JS 也會被鎖
 
 改 matcher 前想清楚：Server Function 是打到自己路由的 POST，把某個路徑排除掉

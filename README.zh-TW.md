@@ -63,13 +63,13 @@ Treehole 圍繞一個情境設計：有一個晚上，想從自己存的清單�
 | 未解鎖的頁面請求 | 改寫到 `/unlock`，網址列保持原樣，解鎖後直接到原本要去的頁面 |
 | 未解鎖的 API 請求 | `401 {"error":"locked"}`：回 JSON，不是 `fetch()` 解析不了的 HTML |
 | 登入狀態 | HMAC-SHA256 簽章的 cookie，`HttpOnly` + `Secure` + `SameSite=lax`，有效 180 天 |
-| 設定缺漏 | 整站鎖住，擁有者也進不去 |
+| 設定缺漏 | 整站鎖住，擁有者也進不去。通行碼短於 16 個字元也算缺漏 |
 
 最後一列是刻意的。`OWNER_PASSCODE` 或 `OWNER_SECRET` 沒設時整站關門而不是開門：忘了設變數的部署救得回來，預設開門的部署救不回來。
 
-通行碼是唯一一道防線。serverless 函式沒有共享狀態可以做次數限制，`/api/unlock` 只有固定 400 ms 延遲，所以請用長的通行片語，不要用四位數 PIN。換掉 `OWNER_SECRET` 會讓所有既有的登入狀態立即失效。
+通行碼是唯一一道防線。serverless 函式沒有共享狀態可以做次數限制，`/api/unlock` 只有固定 400 ms 延遲，所以通行碼至少要 16 個字元，越長越好。cookie 的簽章金鑰由 `OWNER_SECRET` 和通行碼一起產生，換掉任何一個，所有既有的登入狀態都會立即失效。
 
-proxy 以下不再檢查授權。資料層和 route handler 都假設請求已經過關，規則只存在一個檔案裡。
+proxy 以下不再檢查授權。資料層和 route handler 都假設請求已經過關，規則只存在一個檔案裡。唯一的例外是防禦性的：根 layout 查導覽列片數之前會自己驗一次 cookie，繞過 proxy 的路徑（例如 matcher 排除的路徑畫出的 404）不會讀到片庫。
 
 安全標頭分兩處：四個靜態標頭在 `next.config.ts`；每個請求換一次 nonce 的 CSP 由 `src/lib/csp.ts` 產生，proxy 在六條回傳路徑上都掛上。CSP 目前是 Report-Only，`style-src 'self'`，全站沒有內聯樣式。
 
@@ -174,7 +174,7 @@ npm run dev
 |---|---|---|
 | `TMDB_API_KEY` | 是 | TMDB v3 api_key 或 v4 read access token |
 | `DATABASE_URL` | 是 | Neon Postgres 連線字串。Vercel–Neon 整合會用這個名稱自動注入 |
-| `OWNER_PASSCODE` | 是 | 通行碼。請用長的，它是網路和片庫之間唯一的東西 |
+| `OWNER_PASSCODE` | 是 | 通行碼，至少 16 個字元，太短時整站維持鎖住。它是網路和片庫之間唯一的東西 |
 | `OWNER_SECRET` | 是 | 簽 cookie 用的隨機字串 |
 
 產生 `OWNER_SECRET`：
@@ -191,7 +191,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
 
 ## 測試
 
-19 個檔、266 項測試。route handler 和 proxy 直接測試；這些測試裡資料層和 TMDB 都用 mock，不會碰到真的資料庫。
+19 個檔、273 項測試。route handler 和 proxy 直接測試；這些測試裡資料層和 TMDB 都用 mock，不會碰到真的資料庫。
 
 | 檔案 | 涵蓋範圍 |
 |---|---|
@@ -199,7 +199,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
 | `api-library-routes.test.ts` | `favorites`、`watchlist`、`watched`、`ratings`：輸入不合法回 400 且不碰資料庫、合法輸入正規化後交給資料層、資料庫失敗回 503 且不外洩錯誤、短評長度上限 |
 | `api-tmdb-routes.test.ts` | `popular`、`top-rated`、`highest-grossing`、`search`、`discover`、`recommendations`：頁碼與篩選條件清理、`hasMore`、依錯誤種類回 500 或 502 |
 | `api-unlock.test.ts` | `/api/unlock`：未設定、通行碼錯誤、cookie 屬性、固定 400 ms 延遲、內部錯誤回 500 |
-| `owner-session.test.ts` | `issueToken`、`verifyToken`、`passcodeMatches`、`ownerConfig`：偽造簽章、竄改效期、過期與格式錯誤的 token、設定缺漏時鎖住 |
+| `owner-session.test.ts` | `issueToken`、`verifyToken`、`passcodeMatches`、`ownerConfig`：偽造簽章、竄改效期、過期與格式錯誤的 token、設定缺漏時鎖住、通行碼最短長度、換通行碼後舊登入失效 |
 | `recommendations.test.ts` | TMDB 全部或部分失敗時的彙整、只快取完整結果、片庫為空 |
 | `csp.test.ts` | `buildCsp`：nonce、`style-src`、允許的外部來源 |
 | `db-route.test.ts` | `movieFromBody`、`tmdbIdFromQuery`、`addedAtFromBody`：片庫 API 的請求解析 |
