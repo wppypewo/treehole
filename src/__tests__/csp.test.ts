@@ -113,12 +113,12 @@ describe("buildCsp：其餘指令", () => {
 });
 
 describe("標頭名稱", () => {
-  it("目前是 Report-Only", () => {
-    // 翻 CSP_ENFORCE 時這兩條會一起紅，提醒確實是有意為之。
-    // 翻之前 /movie/[id] 的預告片一定要在有資料庫的環境按過一次播放，
+  it("目前是強制執行", () => {
+    // 改回 Report-Only 時這兩條會一起紅，提醒確實是有意為之。
+    // 合併前 /movie/[id] 的預告片一定要在有資料庫的環境按過一次播放，
     // 那是唯一沒被瀏覽器實測涵蓋的路徑。
-    expect(CSP_ENFORCE).toBe(false);
-    expect(CSP_RESPONSE_HEADER).toBe("Content-Security-Policy-Report-Only");
+    expect(CSP_ENFORCE).toBe(true);
+    expect(CSP_RESPONSE_HEADER).toBe("Content-Security-Policy");
   });
 
   it("送進 request 的標頭永遠是 Content-Security-Policy", () => {

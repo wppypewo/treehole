@@ -29,8 +29,12 @@
  * 本機沒有 DATABASE_URL 就只會落到錯誤邊界。頁面上的 YouTube iframe 已經
  * 單獨驗過（見下方 frame-src 與 img-src 的註解），但整頁一起跑的樣子沒看過。
  * 翻成 true 之前，這一頁要在有資料庫的環境開一次並按下播放。
+ *
+ * 2026-11-06 在這個分支翻成 true，本機 production build 重繞一輪（結果見
+ * 分支的 commit 訊息）。/movie/[id] 仍沒在有資料庫的環境驗過，所以這個分支
+ * 合併前，要先在 Vercel preview（有 DATABASE_URL）開一次該頁並按下播放。
  */
-export const CSP_ENFORCE = false;
+export const CSP_ENFORCE = true;
 
 /** Report-Only 時瀏覽器照常渲染，只在 console 印違規。 */
 export const CSP_RESPONSE_HEADER = CSP_ENFORCE
