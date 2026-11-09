@@ -207,7 +207,7 @@ export async function listRecentWatched(limit: number): Promise<WatchedEntry[]> 
   const sql = await db();
   return (await sql`
     SELECT w.tmdb_id, w.title, w.poster_path, w.vote_average,
-           to_char(w.watched_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS watched_at,
+           to_char(w.watched_at AT TIME ZONE 'UTC', ${ISO_UTC}) AS watched_at,
            r.score, r.note
     FROM watched w
     LEFT JOIN ratings r ON r.tmdb_id = w.tmdb_id
@@ -302,7 +302,7 @@ export async function listWatchlistEntries(): Promise<WatchlistEntry[]> {
   const sql = await db();
   return (await sql`
     SELECT l.tmdb_id, l.title, l.poster_path, l.vote_average,
-           to_char(l.added_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS added_at
+           to_char(l.added_at AT TIME ZONE 'UTC', ${ISO_UTC}) AS added_at
     FROM watchlist l
     ORDER BY l.added_at ASC
   `) as unknown as WatchlistEntry[];

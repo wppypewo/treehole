@@ -101,7 +101,13 @@ async function tmdbFetch<T>(
     throw new TmdbError("http", `TMDB responded with ${res.status}`);
   }
 
-  return (await res.json()) as T;
+  // 200 但內容不是 JSON（例如中間層回的 HTML 錯誤頁）也要變成 TmdbError，
+  // 否則呼叫端依 kind 分流的錯誤訊息全部落到「通用錯誤」
+  try {
+    return (await res.json()) as T;
+  } catch {
+    throw new TmdbError("http", "TMDB returned a non-JSON body");
+  }
 }
 
 export function getPopular(
