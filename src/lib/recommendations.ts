@@ -4,25 +4,37 @@ import {
   type MovieSummary,
   type MovieListResponse,
 } from "@/lib/tmdb";
-import { listFavorites, listWatched } from "@/lib/db";
+import { listFavorites, listWatched, listWatchlist } from "@/lib/db";
 
 const SEED_LIMIT = 10; // 最多取幾部已收藏／已看過電影當推薦來源
 const REC_PAGES_PER_SEED = 4; // 每個種子向 TMDB 抓幾頁推薦，攤平後彙整
 const PAGE_SIZE = 20; // 對外分頁每頁筆數
 const AGG_TTL = 10 * 60 * 1000; // 彙整結果快取時間
 
-// 目前所有種子的 tmdb_id（收藏 + 已看過，去重）
-async function seedIds(): Promise<number[]> {
-  const [favorites, watched] = await Promise.all([
-    listFavorites(),
-    listWatched(),
-  ]);
-  return [...new Set([...favorites, ...watched].map((m) => m.tmdb_id))];
+interface Library {
+  /** 推薦的來源：收藏 + 看過（去重） */
+  seeds: number[];
+  /** 想看清單：不當種子（還沒看，不知道喜不喜歡），但已經排進去的片不必再推薦 */
+  watchlist: number[];
 }
 
-// 種子集合 + 語系作為快取鍵：收藏一變動，鍵就變、快取自然失效
-function seedKey(locale: Locale, ids: number[]): string {
-  return `${locale}:${[...ids].sort((a, b) => a - b).join(",")}`;
+async function readLibrary(): Promise<Library> {
+  const [favorites, watched, watchlist] = await Promise.all([
+    listFavorites(),
+    listWatched(),
+    listWatchlist(),
+  ]);
+  return {
+    seeds: [...new Set([...favorites, ...watched].map((m) => m.tmdb_id))],
+    watchlist: watchlist.map((m) => m.tmdb_id),
+  };
+}
+
+const sorted = (ids: number[]) => [...ids].sort((a, b) => a - b).join(",");
+
+// 種子、想看清單與語系一起當快取鍵：任一邊變動，鍵就變、快取自然失效
+function seedKey(locale: Locale, lib: Library): string {
+  return `${locale}:${sorted(lib.seeds)}|${sorted(lib.watchlist)}`;
 }
 
 interface Aggregate {
@@ -38,12 +50,13 @@ const globalForRec = globalThis as unknown as { __recAgg?: Aggregate };
 // complete=false 代表有呼叫失敗，結果不完整，呼叫端不該快取。
 async function buildAggregate(
   locale: Locale,
-  ids: number[],
+  lib: Library,
 ): Promise<{ hasSeeds: boolean; movies: MovieSummary[]; complete: boolean }> {
-  if (ids.length === 0) return { hasSeeds: false, movies: [], complete: true };
+  if (lib.seeds.length === 0) return { hasSeeds: false, movies: [], complete: true };
 
-  const seeds = ids.slice(0, SEED_LIMIT);
-  const owned = new Set(ids); // 已在片庫的片不再推薦
+  const seeds = lib.seeds.slice(0, SEED_LIMIT);
+  // 已在片庫的片（含想看清單）不再推薦
+  const owned = new Set([...lib.seeds, ...lib.watchlist]);
 
   const calls: Promise<MovieListResponse>[] = [];
   for (const id of seeds) {
@@ -84,13 +97,13 @@ async function buildAggregate(
 async function getAggregate(
   locale: Locale,
 ): Promise<{ hasSeeds: boolean; movies: MovieSummary[] }> {
-  const ids = await seedIds();
-  const key = seedKey(locale, ids);
+  const lib = await readLibrary();
+  const key = seedKey(locale, lib);
   const cached = globalForRec.__recAgg;
   if (cached && cached.key === key && Date.now() - cached.at < AGG_TTL) {
     return { hasSeeds: cached.hasSeeds, movies: cached.movies };
   }
-  const { complete, ...built } = await buildAggregate(locale, ids);
+  const { complete, ...built } = await buildAggregate(locale, lib);
   // 部分失敗的殘缺結果照樣回給這一次請求，但不快取：下一次重新整理再試一次
   if (complete) globalForRec.__recAgg = { key, at: Date.now(), ...built };
   return built;

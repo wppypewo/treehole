@@ -8,6 +8,7 @@ import { listFavorites, listWatched } from "@/lib/db";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import InfiniteMovieGrid from "@/components/InfiniteMovieGrid";
 import ErrorNotice from "@/components/ErrorNotice";
+import RefreshButton from "@/components/RefreshButton";
 import SearchField from "@/components/SearchField";
 import LibraryPicks from "@/components/LibraryPicks";
 import MovieGridSkeleton from "@/components/MovieGridSkeleton";
@@ -179,7 +180,11 @@ async function SearchResults({
 }) {
   const result = await outcome;
   if (!result.ok) {
-    return <ErrorNotice message={result.message} placement="mt-10" />;
+    return (
+      <ErrorNotice message={result.message} placement="mt-10">
+        <RefreshButton label={dict.errors.reload} />
+      </ErrorNotice>
+    );
   }
 
   const { found } = result;

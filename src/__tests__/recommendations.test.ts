@@ -16,10 +16,11 @@ vi.mock('@/lib/tmdb', async (importOriginal) => {
 vi.mock('@/lib/db', () => ({
   listFavorites: vi.fn(),
   listWatched: vi.fn(),
+  listWatchlist: vi.fn(),
 }))
 
 import { getRecommendations, TmdbError } from '@/lib/tmdb'
-import { listFavorites, listWatched } from '@/lib/db'
+import { listFavorites, listWatched, listWatchlist } from '@/lib/db'
 import { getForYouPage } from '@/lib/recommendations'
 
 const movie = (id: number) => ({ id, title: `m${id}`, vote_average: 7 })
@@ -30,6 +31,7 @@ beforeEach(() => {
   delete (globalThis as { __recAgg?: unknown }).__recAgg
   vi.mocked(listFavorites).mockResolvedValue([{ tmdb_id: 1 }] as never)
   vi.mocked(listWatched).mockResolvedValue([] as never)
+  vi.mocked(listWatchlist).mockResolvedValue([] as never)
 })
 
 describe('getForYouPage', () => {
@@ -68,6 +70,23 @@ describe('getForYouPage', () => {
     const callsAfterFirst = vi.mocked(getRecommendations).mock.calls.length
     await getForYouPage('zh-TW', 1)
     expect(vi.mocked(getRecommendations).mock.calls.length).toBe(callsAfterFirst)
+  })
+
+  it('想看清單裡的片不推薦，但也不當種子', async () => {
+    vi.mocked(listWatchlist).mockResolvedValue([{ tmdb_id: 11 }] as never)
+    vi.mocked(getRecommendations).mockResolvedValue(page([10, 11]) as never)
+    const res = await getForYouPage('zh-TW', 1)
+    expect(res.results.map((m) => m.id)).toEqual([10])
+    // 只拿收藏的 id 1 當種子
+    expect(new Set(vi.mocked(getRecommendations).mock.calls.map((c) => c[1]))).toEqual(new Set([1]))
+  })
+
+  it('想看清單一變動，快取就失效', async () => {
+    vi.mocked(getRecommendations).mockResolvedValue(page([10, 11]) as never)
+    expect((await getForYouPage('zh-TW', 1)).results.map((m) => m.id)).toEqual([10, 11])
+
+    vi.mocked(listWatchlist).mockResolvedValue([{ tmdb_id: 11 }] as never)
+    expect((await getForYouPage('zh-TW', 1)).results.map((m) => m.id)).toEqual([10])
   })
 
   it('片庫為空時不打 TMDB，回 hasSeeds=false', async () => {

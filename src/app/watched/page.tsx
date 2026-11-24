@@ -4,6 +4,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { listWatchedEntries } from "@/lib/db";
 import { diaryDateFormatter, todayInTaipei } from "@/lib/dates";
 import PageHeader from "@/components/PageHeader";
+import LibraryUnavailable from "@/components/library/LibraryUnavailable";
 import WatchedDiary, { type DiaryRow } from "@/components/library/WatchedDiary";
 
 // getLocale() 讀 cookie，這頁不會被預先產生；片庫資料每次請求直接查資料庫。
@@ -16,7 +17,22 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function WatchedPage() {
   const locale = await getLocale();
   const dict = getDictionary(locale);
-  const entries = await listWatchedEntries();
+  let entries: Awaited<ReturnType<typeof listWatchedEntries>>;
+  try {
+    entries = await listWatchedEntries();
+  } catch (error) {
+    console.error("[watched] 片庫讀取失敗", error);
+    return (
+      <LibraryUnavailable
+        labels={{
+          title: dict.errors.loadFailed,
+          body: dict.library.unavailable,
+          reload: dict.errors.reload,
+          home: dict.errors.home,
+        }}
+      />
+    );
+  }
 
   // 日期拆解在伺服器做，照台北時間；瀏覽器端只負責篩選與分組
   const diaryDate = diaryDateFormatter(locale);
@@ -31,6 +47,7 @@ export default async function WatchedPage() {
         poster_path: m.poster_path,
         vote_average: m.vote_average,
       },
+      watched_at: m.watched_at,
       month: d ? { key: d.monthKey, label: d.monthLabel } : null,
       day: d?.day ?? null,
       weekday: d?.weekday ?? null,
@@ -66,8 +83,10 @@ export default async function WatchedPage() {
           rows={rows}
           labels={{
             remove: dict.library.remove,
-            confirmRemove: dict.library.confirmRemove,
-            cancel: dict.library.cancel,
+            removed: dict.library.removed,
+            undoMore: dict.library.undoMore,
+            undo: dict.actions.undo,
+            saveError: dict.common.saveError,
             removeNamed: dict.library.removeNamed,
             filterGroup: dict.library.filterGroup,
             filterAll: lw.filterAll,
@@ -78,6 +97,7 @@ export default async function WatchedPage() {
             count: dict.common.filmCount,
             undated: lw.undated,
             filteredEmpty: dict.library.filteredEmpty,
+            showAll: dict.library.showAll,
             removeError: dict.common.removeError,
             empty: dict.library.emptyWatched,
             browse: dict.common.browse,

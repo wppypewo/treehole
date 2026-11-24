@@ -4,6 +4,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { listFavoriteEntries } from "@/lib/db";
 import { shelfDateFormatter, todayInTaipei } from "@/lib/dates";
 import PageHeader from "@/components/PageHeader";
+import LibraryUnavailable from "@/components/library/LibraryUnavailable";
 import FavoritesWall, {
   type FavoriteTile,
 } from "@/components/library/FavoritesWall";
@@ -18,7 +19,22 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function FavoritesPage() {
   const locale = await getLocale();
   const dict = getDictionary(locale);
-  const entries = await listFavoriteEntries();
+  let entries: Awaited<ReturnType<typeof listFavoriteEntries>>;
+  try {
+    entries = await listFavoriteEntries();
+  } catch (error) {
+    console.error("[favorites] 片庫讀取失敗", error);
+    return (
+      <LibraryUnavailable
+        labels={{
+          title: dict.errors.loadFailed,
+          body: dict.library.unavailable,
+          reload: dict.errors.reload,
+          home: dict.errors.home,
+        }}
+      />
+    );
+  }
 
   const shelfDate = shelfDateFormatter(locale, todayInTaipei().slice(0, 4));
   const tiles: FavoriteTile[] = entries.map((m) => {
@@ -54,8 +70,10 @@ export default async function FavoritesPage() {
           locale={locale}
           labels={{
             remove: dict.library.remove,
-            confirmRemove: dict.library.confirmRemove,
-            cancel: dict.library.cancel,
+            removed: dict.library.removed,
+            undoMore: dict.library.undoMore,
+            undo: dict.actions.undo,
+            saveError: dict.common.saveError,
             removeNamed: dict.library.removeNamed,
             sortGroup: dict.library.sortGroup,
             sortRecent: lf.sortRecent,

@@ -163,11 +163,19 @@ export async function listFavoriteEntries(): Promise<FavoriteEntry[]> {
   `) as unknown as FavoriteEntry[];
 }
 
-export async function addFavorite(movie: SavedMovie): Promise<void> {
+/**
+ * 加入收藏。addedAt 只在「復原」時帶：取消收藏後按復原，放回原本的收藏時間，
+ * 收藏牆上的位置才不會變。沒帶就是現在。格式由 route 端的 addedAtFromBody 先驗過。
+ */
+export async function addFavorite(
+  movie: SavedMovie,
+  addedAt: string | null = null,
+): Promise<void> {
   const sql = await db();
   await sql`
-    INSERT INTO favorites (tmdb_id, title, poster_path, vote_average)
-    VALUES (${movie.tmdb_id}, ${movie.title}, ${movie.poster_path}, ${movie.vote_average})
+    INSERT INTO favorites (tmdb_id, title, poster_path, vote_average, added_at)
+    VALUES (${movie.tmdb_id}, ${movie.title}, ${movie.poster_path}, ${movie.vote_average},
+            COALESCE(${addedAt}::timestamptz, now()))
     ON CONFLICT (tmdb_id) DO NOTHING
   `;
 }
@@ -274,6 +282,25 @@ export async function markWatched(
       typeof row?.added_at === "string" ? row.added_at : null,
     watchedAdded: row?.watched_added === true,
   };
+}
+
+/**
+ * 「取消看過」之後的復原：把看過那一列連同原本的日期放回去。
+ *
+ * 跟 markWatched 分開，是因為復原不該再動想看清單：取消看過之後，
+ * 人可能已經把這部片放回想看，復原看過不能把它又拿掉。
+ */
+export async function restoreWatched(
+  movie: SavedMovie,
+  watchedAt: string,
+): Promise<void> {
+  const sql = await db();
+  await sql`
+    INSERT INTO watched (tmdb_id, title, poster_path, vote_average, watched_at)
+    VALUES (${movie.tmdb_id}, ${movie.title}, ${movie.poster_path}, ${movie.vote_average},
+            ${watchedAt}::timestamptz)
+    ON CONFLICT (tmdb_id) DO NOTHING
+  `;
 }
 
 export async function removeWatched(tmdbId: number): Promise<void> {

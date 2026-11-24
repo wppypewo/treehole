@@ -20,6 +20,7 @@ vi.mock('@/lib/db', () => ({
   listWatched: vi.fn(),
   markWatched: vi.fn(),
   removeWatched: vi.fn(),
+  restoreWatched: vi.fn(),
   upsertRating: vi.fn(),
   removeRating: vi.fn(),
 }))
@@ -154,7 +155,22 @@ describe('POST /api/favorites', () => {
     const res = await favorites.POST(post('/api/favorites', MOVIE_BODY))
     expect(res.status).toBe(200)
     expect(await res.json()).toEqual({ ok: true })
-    expect(db.addFavorite).toHaveBeenCalledExactlyOnceWith(MOVIE)
+    expect(db.addFavorite).toHaveBeenCalledExactlyOnceWith(MOVIE, null)
+  })
+
+  it('取消收藏後復原：帶回的 added_at 原樣交給資料層', async () => {
+    vi.mocked(db.addFavorite).mockResolvedValue(undefined)
+    const addedAt = '2026-09-12T13:05:00Z'
+    const res = await favorites.POST(post('/api/favorites', { ...MOVIE_BODY, added_at: addedAt }))
+    expect(res.status).toBe(200)
+    expect(db.addFavorite).toHaveBeenCalledExactlyOnceWith(MOVIE, addedAt)
+  })
+
+  it('added_at 不合法回 400，不碰資料庫', async () => {
+    const res = await favorites.POST(post('/api/favorites', { ...MOVIE_BODY, added_at: '2999-01-01T00:00:00Z' }))
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ error: 'invalid-added-at' })
+    expect(db.addFavorite).not.toHaveBeenCalled()
   })
 
   it('資料庫失敗回 503', async () => {
@@ -215,6 +231,26 @@ describe('POST /api/watched', () => {
     vi.mocked(db.markWatched).mockResolvedValue({ removedFromWatchlistAt: null, watchedAdded: false })
     const res = await watched.POST(post('/api/watched', MOVIE_BODY))
     expect(await res.json()).toEqual({ ok: true, removedFromWatchlist: null, watchedAdded: false })
+  })
+
+  it('取消看過後復原：帶 watched_at 只放回看過那一列，不走 markWatched（不動想看）', async () => {
+    vi.mocked(db.restoreWatched).mockResolvedValue(undefined)
+    const watchedAt = '2026-09-21T14:00:00Z'
+    const res = await watched.POST(post('/api/watched', { ...MOVIE_BODY, watched_at: watchedAt }))
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual({ ok: true, removedFromWatchlist: null, watchedAdded: true })
+    expect(db.restoreWatched).toHaveBeenCalledExactlyOnceWith(MOVIE, watchedAt)
+    expect(db.markWatched).not.toHaveBeenCalled()
+  })
+
+  it('watched_at 不合法回 400，不碰資料庫', async () => {
+    for (const watchedAt of ['yesterday', '2999-01-01T00:00:00Z', 1]) {
+      const res = await watched.POST(post('/api/watched', { ...MOVIE_BODY, watched_at: watchedAt }))
+      expect(res.status, String(watchedAt)).toBe(400)
+      expect(await res.json()).toEqual({ error: 'invalid-watched-at' })
+    }
+    expect(db.restoreWatched).not.toHaveBeenCalled()
+    expect(db.markWatched).not.toHaveBeenCalled()
   })
 
   it('資料庫失敗回 503', async () => {

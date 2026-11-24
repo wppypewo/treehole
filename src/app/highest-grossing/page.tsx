@@ -5,6 +5,7 @@ import { getHighestGrossing } from "@/lib/tmdb";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import InfiniteMovieGrid from "@/components/InfiniteMovieGrid";
 import ErrorNotice from "@/components/ErrorNotice";
+import RefreshButton from "@/components/RefreshButton";
 import PageHeader from "@/components/PageHeader";
 
 // 史上最賣座（票房）完整頁：縱向無限捲動到第 20 頁
@@ -30,7 +31,9 @@ export default async function HighestGrossingPage() {
       <PageHeader title={dict.pages.highestGrossing} rule={false} />
       <div className="mt-10">
         {errorMessage ? (
-          <ErrorNotice message={errorMessage} placement="" />
+          <ErrorNotice message={errorMessage} placement="">
+            <RefreshButton label={dict.errors.reload} />
+          </ErrorNotice>
         ) : (
           <InfiniteMovieGrid
             endpoint="/api/highest-grossing"

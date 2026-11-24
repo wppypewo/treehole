@@ -250,8 +250,10 @@ export default async function MoviePage({
                   initialNote={record.rating?.note ?? ""}
                   labels={{
                     ...dict.rating,
+                    undo: dict.actions.undo,
+                    retry: dict.common.retry,
                     saveError: dict.common.saveError,
-                    removeError: dict.common.removeError,
+                    removeError: dict.rating.clearError,
                   }}
                 />
               </>

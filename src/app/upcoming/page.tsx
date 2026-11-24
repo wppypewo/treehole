@@ -8,6 +8,7 @@ import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import { groupReleaseSchedule, todayInTaipei } from "@/lib/dates";
 import { tmdbImage } from "@/lib/images";
 import ErrorNotice from "@/components/ErrorNotice";
+import RefreshButton from "@/components/RefreshButton";
 import PageHeader from "@/components/PageHeader";
 import FallbackImg from "@/components/FallbackImg";
 
@@ -54,7 +55,9 @@ export default async function UpcomingPage() {
       />
       <div className="mt-10">
         {errorMessage ? (
-          <ErrorNotice message={errorMessage} placement="" />
+          <ErrorNotice message={errorMessage} placement="">
+            <RefreshButton label={dict.errors.reload} />
+          </ErrorNotice>
         ) : days.length === 0 ? (
           <p className="border-t border-hairline py-20 text-center text-sm text-paper-faint">
             {dict.lists.upcomingEmpty}

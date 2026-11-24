@@ -12,6 +12,8 @@ interface Labels {
   watchlist: string;
   watched: string;
   removedFromWatchlist: string;
+  /** 關掉某顆鍵之後的通知，旁邊配一個復原 */
+  undone: { watchlist: string; watched: string; favorites: string };
   undo: string;
   since: { watchlist: string; watched: string; favorites: string };
   saveError: string;
@@ -35,6 +37,9 @@ type Kind = "favorites" | "watchlist" | "watched";
 // 標記看過會把同一部片移出想看（資料層的 markWatched 在一句 SQL 裡做完），
 // 所以這裡要把「想看」一起關掉，並且講出來、給一個復原。
 //
+// 三顆鍵關掉時也都給復原：取消看過會丟掉看過的日期，取消收藏會丟掉收藏的日期，
+// 手滑按到時，復原會帶原本的日期放回去，不是當成今天重新加入。
+//
 // 送出中用 aria-disabled 擋重複按，不用 disabled：按下的那顆鍵若被停用，
 // 焦點會掉回 <body>，鍵盤使用者每按一次就被送回頁首。toggle 自己會擋 busy。
 //
@@ -56,8 +61,8 @@ export default function MovieActions({
   const [seen, setSeen] = useState(initial.watched);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
-  // 被移出想看的那一筆原本的加入時間；有值時顯示復原
-  const [undoAt, setUndoAt] = useState<string | null>(null);
+  // 最近一次被拿掉的那一筆：哪張表、原本的日期、要顯示哪句話。有值時顯示復原
+  const [undo, setUndo] = useState<{ kind: Kind; at: string; message: string } | null>(null);
   const router = useRouter();
   const keysRef = useRef<HTMLDivElement>(null);
   const fmt = useMemo(
@@ -79,7 +84,7 @@ export default function MovieActions({
     if (busy) return;
     setBusy(true);
     setFailed(false);
-    setUndoAt(null);
+    setUndo(null);
 
     const active = current !== null;
     // 標記看過時，想看也會被伺服器拿掉，一起先翻
@@ -103,7 +108,11 @@ export default function MovieActions({
           removedFromWatchlist?: { added_at?: unknown } | null;
         } | null;
         const at = data?.removedFromWatchlist?.added_at;
-        if (typeof at === "string") setUndoAt(at);
+        if (typeof at === "string") {
+          setUndo({ kind: "watchlist", at, message: labels.removedFromWatchlist });
+        }
+      } else if (active && current) {
+        setUndo({ kind, at: current, message: labels.undone[kind] });
       }
       // 導覽列的想看／看過片數在 layout 裡算，client 換頁不會重跑 layout。
       // refresh 只重畫 Server Component，這裡的按鈕狀態不受影響。
@@ -117,26 +126,28 @@ export default function MovieActions({
     }
   }
 
-  // 復原：帶原本的加入時間放回去，這部片回到想看清單裡原來的位置，
-  // 而不是被當成剛加入排到最後
-  async function restoreWatchlist() {
-    if (busy || !undoAt) return;
+  // 復原：帶原本的日期放回去，這部片回到清單裡原來的位置，
+  // 而不是被當成剛加入排到最後。看過那張表走 watched_at，另外兩張走 added_at
+  async function restore() {
+    if (busy || !undo) return;
+    const { kind, at } = undo;
     setBusy(true);
     setFailed(false);
     try {
-      const res = await fetch("/api/watchlist", {
+      const stamp = kind === "watched" ? { watched_at: at } : { added_at: at };
+      const res = await fetch(`/api/${kind}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...movie, added_at: undoAt }),
+        body: JSON.stringify({ ...movie, ...stamp }),
       });
-      if (!res.ok) throw new Error(`watchlist responded ${res.status}`);
-      setWant(undoAt);
-      setUndoAt(null);
-      // 復原鍵接著就不畫了；焦點交給剛被放回去的「想看」，報讀器會唸出它已按下
+      if (!res.ok) throw new Error(`${kind} responded ${res.status}`);
+      ({ watchlist: setWant, watched: setSeen, favorites: setFav })[kind](at);
+      setUndo(null);
+      // 復原鍵接著就不畫了；焦點交給剛被放回去的那顆鍵，報讀器會唸出它已按下
       keysRef.current
-        ?.querySelector<HTMLElement>('[data-kind="watchlist"]')
+        ?.querySelector<HTMLElement>(`[data-kind="${kind}"]`)
         ?.focus();
-      router.refresh();
+      if (kind !== "favorites") router.refresh();
     } catch {
       setFailed(true);
     } finally {
@@ -199,12 +210,12 @@ export default function MovieActions({
       {/* live region 一直掛著，內容才會被報讀；條件式整塊掛上去，螢幕閱讀器常常不唸。
           不設計時器自動收掉：這是資料被改了的通知，不該趁人沒看到就消失 */}
       <div role="status" aria-live="polite">
-        {undoAt && (
+        {undo && (
           <p className="mt-3 flex items-baseline justify-between gap-4 text-[0.8125rem] text-paper-dim">
-            <span>{labels.removedFromWatchlist}</span>
+            <span>{undo.message}</span>
             <button
               type="button"
-              onClick={restoreWatchlist}
+              onClick={restore}
               aria-disabled={busy || undefined}
               className="tap-safe link-hair shrink-0 text-paper aria-disabled:opacity-50"
             >

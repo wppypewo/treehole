@@ -7,6 +7,7 @@ import type { MovieDetails } from "@/lib/tmdb";
 import { shelfDateFormatter, todayInTaipei } from "@/lib/dates";
 import { totalRuntime } from "@/lib/library";
 import PageHeader from "@/components/PageHeader";
+import LibraryUnavailable from "@/components/library/LibraryUnavailable";
 import WatchlistTable, {
   type WatchlistRow,
 } from "@/components/library/WatchlistTable";
@@ -31,7 +32,22 @@ function yearOf(date: string | undefined): string | null {
 export default async function WatchlistPage() {
   const locale = await getLocale();
   const dict = getDictionary(locale);
-  const entries = await listWatchlistEntries();
+  let entries: Awaited<ReturnType<typeof listWatchlistEntries>>;
+  try {
+    entries = await listWatchlistEntries();
+  } catch (error) {
+    console.error("[watchlist] 片庫讀取失敗", error);
+    return (
+      <LibraryUnavailable
+        labels={{
+          title: dict.errors.loadFailed,
+          body: dict.library.unavailable,
+          reload: dict.errors.reload,
+          home: dict.errors.home,
+        }}
+      />
+    );
+  }
 
   const looked = entries.slice(0, DETAIL_LIMIT);
   const [detailList, creditList] = await Promise.all([
@@ -68,6 +84,7 @@ export default async function WatchlistPage() {
         poster_path: m.poster_path,
         vote_average: m.vote_average,
       },
+      added_at: m.added_at,
       queue: i + 1,
       title: md?.title ?? m.title,
       originalTitle: md?.original_title ?? null,
@@ -110,8 +127,8 @@ export default async function WatchlistPage() {
           locale={locale}
           labels={{
             remove: dict.library.remove,
-            confirmRemove: dict.library.confirmRemove,
-            cancel: dict.library.cancel,
+            removed: dict.library.removed,
+            undoMore: dict.library.undoMore,
             removeNamed: dict.library.removeNamed,
             sortGroup: dict.library.sortGroup,
             sortQueue: lw.sortQueue,
