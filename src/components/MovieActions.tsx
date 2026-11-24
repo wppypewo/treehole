@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import type { SavedMovie } from "@/lib/db";
 import type { Locale } from "@/i18n/config";
 import { shelfDateFormatter, todayInTaipei } from "@/lib/dates";
+import Reveal from "./Reveal";
+import { useLinger } from "./useLinger";
 
 interface Labels {
   group: string;
@@ -65,6 +67,9 @@ export default function MovieActions({
   const [undo, setUndo] = useState<{ kind: Kind; at: string; message: string } | null>(null);
   const router = useRouter();
   const keysRef = useRef<HTMLDivElement>(null);
+  // 收起時留著上一則內容淡出
+  const shownUndo = useLinger(undo).shown;
+  const showFailed = useLinger(failed ? true : null).shown;
   const fmt = useMemo(
     () => shelfDateFormatter(locale, todayInTaipei().slice(0, 4)),
     [locale],
@@ -192,27 +197,30 @@ export default function MovieActions({
         ))}
       </div>
 
-      {/* 日期跟著鍵對齊，一欄一格。整行都沒有日期時不佔高度，
-          只要有一格就三格都排，空格也留著，欄位才不會錯位 */}
-      {buttons.some((b) => b.date) && (
-        <p className="mt-2 grid grid-cols-3 text-center text-[0.6875rem] text-paper-faint tabular-nums">
-          {buttons.map((b) => {
-            const date = b.date ? fmt(b.date) : null;
-            return (
-              <span key={b.kind}>
-                {date ? labels.since[b.kind].replace("{date}", date) : ""}
-              </span>
-            );
-          })}
-        </p>
-      )}
+      {/* 日期跟著鍵對齊，一欄一格。這一行一直佔一行高：第一次按下時日期才出現，
+          若到那時才插進一行，底下整塊會被往下推一格。新日期淡入 */}
+      <p className="mt-2 grid min-h-[1lh] grid-cols-3 text-center text-[0.6875rem] text-paper-faint tabular-nums">
+        {buttons.map((b) => {
+          const date = b.date ? fmt(b.date) : null;
+          return (
+            <span key={b.kind}>
+              {date && (
+                <span key={date} className="fade-in inline-block">
+                  {labels.since[b.kind].replace("{date}", date)}
+                </span>
+              )}
+            </span>
+          );
+        })}
+      </p>
 
       {/* live region 一直掛著，內容才會被報讀；條件式整塊掛上去，螢幕閱讀器常常不唸。
           不設計時器自動收掉：這是資料被改了的通知，不該趁人沒看到就消失 */}
       <div role="status" aria-live="polite">
-        {undo && (
+        <Reveal open={undo !== null}>
+          {shownUndo && (
           <p className="mt-3 flex items-baseline justify-between gap-4 text-[0.8125rem] text-paper-dim">
-            <span>{undo.message}</span>
+            <span>{shownUndo.message}</span>
             <button
               type="button"
               onClick={restore}
@@ -222,15 +230,18 @@ export default function MovieActions({
               {labels.undo}
             </button>
           </p>
-        )}
+          )}
+        </Reveal>
       </div>
 
       {/* 失敗提示：一條簾幕紅左線加一行字，不畫方框 */}
-      {failed && (
-        <p role="alert" className="mt-3 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim">
-          {labels.saveError}
-        </p>
-      )}
+      <Reveal open={failed}>
+        {showFailed && (
+          <p role="alert" className="mt-3 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim">
+            {labels.saveError}
+          </p>
+        )}
+      </Reveal>
     </div>
   );
 }

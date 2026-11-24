@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -23,6 +23,7 @@ export default function Navbar({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+  const headerRef = useRef<HTMLElement>(null);
 
   // Escape 收起
   useEffect(() => {
@@ -30,8 +31,16 @@ export default function Navbar({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setMenuOpen(false);
     };
+    // 點選單以外的地方收起：選單現在蓋在內容上，不收的話下面的頁面點不到
+    const onDown = (e: PointerEvent) => {
+      if (!headerRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+    };
   }, [menuOpen]);
 
   // 順序依使用頻率：想看、看過緊跟在瀏覽後面，收藏是回頭翻的，排後面。
@@ -50,7 +59,7 @@ export default function Navbar({
   } as Record<Locale, string>;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-hairline bg-ink">
+    <header ref={headerRef} className="sticky top-0 z-30 border-b border-hairline bg-ink">
       {/* min-h 而不是 h：手機系統字級調大時，語言鍵與選單鍵折到第二行，不撐出橫捲 */}
       <nav className="mx-auto flex min-h-16 max-w-[1400px] flex-wrap items-center gap-x-8 px-5 sm:px-8">
         <Link
@@ -96,7 +105,7 @@ export default function Navbar({
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.25"
-                className={`absolute inset-0 h-full w-full transition-opacity duration-200 ${
+                className={`absolute inset-0 h-full w-full transition-opacity duration-(--dur-state) ${
                   menuOpen ? "opacity-0" : "opacity-100"
                 }`}
               >
@@ -108,7 +117,7 @@ export default function Navbar({
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.25"
-                className={`absolute inset-0 h-full w-full transition-opacity duration-200 ${
+                className={`absolute inset-0 h-full w-full transition-opacity duration-(--dur-state) ${
                   menuOpen ? "opacity-100" : "opacity-0"
                 }`}
               >
@@ -120,12 +129,16 @@ export default function Navbar({
         </div>
       </nav>
 
-      {/* Mobile menu：max-height 過渡；inert 讓收合時完全脫離 Tab 順序 */}
+      {/* 手機選單：蓋在頁面上，從導覽列下緣往下 6px 淡入，收起時往回淡出。
+          不推開頁面（原本用 max-height 展開，整頁每一幀重排），只動 opacity/transform。
+          inert 讓收合時完全脫離 Tab 順序 */}
       <div
         inert={!menuOpen}
         aria-hidden={!menuOpen}
-        className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out sm:hidden ${
-          menuOpen ? "max-h-80 opacity-100" : "pointer-events-none max-h-0 opacity-0"
+        className={`absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-hairline bg-ink transition-[opacity,transform,visibility] sm:hidden ${
+          menuOpen
+            ? "visible translate-y-0 opacity-100 duration-(--dur-enter) ease-(--ease-expo)"
+            : "pointer-events-none invisible -translate-y-1.5 opacity-0 duration-(--dur-exit) ease-(--ease-exit)"
         }`}
       >
         <div className="flex flex-col border-t border-hairline px-5 pb-5">

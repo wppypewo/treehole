@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { SavedMovie } from "@/lib/db";
 import { NOTE_MAX_LENGTH } from "@/lib/library";
 import RatingRuler from "./RatingRuler";
+import Reveal from "./Reveal";
+import { useLinger } from "./useLinger";
 
 interface Labels {
   scorePrompt: string;
@@ -213,6 +215,12 @@ export default function RatingEditor({
         ? labels.saved
         : "";
 
+  // 撤銷列與錯誤提示收起時，留著上一則內容淡出
+  const shownCleared = useLinger(cleared).shown;
+  const errorText =
+    status === "error" || error ? (error ?? labels.saveError) : null;
+  const shownError = useLinger(errorText).shown;
+
   return (
     <div>
       <div className="mt-[1.375rem]">
@@ -265,7 +273,7 @@ export default function RatingEditor({
             type="button"
             onClick={clearRating}
             aria-disabled={busy || status === "saving" || undefined}
-            className="tap-safe text-[0.8125rem] tracking-[0.04em] text-paper-faint transition-colors hover:text-paper aria-disabled:opacity-50"
+            className="fade-in tap-safe text-[0.8125rem] tracking-[0.04em] text-paper-faint transition-colors hover:text-paper aria-disabled:opacity-50"
           >
             {labels.clear}
           </button>
@@ -277,13 +285,19 @@ export default function RatingEditor({
           aria-live="polite"
           className="text-[0.75rem] text-paper-faint"
         >
-          {statusText}
+          {/* 「儲存中」換成「已儲存」：舊字直接換掉，新字淡入 */}
+          {statusText && (
+            <span key={statusText} className="fade-in inline-block">
+              {statusText}
+            </span>
+          )}
         </p>
       </div>
 
       {/* 清除後的復原。跟片庫三顆鍵一樣不設計時器：資料被改了的通知，不該自己消失 */}
       <div role="status" aria-live="polite">
-        {cleared && (
+        <Reveal open={cleared !== null}>
+        {shownCleared && (
           <p className="mt-3 flex items-baseline justify-between gap-4 text-[0.8125rem] text-paper-dim">
             <span>{labels.cleared}</span>
             <button
@@ -296,14 +310,16 @@ export default function RatingEditor({
             </button>
           </p>
         )}
+        </Reveal>
       </div>
 
-      {(status === "error" || error) && (
+      <Reveal open={errorText !== null}>
+      {shownError && (
         <p
           role="alert"
           className="mt-4 flex items-baseline justify-between gap-4 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
         >
-          <span>{error ?? labels.saveError}</span>
+          <span>{shownError}</span>
           {status === "error" && !error && (
             <button
               type="button"
@@ -315,6 +331,7 @@ export default function RatingEditor({
           )}
         </p>
       )}
+      </Reveal>
     </div>
   );
 }

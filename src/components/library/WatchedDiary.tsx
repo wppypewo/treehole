@@ -111,6 +111,7 @@ export default function WatchedDiary({
     try {
       const res = await fetch(`/api/watched?tmdb_id=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(`watched responded ${res.status}`);
+      capture();
       undoStack.push(row);
       router.refresh();
     } catch {
@@ -149,14 +150,14 @@ export default function WatchedDiary({
       labels={labels}
       busy={undoStack.busy}
       onUndo={undo}
-      className={undoStack.top ? "mt-5" : ""}
+      className={list.length > 0 || undoStack.top ? "min-h-11 max-sm:basis-full" : ""}
     />
   );
 
   const alert = error && (
     <p
       role="alert"
-      className="mt-5 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
+      className="fade-in mt-5 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
     >
       {error}
     </p>
@@ -164,7 +165,7 @@ export default function WatchedDiary({
 
   if (list.length === 0) {
     return (
-      <div>
+      <div className="enter-soft">
         {status}
         {alert}
         <LibraryEmpty text={labels.empty} browse={labels.browse} linkRef={emptyRef} />
@@ -173,9 +174,11 @@ export default function WatchedDiary({
   }
 
   return (
-    <div>
+    <div className="enter-soft">
+      {/* 篩選與撤銷列同一行：撤銷列預留高度，出現時不把整本日誌往下推 */}
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
       {/* 只剩一部時篩選沒意義就不畫；但正在篩選中時要留著，不然回不到「全部」 */}
-      {(list.length > 1 || filter !== "all") && (
+      {list.length > 1 || filter !== "all" ? (
         <Segmented
           options={[
             { value: "all", label: labels.filterAll },
@@ -189,9 +192,12 @@ export default function WatchedDiary({
           }}
           label={labels.filterGroup}
         />
+      ) : (
+        <span />
       )}
 
       {status}
+      </div>
       {alert}
 
       {groups.length === 0 ? (

@@ -41,8 +41,8 @@ export default function NavLinks({
             {link.count && <NavCount counts={counts} kind={link.count} />}
             <span
               aria-hidden
-              className={`nav-mark absolute -bottom-0.5 left-0 h-px bg-curtain transition-all duration-300 ease-out ${
-                isActive ? "w-full" : "w-0"
+              className={`nav-mark absolute -bottom-0.5 left-0 h-px w-full origin-left bg-curtain transition-transform duration-(--dur-move) ease-(--ease-expo) ${
+                isActive ? "scale-x-100" : "scale-x-0"
               }`}
             />
           </Link>

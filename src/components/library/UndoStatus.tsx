@@ -1,5 +1,7 @@
 "use client";
 
+import { useLinger } from "../useLinger";
+
 /**
  * 片庫三頁共用的狀態列：最近一個動作的說明、「復原」，
  * 連續做了好幾個動作時再補一句還能往回復原幾部。
@@ -23,14 +25,24 @@ export default function UndoStatus({
   onUndo: () => void;
   className?: string;
 }) {
+  // 復原完最後一筆時，這列先淡出再清空，不是一下子不見
+  const { shown, closing } = useLinger(message);
+
   return (
     <p
       role="status"
-      className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.8125rem] text-paper-dim ${className}`}
+      className={`flex items-center text-[0.8125rem] text-paper-dim ${className}`}
     >
-      {message && (
-        <>
-          <span>{message}</span>
+      {shown && (
+        <span
+          data-closing={closing || undefined}
+          inert={closing}
+          className="fade-in inline-flex flex-wrap items-center gap-x-4 gap-y-1"
+        >
+          {/* 換成下一筆時只換這段字；復原鍵不重掛，連按時焦點才留得住 */}
+          <span key={shown} className="fade-in">
+            {shown}
+          </span>
           <button
             type="button"
             onClick={onUndo}
@@ -44,7 +56,7 @@ export default function UndoStatus({
               {labels.undoMore.replace("{n}", String(remaining))}
             </span>
           )}
-        </>
+        </span>
       )}
     </p>
   );
