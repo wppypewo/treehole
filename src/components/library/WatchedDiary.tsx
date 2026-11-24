@@ -19,6 +19,21 @@ import { useFlip } from "./useFlip";
 import { useRefocus } from "./useRefocus";
 import FallbackImg from "@/components/FallbackImg";
 
+/**
+ * 把一筆放回日誌原來的位置：清單是看過時間新的在前，插在第一筆比它舊的前面。
+ * 直接接在最後的話，復原後那部片會跑到同月份的最底下，日期順序就亂了。
+ * 時間解析不了的排最後，跟伺服器給的順序一致。
+ */
+function putBack(list: DiaryRow[], row: DiaryRow): DiaryRow[] {
+  if (list.some((r) => r.movie.tmdb_id === row.movie.tmdb_id)) return list;
+  const t = Date.parse(row.watched_at);
+  const at = Number.isNaN(t)
+    ? -1
+    : list.findIndex((r) => !(Date.parse(r.watched_at) >= t));
+  if (at === -1) return [...list, row];
+  return [...list.slice(0, at), row, ...list.slice(at)];
+}
+
 export interface DiaryRow {
   movie: SavedMovie;
   /** 原始的看過時間（ISO），復原時原樣送回，片才會回到日誌裡原來那一天 */
@@ -100,7 +115,7 @@ export default function WatchedDiary({
       router.refresh();
     } catch {
       capture();
-      setList((prev) => (prev.some((r) => r.movie.tmdb_id === id) ? prev : [...prev, row]));
+      setList((prev) => putBack(prev, row));
       setError(labels.removeError);
     }
   }
@@ -117,7 +132,7 @@ export default function WatchedDiary({
       if (!res.ok) throw new Error(`watched responded ${res.status}`);
       capture();
       if (isLast) arrive(row.movie.tmdb_id);
-      setList((prev) => [...prev, row]);
+      setList((prev) => putBack(prev, row));
       router.refresh();
     });
     if (!ok) setError(labels.saveError);
