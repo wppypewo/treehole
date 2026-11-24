@@ -66,9 +66,13 @@ export default function FavoritesWall({
   const { leave, arrive, emptyRef } = useRefocus(containerRef);
   const undoStack = useUndoStack<FavoriteTile>();
 
+  // 全部都沒評分時，「我的評分」排出來跟「最近收藏」一樣，不給這個選項。
+  // 最後一部有評分的移出之後選項會消失，排序要跟著退回預設，分段組才有選中的那一格
+  const anyScore = list.some((t) => t.score !== null);
+  const activeSort: FavoritesSort = sort === "mine" && !anyScore ? "recent" : sort;
   const shown = sortFavorites(
     list.map((t) => ({ ...t, title: t.movie.title })),
-    sort,
+    activeSort,
     locale,
   );
 
@@ -143,9 +147,6 @@ export default function FavoritesWall({
     );
   }
 
-  // 全部都沒評分時，「我的評分」排出來跟「最近收藏」一樣，不給這個選項
-  const anyScore = list.some((t) => t.score !== null);
-
   return (
     <div>
       {list.length > 1 && (
@@ -155,7 +156,7 @@ export default function FavoritesWall({
             { value: "title", label: labels.sortTitle },
             ...(anyScore ? [{ value: "mine" as const, label: labels.sortMine }] : []),
           ]}
-          value={sort}
+          value={activeSort}
           onChange={(v) => {
             capture();
             setSort(v);

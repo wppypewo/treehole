@@ -84,7 +84,11 @@ export default function WatchlistTable({
   const { leave, arrive, emptyRef } = useRefocus(containerRef);
   const undoStack = useUndoStack<Undoable>();
 
-  const shown = sortWatchlist(list, sort, locale);
+  // 有片長可排才給「片長」這個選項。最後一部有片長的移出之後選項會消失，
+  // 排序要跟著退回預設，不然分段組裡沒有一格是選中的，鍵盤也 Tab 不進去
+  const hasRuntime = list.some((r) => r.runtime !== null);
+  const activeSort: WatchlistSort = sort === "runtime" && !hasRuntime ? "queue" : sort;
+  const shown = sortWatchlist(list, activeSort, locale);
   // 畫面上的序號照「目前還在清單上的」加入先後重排：記為看過或移出一部之後，
   // 後面的往前遞補，跟重新整理後伺服器給的編號一致。row.queue 只拿來排先後
   const rank = new Map(
@@ -139,10 +143,10 @@ export default function WatchlistTable({
   }
 
   // 復原：先帶原本的加入時間把片放回想看（使用者比較在乎的那一半），
-  // 是「標為看過」的話再撤掉那筆看過。放回失敗就整個停下，不做一半
+  // 是「標為看過」的話再撤掉那筆看過。任一步失敗，這一筆都留在堆疊上，再按一次復原就重做：
+  // 放回想看是 ON CONFLICT DO NOTHING，重送不會多一筆，所以只撤看過失敗時重來也安全
   async function undo() {
     setError(null);
-    let partial = false;
     const ok = await undoStack.undo(async (item, isLast) => {
       const { row } = item;
       const put = await fetch("/api/watchlist", {
@@ -154,17 +158,22 @@ export default function WatchlistTable({
       capture();
       // 堆疊還有東西時焦點留在「復原」上；最後一筆才交給放回來的那一列
       if (isLast) arrive(row.movie.tmdb_id);
-      setList((prev) => [...prev, row]);
+      setList((prev) =>
+        prev.some((r) => r.movie.tmdb_id === row.movie.tmdb_id) ? prev : [...prev, row],
+      );
       if (item.type === "watched" && item.watchedAdded) {
         const del = await fetch(`/api/watched?tmdb_id=${row.movie.tmdb_id}`, {
           method: "DELETE",
         });
-        // 片已經回到清單，只是看過那一筆沒撤掉。照實講，不假裝全部成功
-        if (!del.ok) partial = true;
+        // 片已經回到清單，只是看過那一筆沒撤掉。照實講，也不把這一筆從堆疊拿掉
+        if (!del.ok) {
+          router.refresh();
+          throw new Error(`watched responded ${del.status}`);
+        }
       }
       router.refresh();
     });
-    if (!ok || partial) setError(labels.saveError);
+    if (!ok) setError(labels.saveError);
   }
 
   const top = undoStack.top;
@@ -175,8 +184,6 @@ export default function WatchlistTable({
       )
     : null;
 
-  // 有片長可排才給「片長」這個選項
-  const hasRuntime = list.some((r) => r.runtime !== null);
   const options = [
     { value: "queue" as const, label: labels.sortQueue },
     ...(hasRuntime ? [{ value: "runtime" as const, label: labels.sortRuntime }] : []),
@@ -189,7 +196,7 @@ export default function WatchlistTable({
         {list.length > 1 ? (
           <Segmented
             options={options}
-            value={sort}
+            value={activeSort}
             onChange={(v) => {
               capture();
               setSort(v);

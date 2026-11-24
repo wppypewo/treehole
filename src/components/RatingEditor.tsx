@@ -77,8 +77,10 @@ export default function RatingEditor({
     if (!score) return;
     if (score === persisted.current.score && note === persisted.current.note)
       return;
-    // 同一時間只送一筆，後到的排在它後面；不然慢的那筆可能後到，蓋掉新的
-    if (inFlight.current) {
+    // 同一時間只送一筆，後到的排在它後面；不然慢的那筆可能後到，蓋掉新的。
+    // 例外是頁面要走了（keepalive）：排隊的那筆要等前一筆回來才送，分頁一關就沒機會了，
+    // 所以直接帶 keepalive 把最新內容送出去。前一筆已經先上路，伺服器照順序收到的機會大
+    if (inFlight.current && !keepalive) {
       queued.current = true;
       return;
     }
@@ -95,7 +97,11 @@ export default function RatingEditor({
       // 不看狀態碼就顯示「已儲存」，等於在資料庫寫失敗時對使用者說謊。
       if (!res.ok) throw new Error(`ratings responded ${res.status}`);
       persisted.current = { score, note };
-      setStatus("saved");
+      // 送出之後人可能又改了短評，那段新字還在等計時器。這時說「已儲存」是謊話
+      const current = latest.current;
+      setStatus(
+        current.score === score && current.note === note ? "saved" : "idle",
+      );
     } catch {
       setStatus("error");
     } finally {
