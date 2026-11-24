@@ -7,13 +7,17 @@ import type { Locale } from "@/i18n/config";
 import type { SavedMovie } from "@/lib/db.types";
 import { sortWatchlist, type WatchlistSort } from "@/lib/library";
 import Segmented from "@/components/Segmented";
-import ConfirmRemove, { type RemoveLabels } from "./ConfirmRemove";
+import RemoveButton, { type RemoveLabels } from "./RemoveButton";
 import LibraryEmpty from "./LibraryEmpty";
+import UndoStatus from "./UndoStatus";
+import { useUndoStack } from "./useUndoStack";
 import { useFlip } from "./useFlip";
 import { useRefocus } from "./useRefocus";
 
 export interface WatchlistRow {
   movie: SavedMovie;
+  /** 原始的加入時間（ISO），復原時原樣送回，片才會回到原來的序位 */
+  added_at: string;
   /** 依加入先後的序號，從 1 起算 */
   queue: number;
   title: string;
@@ -35,6 +39,8 @@ interface Labels extends RemoveLabels {
   markWatched: string;
   markWatchedNamed: string;
   markedWatched: string;
+  removed: string;
+  undoMore: string;
   undo: string;
   saveError: string;
   removeError: string;
@@ -42,21 +48,23 @@ interface Labels extends RemoveLabels {
   browse: string;
 }
 
-/** 標記看過之後、復原之前要記住的東西 */
-interface Pending {
-  row: WatchlistRow;
-  /** markWatched 回傳的原加入時間，復原時原樣送回，片才會回到原來的序位 */
-  addedAt: string | null;
-  /** 這次是不是真的新增了一列看過；本來就看過的話復原不能去刪它 */
-  watchedAdded: boolean;
-}
+/** 復原堆疊裡的一筆：移出，或標為看過 */
+type Undoable =
+  | { type: "removed"; row: WatchlistRow }
+  | {
+      type: "watched";
+      row: WatchlistRow;
+      /** 這次是不是真的新增了一列看過；本來就看過的話復原不能去刪它 */
+      watchedAdded: boolean;
+    };
 
 /**
  * 想看清單。排成放映表（跟首頁那一段同一種列），因為這一頁要回答的是
  * 「還有哪些、先看哪部」：序號、片名、導演、年份與片長、加入日。
  *
- * 每一列有兩個動作：「看過了」直接記一筆看過並移出清單，附復原；
- * 「拿掉」是兩段式。片名本身是連到詳情頁的連結，點擊範圍撐滿整列，
+ * 每一列有兩個動作：「標為看過」記一筆看過並移出清單，「移出」直接移出。
+ * 兩個都是按下去畫面當下就變，狀態列給復原；連做好幾筆也能一路往回復原。
+ * 片名本身是連到詳情頁的連結，點擊範圍撐滿整列，
  * 兩個動作鍵浮在連結上面（relative z-10），不會被整列連結吃掉。
  */
 export default function WatchlistTable({
@@ -70,25 +78,37 @@ export default function WatchlistTable({
 }) {
   const [list, setList] = useState(rows);
   const [sort, setSort] = useState<WatchlistSort>("queue");
-  const [busy, setBusy] = useState<number | null>(null);
-  const [pending, setPending] = useState<Pending | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { containerRef, capture } = useFlip<HTMLOListElement>();
   const { leave, arrive, emptyRef } = useRefocus(containerRef);
+  const undoStack = useUndoStack<Undoable>();
 
   const shown = sortWatchlist(list, sort, locale);
-  // 畫面上的序號照「目前還在清單上的」加入先後重排：記為看過或拿掉一部之後，
+  // 畫面上的序號照「目前還在清單上的」加入先後重排：記為看過或移出一部之後，
   // 後面的往前遞補，跟重新整理後伺服器給的編號一致。row.queue 只拿來排先後
   const rank = new Map(
     sortWatchlist(list, "queue", locale).map((r, i) => [r.movie.tmdb_id, i + 1]),
   );
 
-  // 送出中的鍵只標 aria-disabled（見 ConfirmRemove），這裡自己擋重複送出
-  async function markWatched(row: WatchlistRow) {
-    if (busy !== null) return;
-    setBusy(row.movie.tmdb_id);
+  // 兩個動作共用：先從畫面拿掉，寫入失敗再放回來
+  function takeOut(id: number) {
     setError(null);
+    capture();
+    leave(id);
+    setList((prev) => prev.filter((r) => r.movie.tmdb_id !== id));
+  }
+
+  function putBack(row: WatchlistRow, message: string) {
+    capture();
+    setList((prev) =>
+      prev.some((r) => r.movie.tmdb_id === row.movie.tmdb_id) ? prev : [...prev, row],
+    );
+    setError(message);
+  }
+
+  async function markWatched(row: WatchlistRow) {
+    takeOut(row.movie.tmdb_id);
     try {
       const res = await fetch("/api/watched", {
         method: "POST",
@@ -96,82 +116,64 @@ export default function WatchlistTable({
         body: JSON.stringify(row.movie),
       });
       if (!res.ok) throw new Error(`watched responded ${res.status}`);
-      const data = (await res.json()) as {
-        removedFromWatchlist: { added_at: string } | null;
-        watchedAdded: boolean;
-      };
-      capture();
-      leave(row.movie.tmdb_id);
-      setList((prev) => prev.filter((r) => r.movie.tmdb_id !== row.movie.tmdb_id));
-      setPending({
-        row,
-        addedAt: data.removedFromWatchlist?.added_at ?? null,
-        watchedAdded: data.watchedAdded,
-      });
+      const data = (await res.json()) as { watchedAdded: boolean };
+      undoStack.push({ type: "watched", row, watchedAdded: data.watchedAdded });
       router.refresh();
     } catch {
-      setError(labels.saveError);
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  // 復原：先把片放回想看（這是使用者比較在乎的那一半），再撤掉看過。
-  // 放回失敗就整個停下，畫面維持「已記為看過」，不做一半
-  async function undo() {
-    if (!pending || busy !== null) return;
-    const { row, addedAt, watchedAdded } = pending;
-    setBusy(row.movie.tmdb_id);
-    setError(null);
-    try {
-      const put = await fetch("/api/watchlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          addedAt ? { ...row.movie, added_at: addedAt } : row.movie,
-        ),
-      });
-      if (!put.ok) throw new Error(`watchlist responded ${put.status}`);
-      capture();
-      // 「復原」這顆鍵跟著消失，焦點回到放回來的那一列
-      arrive(row.movie.tmdb_id);
-      setList((prev) => [...prev, row]);
-      setPending(null);
-      if (watchedAdded) {
-        const del = await fetch(`/api/watched?tmdb_id=${row.movie.tmdb_id}`, {
-          method: "DELETE",
-        });
-        // 片已經回到清單，只是看過那一筆沒撤掉。照實講，不假裝全部成功
-        if (!del.ok) setError(labels.saveError);
-      }
-      router.refresh();
-    } catch {
-      setError(labels.saveError);
-    } finally {
-      setBusy(null);
+      putBack(row, labels.saveError);
     }
   }
 
   async function remove(row: WatchlistRow) {
-    if (busy !== null) return;
-    setBusy(row.movie.tmdb_id);
-    setError(null);
+    takeOut(row.movie.tmdb_id);
     try {
       const res = await fetch(`/api/watchlist?tmdb_id=${row.movie.tmdb_id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error(`watchlist responded ${res.status}`);
-      capture();
-      leave(row.movie.tmdb_id);
-      setList((prev) => prev.filter((r) => r.movie.tmdb_id !== row.movie.tmdb_id));
-      // 拿掉之後，上一次「看過了」的復原還有效，不清掉
+      undoStack.push({ type: "removed", row });
       router.refresh();
     } catch {
-      setError(labels.removeError);
-    } finally {
-      setBusy(null);
+      putBack(row, labels.removeError);
     }
   }
+
+  // 復原：先帶原本的加入時間把片放回想看（使用者比較在乎的那一半），
+  // 是「標為看過」的話再撤掉那筆看過。放回失敗就整個停下，不做一半
+  async function undo() {
+    setError(null);
+    let partial = false;
+    const ok = await undoStack.undo(async (item, isLast) => {
+      const { row } = item;
+      const put = await fetch("/api/watchlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...row.movie, added_at: row.added_at }),
+      });
+      if (!put.ok) throw new Error(`watchlist responded ${put.status}`);
+      capture();
+      // 堆疊還有東西時焦點留在「復原」上；最後一筆才交給放回來的那一列
+      if (isLast) arrive(row.movie.tmdb_id);
+      setList((prev) => [...prev, row]);
+      if (item.type === "watched" && item.watchedAdded) {
+        const del = await fetch(`/api/watched?tmdb_id=${row.movie.tmdb_id}`, {
+          method: "DELETE",
+        });
+        // 片已經回到清單，只是看過那一筆沒撤掉。照實講，不假裝全部成功
+        if (!del.ok) partial = true;
+      }
+      router.refresh();
+    });
+    if (!ok || partial) setError(labels.saveError);
+  }
+
+  const top = undoStack.top;
+  const message = top
+    ? (top.type === "watched" ? labels.markedWatched : labels.removed).replace(
+        "{title}",
+        top.row.title,
+      )
+    : null;
 
   // 有片長可排才給「片長」這個選項
   const hasRuntime = list.some((r) => r.runtime !== null);
@@ -200,26 +202,14 @@ export default function WatchlistTable({
 
         {/* 狀態列固定存在，讓報讀器接得到變化；沒事時是空的。
             清單空了又沒有待復原時不佔高度，空狀態那一列才貼得住刊頭 */}
-        <p
-          role="status"
-          className={`flex flex-wrap items-center gap-x-4 text-[0.8125rem] text-paper-dim ${
-            list.length > 0 || pending ? "min-h-11" : ""
-          }`}
-        >
-          {pending && (
-            <>
-              <span>{labels.markedWatched.replace("{title}", pending.row.title)}</span>
-              <button
-                type="button"
-                onClick={undo}
-                aria-disabled={busy !== null || undefined}
-                className="link-hair tap-safe text-paper aria-disabled:opacity-40"
-              >
-                {labels.undo}
-              </button>
-            </>
-          )}
-        </p>
+        <UndoStatus
+          message={message}
+          remaining={undoStack.remaining}
+          labels={labels}
+          busy={undoStack.busy}
+          onUndo={undo}
+          className={list.length > 0 || top ? "min-h-11" : ""}
+        />
       </div>
 
       {error && (
@@ -286,17 +276,15 @@ export default function WatchlistTable({
                 <button
                   type="button"
                   onClick={() => markWatched(row)}
-                  aria-disabled={busy !== null || undefined}
                   aria-label={labels.markWatchedNamed.replace("{title}", row.title)}
-                  className="tap-safe text-[0.8125rem] tracking-[0.02em] text-paper-dim transition-colors hover:text-paper aria-disabled:opacity-40"
+                  className="tap-safe text-[0.8125rem] tracking-[0.02em] text-paper-dim transition-colors hover:text-paper"
                 >
                   {labels.markWatched}
                 </button>
-                <ConfirmRemove
+                <RemoveButton
                   title={row.title}
                   labels={labels}
-                  busy={busy !== null}
-                  onConfirm={() => remove(row)}
+                  onRemove={() => remove(row)}
                 />
               </span>
             </li>

@@ -107,7 +107,7 @@ export default function Tonight({
         )}
 
         <div className="mt-7 flex flex-wrap gap-2.5">
-          {/* 「打開這部」離開這一段就不知道是哪部（例如讀屏的連結清單），用片名補描述 */}
+          {/* 「查看詳情」離開這一段就不知道是哪部（例如讀屏的連結清單），用片名補描述 */}
           <Link
             href={`/movie/${film.id}`}
             aria-describedby="tonight-title"

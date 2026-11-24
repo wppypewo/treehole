@@ -41,15 +41,20 @@ export interface Dictionary {
     emptyFavorites: string;
     emptyWatchlist: string;
     emptyWatched: string;
-    /** 片庫有片、但評分門檻篩到一部不剩。和「片庫是空的」是兩回事，不能共用一句 */
+    /** 片庫有片、但篩選篩到一部不剩。和「片庫是空的」是兩回事，不能共用一句 */
     filteredEmpty: string;
+    /** 篩選篩空時的出路：一鍵回到全部 */
+    showAll: string;
+    /** 片庫三頁讀不到資料庫時的說明 */
+    unavailable: string;
     favoritesTitle: string;
     watchlistTitle: string;
     watchedTitle: string;
-    /** 兩段式拿掉：第一下換成確認與取消，第二下才真的送出 */
-    confirmRemove: string;
-    cancel: string;
-    /** 按鈕的完整名稱，{title} 由呼叫端代入；畫面上只顯示「拿掉」 */
+    /** 移出之後的狀態列，旁邊配復原。{title} 由呼叫端代入 */
+    removed: string;
+    /** 連續移出好幾部時，接在狀態列後面：還能往回復原幾部。{n} 由呼叫端代入 */
+    undoMore: string;
+    /** 按鈕的完整名稱，{title} 由呼叫端代入；畫面上只顯示「移出」 */
     removeNamed: string;
     /** 排序／篩選那組分段鍵的組名，給報讀用 */
     sortGroup: string;
@@ -157,9 +162,12 @@ export interface Dictionary {
     scorePrompt: string;
     note: string;
     notePlaceholder: string;
-    save: string;
+    saving: string;
     saved: string;
+    needScore: string;
     clear: string;
+    cleared: string;
+    clearError: string;
   };
   actions: {
     /** 三顆切換鍵那一組的欄名 */
@@ -169,6 +177,8 @@ export interface Dictionary {
     watched: string;
     /** 標記看過時順手移出想看，畫面上要講 */
     removedFromWatchlist: string;
+    /** 關掉某顆鍵之後的通知，旁邊配一個復原 */
+    undone: { watchlist: string; watched: string; favorites: string };
     undo: string;
     /** 三顆鍵底下對齊的日期。{date} 是「9/12」這種短寫 */
     since: { watchlist: string; watched: string; favorites: string };
@@ -290,26 +300,28 @@ const zhTW: Dictionary = {
     title: "搜尋",
   },
   library: {
-    remove: "拿掉",
+    remove: "移出",
     emptyFavorites: "收藏是空的。在電影頁按「收藏」加入。",
     emptyWatchlist: "想看清單是空的。在電影頁按「想看」加入。",
-    emptyWatched: "還沒有看過的紀錄。在電影頁按「標記看過」記下一部。",
-    filteredEmpty: "這個評分門檻下沒有片。",
+    emptyWatched: "還沒有看過的紀錄。在電影頁按「看過」記下一部。",
+    filteredEmpty: "這個篩選下沒有片。",
+    showAll: "顯示全部",
+    unavailable: "片庫暫時讀不到。資料都還在，等一下重新載入試試。",
     favoritesTitle: "收藏",
     watchlistTitle: "想看",
     watchedTitle: "看過",
-    confirmRemove: "確定拿掉",
-    cancel: "取消",
-    removeNamed: "從這張清單拿掉《{title}》",
+    removed: "已移出《{title}》。",
+    undoMore: "還能再復原 {n} 部",
+    removeNamed: "從這張清單移出《{title}》",
     sortGroup: "排序",
     filterGroup: "篩選",
     watchlist: {
       sortQueue: "加入先後",
       sortRuntime: "片長",
       sortTitle: "片名",
-      markWatched: "看過了",
-      markWatchedNamed: "把《{title}》記為看過",
-      markedWatched: "《{title}》記為看過，已移出想看。",
+      markWatched: "標為看過",
+      markWatchedNamed: "把《{title}》標為看過",
+      markedWatched: "《{title}》已標為看過，移出想看。",
       partialDetails: "片長與導演只查了前 {n} 部。",
     },
     watched: {
@@ -440,16 +452,20 @@ const zhTW: Dictionary = {
     scorePrompt: "評分",
     note: "短評",
     notePlaceholder: "只有你看得到。",
-    save: "儲存",
+    saving: "儲存中…",
     saved: "已儲存",
+    needScore: "先選分數，短評才會一起存。",
     clear: "清除評分",
+    cleared: "已清除評分與短評。",
+    clearError: "沒有清除成功，請再試一次。",
   },
   actions: {
     group: "片庫",
     favorite: "收藏",
     watchlist: "想看",
     watched: "看過",
-    removedFromWatchlist: "已從想看清單移除。",
+    removedFromWatchlist: "已移出想看。",
+    undone: { watchlist: "已移出想看。", watched: "已取消看過。", favorites: "已取消收藏。" },
     undo: "復原",
     since: { watchlist: "{date} 加入", watched: "{date} 看過", favorites: "{date} 收藏" },
   },
@@ -459,7 +475,7 @@ const zhTW: Dictionary = {
       nth: "今晚：想看清單依加入先後的第 {n} 部，共 {total} 部",
       fallbackEmpty: "想看清單還是空的，先放 TMDB 熱門榜第一部。",
       fallbackError: "片庫暫時讀不到，先放 TMDB 熱門榜第一部。",
-      open: "打開這部",
+      open: "查看詳情",
       next: "換一部",
       stillCredit: "劇照 · TMDB",
     },
@@ -490,7 +506,7 @@ const zhTW: Dictionary = {
   common: {
     empty: "TMDB 沒有回傳任何片。",
     loading: "載入中…",
-    noMore: "已經到底了",
+    noMore: "到底了。",
     loadError: "載入失敗，請稍後重試。",
     retry: "重試",
     seeAll: "查看全部",
@@ -500,7 +516,7 @@ const zhTW: Dictionary = {
     filmCount: "{n} 部",
     browse: "瀏覽電影",
     saveError: "沒有存成功，請再試一次。",
-    removeError: "沒有拿掉，請再試一次。",
+    removeError: "沒有移出成功，請再試一次。",
   },
   unlock: {
     title: "這個站是私人的",
@@ -513,8 +529,8 @@ const zhTW: Dictionary = {
       "站台還沒設定通行碼，或通行碼短於 16 個字元，現在沒有人進得來。請設定 OWNER_PASSCODE（至少 16 個字元）與 OWNER_SECRET 兩個環境變數。",
   },
   errors: {
-    missingKey: "尚未設定 TMDB 金鑰，請在 .env 填入 TMDB_API_KEY 後重新整理。",
-    invalidKey: "TMDB 金鑰無效，請確認 .env 的 TMDB_API_KEY 是否正確。",
+    missingKey: "站台還沒設定 TMDB 金鑰（TMDB_API_KEY），電影資料暫時讀不到。",
+    invalidKey: "TMDB 不接受站台目前的金鑰（TMDB_API_KEY），電影資料暫時讀不到。",
     network: "無法連線到 TMDB，請檢查網路後重試。",
     http: "TMDB 服務回應異常，請稍後重試。",
     notFound: "找不到這部電影。",
@@ -566,13 +582,15 @@ const en: Dictionary = {
     remove: "Remove",
     emptyFavorites: "No favorites yet. Use Favorite on any film page to add one.",
     emptyWatchlist: "Your watchlist is empty. Use Watchlist on any film page to add one.",
-    emptyWatched: "No films logged yet. Use Mark watched on any film page to log one.",
-    filteredEmpty: "No films at this rating threshold.",
+    emptyWatched: "No films logged yet. Use Watched on any film page to log one.",
+    filteredEmpty: "No films match this filter.",
+    showAll: "Show all",
+    unavailable: "Your library can't be reached right now. Nothing is lost — try reloading in a moment.",
     favoritesTitle: "Favorites",
     watchlistTitle: "Watchlist",
     watchedTitle: "Watched",
-    confirmRemove: "Remove it",
-    cancel: "Cancel",
+    removed: "Removed “{title}”.",
+    undoMore: "{n} more to undo",
     removeNamed: "Remove “{title}” from this list",
     sortGroup: "Sort",
     filterGroup: "Filter",
@@ -580,7 +598,7 @@ const en: Dictionary = {
       sortQueue: "Order added",
       sortRuntime: "Runtime",
       sortTitle: "Title",
-      markWatched: "Watched it",
+      markWatched: "Mark watched",
       markWatchedNamed: "Mark “{title}” as watched",
       markedWatched: "“{title}” marked watched and taken off the watchlist.",
       partialDetails: "Runtime and director were looked up for the first {n} films only.",
@@ -665,9 +683,12 @@ const en: Dictionary = {
     scorePrompt: "Score",
     note: "Note",
     notePlaceholder: "Only you can see this.",
-    save: "Save",
+    saving: "Saving…",
     saved: "Saved",
+    needScore: "Pick a score first — the note is saved with it.",
     clear: "Clear rating",
+    cleared: "Rating and note cleared.",
+    clearError: "Couldn't clear it. Please try again.",
   },
   actions: {
     group: "Library",
@@ -675,6 +696,11 @@ const en: Dictionary = {
     watchlist: "Watchlist",
     watched: "Watched",
     removedFromWatchlist: "Removed from your watchlist.",
+    undone: {
+      watchlist: "Removed from your watchlist.",
+      watched: "No longer marked as watched.",
+      favorites: "Removed from favorites.",
+    },
     undo: "Undo",
     since: { watchlist: "Added {date}", watched: "Watched {date}", favorites: "Saved {date}" },
   },
@@ -684,7 +710,7 @@ const en: Dictionary = {
       nth: "Tonight: film {n} of {total} on your watchlist, oldest first",
       fallbackEmpty: "Your watchlist is empty, so this is the top film on TMDB's popular list.",
       fallbackError: "Your library could not be read, so this is the top film on TMDB's popular list.",
-      open: "Open",
+      open: "View details",
       next: "Another one",
       stillCredit: "Still · TMDB",
     },
@@ -715,7 +741,7 @@ const en: Dictionary = {
   common: {
     empty: "TMDB returned no films.",
     loading: "Loading…",
-    noMore: "You've reached the end",
+    noMore: "That's the end.",
     loadError: "Failed to load. Please retry later.",
     retry: "Retry",
     seeAll: "See all",
@@ -739,8 +765,9 @@ const en: Dictionary = {
   },
   errors: {
     missingKey:
-      "TMDB API key is not set. Add TMDB_API_KEY to .env and refresh.",
-    invalidKey: "Invalid TMDB API key. Check TMDB_API_KEY in .env.",
+      "This site has no TMDB API key (TMDB_API_KEY) set, so film data can't load.",
+    invalidKey:
+      "TMDB rejected this site's API key (TMDB_API_KEY), so film data can't load.",
     network: "Cannot reach TMDB. Check your network and retry.",
     http: "TMDB returned an unexpected response. Please retry later.",
     notFound: "Movie not found.",

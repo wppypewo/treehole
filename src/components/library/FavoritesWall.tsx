@@ -8,8 +8,10 @@ import { tmdbImage, tmdbSrcSet, IMAGE_SIZES } from "@/lib/images";
 import { sortFavorites, type FavoritesSort } from "@/lib/library";
 import FallbackImg from "@/components/FallbackImg";
 import Segmented from "@/components/Segmented";
-import ConfirmRemove, { type RemoveLabels } from "./ConfirmRemove";
+import RemoveButton, { type RemoveLabels } from "./RemoveButton";
 import LibraryEmpty from "./LibraryEmpty";
+import UndoStatus from "./UndoStatus";
+import { useUndoStack } from "./useUndoStack";
 import { useFlip } from "./useFlip";
 import { useRefocus } from "./useRefocus";
 
@@ -29,6 +31,10 @@ interface Labels extends RemoveLabels {
   sortMine: string;
   /** 「我給 {n} 分」 */
   score: string;
+  removed: string;
+  undoMore: string;
+  undo: string;
+  saveError: string;
   removeError: string;
   empty: string;
   browse: string;
@@ -55,10 +61,10 @@ export default function FavoritesWall({
 }) {
   const [list, setList] = useState(tiles);
   const [sort, setSort] = useState<FavoritesSort>("recent");
-  const [busy, setBusy] = useState<number | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { containerRef, capture } = useFlip<HTMLOListElement>();
-  const { leave, emptyRef } = useRefocus(containerRef);
+  const { leave, arrive, emptyRef } = useRefocus(containerRef);
+  const undoStack = useUndoStack<FavoriteTile>();
 
   const shown = sortFavorites(
     list.map((t) => ({ ...t, title: t.movie.title })),
@@ -66,29 +72,74 @@ export default function FavoritesWall({
     locale,
   );
 
-  // 收藏沒有導覽列計數，拿掉之後不必 router.refresh
+  // 先從畫面拿掉再送出，按下去當下就有反應；寫入失敗再放回來並說明。
+  // 收藏沒有導覽列計數，移出之後不必 router.refresh
   async function remove(tile: FavoriteTile) {
-    if (busy !== null) return;
-    setBusy(tile.movie.tmdb_id);
-    setFailed(false);
+    const id = tile.movie.tmdb_id;
+    setError(null);
+    capture();
+    leave(id);
+    setList((prev) => prev.filter((t) => t.movie.tmdb_id !== id));
     try {
-      const res = await fetch(`/api/favorites?tmdb_id=${tile.movie.tmdb_id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`/api/favorites?tmdb_id=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(`favorites responded ${res.status}`);
-      capture();
-      leave(tile.movie.tmdb_id);
-      setList((prev) => prev.filter((t) => t.movie.tmdb_id !== tile.movie.tmdb_id));
+      undoStack.push(tile);
     } catch {
-      setFailed(true);
-    } finally {
-      setBusy(null);
+      capture();
+      setList((prev) => (prev.some((t) => t.movie.tmdb_id === id) ? prev : [...prev, tile]));
+      setError(labels.removeError);
     }
   }
 
+  // 復原：帶原本的收藏時間放回去，「最近收藏」排序裡回到原位
+  async function undo() {
+    setError(null);
+    const ok = await undoStack.undo(async (tile, isLast) => {
+      const res = await fetch("/api/favorites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...tile.movie, added_at: tile.added_at }),
+      });
+      if (!res.ok) throw new Error(`favorites responded ${res.status}`);
+      capture();
+      // 堆疊還有東西時焦點留在「復原」上，方便一路按下去；最後一筆才交給放回來的那張
+      if (isLast) arrive(tile.movie.tmdb_id);
+      setList((prev) => [...prev, tile]);
+    });
+    if (!ok) setError(labels.saveError);
+  }
+
+  const status = (
+    <UndoStatus
+      message={
+        undoStack.top
+          ? labels.removed.replace("{title}", undoStack.top.movie.title)
+          : null
+      }
+      remaining={undoStack.remaining}
+      labels={labels}
+      busy={undoStack.busy}
+      onUndo={undo}
+      className={undoStack.top ? "mt-5" : ""}
+    />
+  );
+
+  const alert = error && (
+    <p
+      role="alert"
+      className="mt-5 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
+    >
+      {error}
+    </p>
+  );
+
   if (list.length === 0) {
     return (
-      <LibraryEmpty text={labels.empty} browse={labels.browse} linkRef={emptyRef} />
+      <div>
+        {status}
+        {alert}
+        <LibraryEmpty text={labels.empty} browse={labels.browse} linkRef={emptyRef} />
+      </div>
     );
   }
 
@@ -113,14 +164,8 @@ export default function FavoritesWall({
         />
       )}
 
-      {failed && (
-        <p
-          role="alert"
-          className="mt-5 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
-        >
-          {labels.removeError}
-        </p>
-      )}
+      {status}
+      {alert}
 
       <ol
         ref={containerRef}
@@ -153,9 +198,9 @@ export default function FavoritesWall({
                   {t.movie.title}
                 </p>
               </Link>
-              {/* 手機兩欄時一欄約 165px，分數、日期、拿掉擠不下一行。
-                  手機上「拿掉」一律自成一行：有的卡擠得下、有的擠不下時，
-                  同一排兩張卡的「拿掉」會一高一低。
+              {/* 手機兩欄時一欄約 165px，分數、日期、移出擠不下一行。
+                  手機上「移出」一律自成一行：有的卡擠得下、有的擠不下時，
+                  同一排兩張卡的「移出」會一高一低。
                   分數與日期之間的點交給 dot-run，日期換行時行首不留點 */}
               <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-[0.8125rem]">
                 <p className="dot-run basis-full tabular-nums sm:basis-auto">
@@ -168,11 +213,10 @@ export default function FavoritesWall({
                     {t.added && <span className="text-paper-faint">{t.added}</span>}
                   </span>
                 </p>
-                <ConfirmRemove
+                <RemoveButton
                   title={t.movie.title}
                   labels={labels}
-                  busy={busy !== null}
-                  onConfirm={() => remove(t)}
+                  onRemove={() => remove(t)}
                   className="shrink-0"
                 />
               </div>

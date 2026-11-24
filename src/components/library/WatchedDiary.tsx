@@ -11,14 +11,18 @@ import {
   type WatchedFilter,
 } from "@/lib/library";
 import Segmented from "@/components/Segmented";
-import ConfirmRemove, { type RemoveLabels } from "./ConfirmRemove";
+import RemoveButton, { type RemoveLabels } from "./RemoveButton";
 import LibraryEmpty from "./LibraryEmpty";
+import UndoStatus from "./UndoStatus";
+import { useUndoStack } from "./useUndoStack";
 import { useFlip } from "./useFlip";
 import { useRefocus } from "./useRefocus";
 import FallbackImg from "@/components/FallbackImg";
 
 export interface DiaryRow {
   movie: SavedMovie;
+  /** 原始的看過時間（ISO），復原時原樣送回，片才會回到日誌裡原來那一天 */
+  watched_at: string;
   /** 分組用，伺服器依台北時間算好；日期解析不了是 null */
   month: { key: string; label: string } | null;
   /** 大字的日「21」與星期「週六」 */
@@ -43,6 +47,12 @@ interface Labels extends RemoveLabels {
   /** 沒有日期的那一組的標題 */
   undated: string;
   filteredEmpty: string;
+  /** 篩選後沒東西時的出口：一鍵回到全部 */
+  showAll: string;
+  removed: string;
+  undoMore: string;
+  undo: string;
+  saveError: string;
   removeError: string;
   empty: string;
   browse: string;
@@ -68,43 +78,89 @@ export default function WatchedDiary({
 }) {
   const [list, setList] = useState(rows);
   const [filter, setFilter] = useState<WatchedFilter>("all");
-  const [busy, setBusy] = useState<number | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { containerRef, capture } = useFlip<HTMLDivElement>();
-  const { leave, emptyRef } = useRefocus(containerRef);
+  const { leave, arrive, emptyRef } = useRefocus(containerRef);
+  const undoStack = useUndoStack<DiaryRow>();
 
   const groups = groupByMonth(filterWatched(list, filter));
 
+  // 先從畫面拿掉再送出；寫入失敗再放回來並說明
   async function remove(row: DiaryRow) {
-    if (busy !== null) return;
-    setBusy(row.movie.tmdb_id);
-    setFailed(false);
+    const id = row.movie.tmdb_id;
+    setError(null);
+    capture();
+    leave(id);
+    setList((prev) => prev.filter((r) => r.movie.tmdb_id !== id));
     try {
-      const res = await fetch(`/api/watched?tmdb_id=${row.movie.tmdb_id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`/api/watched?tmdb_id=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(`watched responded ${res.status}`);
-      capture();
-      leave(row.movie.tmdb_id);
-      setList((prev) => prev.filter((r) => r.movie.tmdb_id !== row.movie.tmdb_id));
+      undoStack.push(row);
       router.refresh();
     } catch {
-      setFailed(true);
-    } finally {
-      setBusy(null);
+      capture();
+      setList((prev) => (prev.some((r) => r.movie.tmdb_id === id) ? prev : [...prev, row]));
+      setError(labels.removeError);
     }
   }
 
+  // 復原：帶原本的看過時間放回去，回到原來那個月、那一天
+  async function undo() {
+    setError(null);
+    const ok = await undoStack.undo(async (row, isLast) => {
+      const res = await fetch("/api/watched", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...row.movie, watched_at: row.watched_at }),
+      });
+      if (!res.ok) throw new Error(`watched responded ${res.status}`);
+      capture();
+      if (isLast) arrive(row.movie.tmdb_id);
+      setList((prev) => [...prev, row]);
+      router.refresh();
+    });
+    if (!ok) setError(labels.saveError);
+  }
+
+  const status = (
+    <UndoStatus
+      message={
+        undoStack.top
+          ? labels.removed.replace("{title}", undoStack.top.movie.title)
+          : null
+      }
+      remaining={undoStack.remaining}
+      labels={labels}
+      busy={undoStack.busy}
+      onUndo={undo}
+      className={undoStack.top ? "mt-5" : ""}
+    />
+  );
+
+  const alert = error && (
+    <p
+      role="alert"
+      className="mt-5 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
+    >
+      {error}
+    </p>
+  );
+
   if (list.length === 0) {
     return (
-      <LibraryEmpty text={labels.empty} browse={labels.browse} linkRef={emptyRef} />
+      <div>
+        {status}
+        {alert}
+        <LibraryEmpty text={labels.empty} browse={labels.browse} linkRef={emptyRef} />
+      </div>
     );
   }
 
   return (
     <div>
-      {list.length > 1 && (
+      {/* 只剩一部時篩選沒意義就不畫；但正在篩選中時要留著，不然回不到「全部」 */}
+      {(list.length > 1 || filter !== "all") && (
         <Segmented
           options={[
             { value: "all", label: labels.filterAll },
@@ -120,24 +176,30 @@ export default function WatchedDiary({
         />
       )}
 
-      {failed && (
-        <p
-          role="alert"
-          className="mt-5 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
-        >
-          {labels.removeError}
-        </p>
-      )}
+      {status}
+      {alert}
 
       {groups.length === 0 ? (
-        // 篩選中拿掉最後一部時焦點落在這句話上（tabIndex -1：可被聚焦，不進 Tab 順序）
-        <p
-          ref={emptyRef}
-          tabIndex={-1}
-          className="py-20 text-center text-sm text-paper-faint"
-        >
-          {labels.filteredEmpty}
-        </p>
+        // 篩選中移出最後一部時焦點落在這句話上（tabIndex -1：可被聚焦，不進 Tab 順序）
+        <div className="py-20 text-center">
+          <p
+            ref={emptyRef}
+            tabIndex={-1}
+            className="text-sm text-paper-faint"
+          >
+            {labels.filteredEmpty}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              capture();
+              setFilter("all");
+            }}
+            className="tap-safe link-hair mt-3 text-[0.8125rem] text-paper"
+          >
+            {labels.showAll}
+          </button>
+        </div>
       ) : (
         <div ref={containerRef}>
           {groups.map((g) => {
@@ -158,7 +220,6 @@ export default function WatchedDiary({
                       key={row.movie.tmdb_id}
                       row={row}
                       labels={labels}
-                      busy={busy !== null}
                       onRemove={() => remove(row)}
                     />
                   ))}
@@ -175,12 +236,10 @@ export default function WatchedDiary({
 function DiaryItem({
   row,
   labels,
-  busy,
   onRemove,
 }: {
   row: DiaryRow;
   labels: Labels;
-  busy: boolean;
   onRemove: () => void;
 }) {
   const id = row.movie.tmdb_id;
@@ -242,7 +301,7 @@ function DiaryItem({
 
       {/* 手機接在內文下面（第三欄第二列），桌機另開一欄靠右 */}
       <div className="relative z-10 col-start-3 mt-2 min-[700px]:col-start-4 min-[700px]:row-start-1 min-[700px]:mt-0 min-[700px]:self-start">
-        <ConfirmRemove title={row.movie.title} labels={labels} busy={busy} onConfirm={onRemove} />
+        <RemoveButton title={row.movie.title} labels={labels} onRemove={onRemove} />
       </div>
     </li>
   );

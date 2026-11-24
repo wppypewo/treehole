@@ -5,6 +5,7 @@ import { getForYouPage } from "@/lib/recommendations";
 import { tmdbErrorMessage } from "@/lib/tmdb-error";
 import InfiniteMovieGrid from "@/components/InfiniteMovieGrid";
 import ErrorNotice from "@/components/ErrorNotice";
+import RefreshButton from "@/components/RefreshButton";
 import PageHeader from "@/components/PageHeader";
 
 // 同 movie/[id]：getLocale() 已保證動態渲染，推薦種子直接查資料庫。
@@ -32,7 +33,9 @@ export default async function RecommendationsPage() {
       <PageHeader title={dict.pages.recommendations} />
       <div className="mt-10">
         {errorMessage ? (
-          <ErrorNotice message={errorMessage} placement="" />
+          <ErrorNotice message={errorMessage} placement="">
+            <RefreshButton label={dict.errors.reload} />
+          </ErrorNotice>
         ) : (
           <InfiniteMovieGrid
             endpoint="/api/recommendations"

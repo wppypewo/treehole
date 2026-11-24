@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { listFavorites, addFavorite, removeFavorite } from "@/lib/db";
 import {
+  addedAtFromBody,
   dbErrorResponse,
   movieFromBody,
   tmdbIdFromQuery,
@@ -17,14 +18,20 @@ export async function GET() {
   }
 }
 
-// POST：新增收藏（body 帶電影資訊）
+// POST：新增收藏（body 帶電影資訊）。
+// 可選的 added_at 只給「取消收藏後復原」用，放回原本的收藏時間。
 export async function POST(request: Request) {
-  const movie = movieFromBody(await request.json().catch(() => null));
+  const body = await request.json().catch(() => null);
+  const movie = movieFromBody(body);
   if (!movie) {
     return NextResponse.json({ error: "invalid-id" }, { status: 400 });
   }
+  const addedAt = addedAtFromBody(body);
+  if (addedAt === "invalid") {
+    return NextResponse.json({ error: "invalid-added-at" }, { status: 400 });
+  }
   try {
-    await addFavorite(movie);
+    await addFavorite(movie, addedAt);
     return NextResponse.json({ ok: true });
   } catch (error) {
     return dbErrorResponse(error);
