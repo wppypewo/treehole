@@ -124,14 +124,14 @@ export default function FavoritesWall({
       labels={labels}
       busy={undoStack.busy}
       onUndo={undo}
-      className={undoStack.top ? "mt-5" : ""}
+      className={list.length > 0 || undoStack.top ? "min-h-11 max-sm:basis-full" : ""}
     />
   );
 
   const alert = error && (
     <p
       role="alert"
-      className="mt-5 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
+      className="fade-in mt-5 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
     >
       {error}
     </p>
@@ -139,7 +139,7 @@ export default function FavoritesWall({
 
   if (list.length === 0) {
     return (
-      <div>
+      <div className="enter-soft">
         {status}
         {alert}
         <LibraryEmpty text={labels.empty} browse={labels.browse} linkRef={emptyRef} />
@@ -148,8 +148,10 @@ export default function FavoritesWall({
   }
 
   return (
-    <div>
-      {list.length > 1 && (
+    <div className="enter-soft">
+      {/* 排序與撤銷列同一行：撤銷列預留高度，出現時不把整面牆往下推 */}
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+      {list.length > 1 ? (
         <Segmented
           options={[
             { value: "recent", label: labels.sortRecent },
@@ -163,9 +165,12 @@ export default function FavoritesWall({
           }}
           label={labels.sortGroup}
         />
+      ) : (
+        <span />
       )}
 
       {status}
+      </div>
       {alert}
 
       <ol

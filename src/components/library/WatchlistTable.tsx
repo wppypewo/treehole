@@ -191,7 +191,7 @@ export default function WatchlistTable({
   ];
 
   return (
-    <div>
+    <div className="enter-soft">
       <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
         {list.length > 1 ? (
           <Segmented
@@ -215,14 +215,14 @@ export default function WatchlistTable({
           labels={labels}
           busy={undoStack.busy}
           onUndo={undo}
-          className={list.length > 0 || top ? "min-h-11" : ""}
+          className={list.length > 0 || top ? "min-h-11 max-sm:basis-full" : ""}
         />
       </div>
 
       {error && (
         <p
           role="alert"
-          className="mt-4 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
+          className="fade-in mt-4 border-l-2 border-curtain py-1 pl-4 text-sm text-paper-dim"
         >
           {error}
         </p>
