@@ -37,7 +37,7 @@ export default function UndoStatus({
         <span
           data-closing={closing || undefined}
           inert={closing}
-          className="fade-in inline-flex flex-wrap items-center gap-x-4 gap-y-1"
+          className="linger inline-flex flex-wrap items-center gap-x-4 gap-y-1"
         >
           {/* 換成下一筆時只換這段字；復原鍵不重掛，連按時焦點才留得住 */}
           <span key={shown} className="fade-in">

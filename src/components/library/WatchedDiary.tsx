@@ -111,7 +111,6 @@ export default function WatchedDiary({
     try {
       const res = await fetch(`/api/watched?tmdb_id=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(`watched responded ${res.status}`);
-      capture();
       undoStack.push(row);
       router.refresh();
     } catch {

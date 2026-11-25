@@ -121,7 +121,6 @@ export default function WatchlistTable({
       });
       if (!res.ok) throw new Error(`watched responded ${res.status}`);
       const data = (await res.json()) as { watchedAdded: boolean };
-      capture();
       undoStack.push({ type: "watched", row, watchedAdded: data.watchedAdded });
       router.refresh();
     } catch {
@@ -136,7 +135,6 @@ export default function WatchlistTable({
         method: "DELETE",
       });
       if (!res.ok) throw new Error(`watchlist responded ${res.status}`);
-      capture();
       undoStack.push({ type: "removed", row });
       router.refresh();
     } catch {

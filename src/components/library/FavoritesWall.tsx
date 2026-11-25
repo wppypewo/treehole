@@ -87,7 +87,6 @@ export default function FavoritesWall({
     try {
       const res = await fetch(`/api/favorites?tmdb_id=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(`favorites responded ${res.status}`);
-      capture();
       undoStack.push(tile);
     } catch {
       capture();

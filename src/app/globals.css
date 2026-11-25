@@ -809,24 +809,34 @@ body {
   padding: 4px;
 }
 
-/* 換內容、剛出現的一小段字：淡入並從下方 4px 浮上來；
-   搭配 useLinger 的 data-closing 淡出再卸載 */
+/* 換內容、剛出現的一小段字：淡入並從下方 4px 浮上來 */
 @keyframes fade-in {
   from {
     opacity: 0;
     transform: translateY(4px);
   }
 }
-@keyframes fade-out {
-  to {
-    opacity: 0;
-  }
-}
 .fade-in {
   animation: fade-in var(--dur-enter) var(--ease-expo) backwards;
 }
-.fade-in[data-closing] {
-  animation: fade-out var(--dur-exit) var(--ease-exit) forwards;
+
+/* 會離場的區塊（搭配 useLinger 的 data-closing）：進出場都用 transition 而不是 keyframes。
+   離場淡到一半又有新值時，transition 從當下的透明度接回 1；keyframes 會換動畫名、從 0 重播，閃一下 */
+.linger {
+  transition:
+    opacity var(--dur-enter) var(--ease-expo),
+    translate var(--dur-enter) var(--ease-expo);
+}
+@starting-style {
+  .linger {
+    opacity: 0;
+    translate: 0 4px;
+  }
+}
+.linger[data-closing] {
+  opacity: 0;
+  transition-duration: var(--dur-exit);
+  transition-timing-function: var(--ease-exit);
 }
 
 /* 骨架換成內容：只淡入不位移。骨架與內容的版面一致，位移反而像跳了一下 */
