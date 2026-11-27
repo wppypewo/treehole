@@ -91,7 +91,7 @@ export default function MovieRow({
         <div className="flex items-center gap-4">
           <Link
             href={moreHref}
-            className="tap-safe text-[0.75rem] tracking-[0.08em] text-paper-faint transition-colors hover:text-paper"
+            className="tap-safe text-small tracking-label text-paper-faint transition-colors hover:text-paper"
           >
             {moreLabel}
           </Link>

@@ -232,7 +232,7 @@ export default async function MoviePage({
             </h2>
             {record ? (
               <>
-                <div className="mt-[1.375rem]">
+                <div className="mt-6">
                   <MovieActions
                     movie={savedMovie}
                     initial={{
@@ -258,7 +258,7 @@ export default async function MoviePage({
                 />
               </>
             ) : (
-              <div className="mt-[1.375rem] border-l-2 border-curtain pl-4">
+              <div className="mt-6 border-l-2 border-curtain pl-4">
                 <p className="text-sm leading-relaxed text-paper-dim">
                   {dict.movie.ledgerUnavailable}
                 </p>
@@ -313,7 +313,7 @@ export default async function MoviePage({
               className="detail-trailer mt-16"
             >
               <SectionHead id="trailer-title" title={dict.movie.trailer} />
-              <div className="mt-[1.125rem]">
+              <div className="mt-4">
                 <TrailerPlayer
                   youTubeKey={trailerKey}
                   title={movie.title}
@@ -330,7 +330,7 @@ export default async function MoviePage({
           <div className="mx-auto max-w-[1400px] px-5 sm:px-8">
             <SectionHead id="cast-title" title={dict.movie.castRail} />
           </div>
-          <div className="rail scrollbar-hide mt-[0.875rem] flex overflow-x-auto [--rail-gap:1.25rem]">
+          <div className="rail scrollbar-hide mt-4 flex overflow-x-auto [--rail-gap:1.25rem]">
             <div aria-hidden className="rail-gutter" />
             {credits.cast.slice(0, 15).map((c) => (
               <PersonCard
@@ -352,7 +352,7 @@ export default async function MoviePage({
           className="mx-auto mt-20 max-w-[1400px] px-5 sm:px-8"
         >
           <SectionHead id="related-title" title={dict.recommendations.related} />
-          <div className="mt-[1.125rem]">
+          <div className="mt-4">
             {/* 12 部在 2／3／4 欄都排得滿；5 欄時最後一列只剩 2 部，藏掉 */}
             <MovieGrid
               movies={related}

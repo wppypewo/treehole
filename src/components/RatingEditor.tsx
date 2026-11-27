@@ -223,7 +223,7 @@ export default function RatingEditor({
 
   return (
     <div>
-      <div className="mt-[1.375rem]">
+      <div className="mt-6">
         <p id="rating-scale-label" className="t-label">
           {labels.scorePrompt}
         </p>
@@ -236,7 +236,7 @@ export default function RatingEditor({
         </div>
       </div>
 
-      <div className="mt-[1.375rem]">
+      <div className="mt-6">
         <label htmlFor="rating-note" className="t-label block">
           {labels.note}
         </label>
@@ -260,7 +260,7 @@ export default function RatingEditor({
         />
         <p
           id="rating-note-hint"
-          className="mt-1.5 min-h-[1.25rem] text-[0.75rem] text-paper-faint"
+          className="mt-1.5 min-h-[1.25rem] text-small text-paper-faint"
         >
           {waitingForScore ? labels.needScore : ""}
         </p>
@@ -273,7 +273,7 @@ export default function RatingEditor({
             type="button"
             onClick={clearRating}
             aria-disabled={busy || status === "saving" || undefined}
-            className="fade-in tap-safe text-[0.8125rem] tracking-[0.04em] text-paper-faint transition-colors hover:text-paper aria-disabled:opacity-50"
+            className="fade-in tap-safe text-ui tracking-label text-paper-faint transition-colors hover:text-paper aria-disabled:opacity-50"
           >
             {labels.clear}
           </button>
@@ -283,7 +283,7 @@ export default function RatingEditor({
         <p
           role="status"
           aria-live="polite"
-          className="text-[0.75rem] text-paper-faint"
+          className="text-small text-paper-faint"
         >
           {/* 「儲存中」換成「已儲存」：舊字直接換掉，新字淡入 */}
           {statusText && (
@@ -298,7 +298,7 @@ export default function RatingEditor({
       <div role="status" aria-live="polite">
         <Reveal open={cleared !== null}>
         {shownCleared && (
-          <p className="mt-3 flex items-baseline justify-between gap-4 text-[0.8125rem] text-paper-dim">
+          <p className="mt-3 flex items-baseline justify-between gap-4 text-ui text-paper-dim">
             <span>{labels.cleared}</span>
             <button
               type="button"

@@ -343,7 +343,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         {/* 其他片單的入口。導覽列只放片庫，這幾頁靠這裡進得去 */}
         <nav aria-labelledby="home-lists" className="mt-24">
           <SectionHead id="home-lists" title={dict.home.lists} />
-          <ul className="mt-[1.125rem] flex flex-wrap gap-x-7 gap-y-3 border-t border-hairline-strong pt-5 text-sm text-paper-dim">
+          <ul className="mt-4 flex flex-wrap gap-x-7 gap-y-3 border-t border-hairline-strong pt-5 text-sm text-paper-dim">
             {lists.map((l) => (
               <li key={l.href}>
                 <Link href={l.href} className="link-hair tap-inline">

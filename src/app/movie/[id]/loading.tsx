@@ -21,9 +21,9 @@ export default function Loading() {
 
         <div className="detail-ledger mt-12 border border-hairline-strong p-6 min-[1000px]:mt-0">
           <div className="h-5 w-24 animate-pulse bg-ink-raised" />
-          <div className="mt-[1.375rem] h-12 w-full animate-pulse bg-ink-raised" />
-          <div className="mt-[1.375rem] h-11 w-full animate-pulse bg-ink-raised" />
-          <div className="mt-[1.375rem] h-24 w-full animate-pulse bg-ink-raised" />
+          <div className="mt-6 h-12 w-full animate-pulse bg-ink-raised" />
+          <div className="mt-6 h-11 w-full animate-pulse bg-ink-raised" />
+          <div className="mt-6 h-24 w-full animate-pulse bg-ink-raised" />
         </div>
       </div>
     </div>

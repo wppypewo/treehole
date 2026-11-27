@@ -36,7 +36,7 @@ export default function ProgramTable({
     : "min-[900px]:grid-cols-[3.5rem_minmax(0,1.3fr)_minmax(0,1fr)_9.5rem]";
 
   return (
-    <ol className="mt-[1.125rem] border-t border-hairline-strong">
+    <ol className="mt-4 border-t border-hairline-strong">
       {rows.map((row, i) => (
         <li key={row.id}>
           <Link
@@ -45,7 +45,7 @@ export default function ProgramTable({
           >
             <span
               aria-hidden
-              className={`t-num text-[1.375rem] ${
+              className={`t-num text-figure-sm ${
                 row.id === currentId ? "text-curtain-ink" : "text-paper-faint"
               }`}
             >
@@ -66,11 +66,11 @@ export default function ProgramTable({
               )}
             </span>
 
-            <span className="hidden text-[0.8125rem] text-paper-dim min-[900px]:block">
+            <span className="hidden text-ui text-paper-dim min-[900px]:block">
               {row.director}
             </span>
 
-            <span className="col-start-2 text-[0.8125rem] text-paper-dim tabular-nums min-[900px]:col-start-auto">
+            <span className="col-start-2 text-ui text-paper-dim tabular-nums min-[900px]:col-start-auto">
               {row.sub}
             </span>
 

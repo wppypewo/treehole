@@ -33,7 +33,7 @@ export default function NavLinks({
             key={link.href}
             href={link.href}
             aria-current={isActive ? "page" : undefined}
-            className={`relative py-1 text-[0.8125rem] tracking-[0.06em] transition-colors ${
+            className={`relative py-1 text-ui tracking-label transition-colors ${
               isActive ? "text-paper" : "text-paper-dim hover:text-paper"
             }`}
           >

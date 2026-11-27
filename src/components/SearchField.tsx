@@ -29,7 +29,7 @@ export default function SearchField({
       {/* 純文字送出鍵：輸入框已經是一條底線，再加一個外框會變成兩個框 */}
       <button
         type="submit"
-        className="tap-safe absolute top-1/2 right-0 -translate-y-1/2 px-1 text-[0.8125rem] tracking-[0.06em] text-paper-dim transition-colors hover:text-curtain-ink"
+        className="tap-safe absolute top-1/2 right-0 -translate-y-1/2 px-1 text-ui tracking-label text-paper-dim transition-colors hover:text-curtain-ink"
       >
         {buttonLabel}
       </button>

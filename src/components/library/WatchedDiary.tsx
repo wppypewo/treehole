@@ -215,7 +215,7 @@ export default function WatchedDiary({
               capture();
               setFilter("all");
             }}
-            className="tap-safe link-hair mt-3 text-[0.8125rem] text-paper"
+            className="tap-safe link-hair mt-3 text-ui text-paper"
           >
             {labels.showAll}
           </button>
@@ -227,7 +227,7 @@ export default function WatchedDiary({
             return (
               <section key={g.key || "undated"} aria-labelledby={headId} className="mt-12 first:mt-8">
                 <div className="flex items-baseline gap-3.5 border-b border-hairline-strong pb-3">
-                  <h2 id={headId} className="font-display text-[1.375rem] text-paper">
+                  <h2 id={headId} className="font-display text-figure-sm text-paper">
                     {g.label || labels.undated}
                   </h2>
                   <p className="t-meta text-paper-faint">
@@ -274,10 +274,10 @@ function DiaryItem({
       <p className="leading-none">
         {row.day ? (
           <>
-            <span aria-hidden className="date-num t-num block text-[1.875rem] min-[700px]:text-[2.5rem]">
+            <span aria-hidden className="date-num t-num block text-figure min-[700px]:text-figure-lg">
               {row.day}
             </span>
-            <span aria-hidden className="mt-1.5 block text-[0.6875rem] tracking-[0.06em] text-paper-faint">
+            <span aria-hidden className="mt-1.5 block text-caption tracking-label text-paper-faint">
               {row.weekday}
             </span>
             <span className="sr-only">{row.full}</span>
@@ -299,11 +299,11 @@ function DiaryItem({
       <div className="min-w-0">
         <Link
           href={`/movie/${id}`}
-          className="font-display text-[1.1875rem] leading-snug text-paper after:absolute after:inset-0 after:content-['']"
+          className="font-display text-row-lg leading-snug text-paper after:absolute after:inset-0 after:content-['']"
         >
           {row.movie.title}
         </Link>
-        <p className="mt-1 text-[0.8125rem]">
+        <p className="mt-1 text-ui">
           {row.score !== null ? (
             <span className="text-curtain-ink tabular-nums">
               {labels.score.replace("{n}", String(row.score))}
@@ -313,7 +313,7 @@ function DiaryItem({
           )}
         </p>
         {row.note && (
-          <p className="mt-2 max-w-[60ch] text-[0.875rem] leading-relaxed text-paper-dim">
+          <p className="mt-2 max-w-[60ch] text-body leading-relaxed text-paper-dim">
             {row.note}
           </p>
         )}

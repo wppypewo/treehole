@@ -200,7 +200,7 @@ export default function FavoritesWall({
                     <TitleSlate title={t.movie.title} />
                   )}
                 </div>
-                <p className="poster-cap mt-3 font-display text-[1.0625rem] leading-snug">
+                <p className="poster-cap mt-3 font-display text-row leading-snug">
                   {t.movie.title}
                 </p>
               </Link>
@@ -208,7 +208,7 @@ export default function FavoritesWall({
                   手機上「移出」一律自成一行：有的卡擠得下、有的擠不下時，
                   同一排兩張卡的「移出」會一高一低。
                   分數與日期之間的點交給 dot-run，日期換行時行首不留點 */}
-              <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-[0.8125rem]">
+              <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-ui">
                 <p className="dot-run basis-full tabular-nums sm:basis-auto">
                   <span>
                     {t.score !== null && (
@@ -237,7 +237,7 @@ export default function FavoritesWall({
 // 沒有海報、或海報載不出來，都在框裡排片名
 function TitleSlate({ title }: { title: string }) {
   return (
-    <div className="flex h-full w-full items-center justify-center px-3 text-center text-[0.6875rem] tracking-wide text-paper-dim">
+    <div className="flex h-full w-full items-center justify-center px-3 text-center text-caption tracking-wide text-paper-dim">
       {title}
     </div>
   );

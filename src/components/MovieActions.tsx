@@ -199,7 +199,7 @@ export default function MovieActions({
 
       {/* 日期跟著鍵對齊，一欄一格。這一行一直佔一行高：第一次按下時日期才出現，
           若到那時才插進一行，底下整塊會被往下推一格。新日期淡入 */}
-      <p className="mt-2 grid min-h-[1lh] grid-cols-3 text-center text-[0.6875rem] text-paper-faint tabular-nums">
+      <p className="mt-2 grid min-h-[1lh] grid-cols-3 text-center text-caption text-paper-faint tabular-nums">
         {buttons.map((b) => {
           const date = b.date ? fmt(b.date) : null;
           return (
@@ -219,7 +219,7 @@ export default function MovieActions({
       <div role="status" aria-live="polite">
         <Reveal open={undo !== null}>
           {shownUndo && (
-          <p className="mt-3 flex items-baseline justify-between gap-4 text-[0.8125rem] text-paper-dim">
+          <p className="mt-3 flex items-baseline justify-between gap-4 text-ui text-paper-dim">
             <span>{shownUndo.message}</span>
             <button
               type="button"

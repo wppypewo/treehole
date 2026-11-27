@@ -326,7 +326,7 @@ export default function BrowseClient({
           <span className="t-label mr-2.5">{labels.summaryPrefix}</span>
           {summary}
         </p>
-        <div className="flex shrink-0 items-center gap-x-5 text-[0.8125rem]">
+        <div className="flex shrink-0 items-center gap-x-5 text-ui">
           {!isDefault && (
             <button
               type="button"

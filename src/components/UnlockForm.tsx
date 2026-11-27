@@ -76,7 +76,7 @@ export default function UnlockForm({
         <button
           type="submit"
           disabled={busy || !passcode}
-          className="tap-safe absolute top-1/2 right-0 -translate-y-1/2 px-1 text-[0.8125rem] tracking-[0.06em] text-paper-dim transition-colors hover:text-curtain-ink disabled:opacity-40 disabled:hover:text-paper-dim"
+          className="tap-safe absolute top-1/2 right-0 -translate-y-1/2 px-1 text-ui tracking-label text-paper-dim transition-colors hover:text-curtain-ink disabled:opacity-40 disabled:hover:text-paper-dim"
         >
           {labels.submit}
         </button>

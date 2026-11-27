@@ -20,33 +20,33 @@ export interface DiaryEntry {
  */
 export default function DiaryStrip({ entries }: { entries: DiaryEntry[] }) {
   return (
-    <ol className="mt-[1.125rem] grid grid-cols-1 border-t border-hairline-strong min-[700px]:grid-cols-2 min-[1100px]:grid-cols-4">
+    <ol className="mt-4 grid grid-cols-1 border-t border-hairline-strong min-[700px]:grid-cols-2 min-[1100px]:grid-cols-4">
       {entries.map((e) => (
         <li key={e.id} className="border-b border-hairline">
           <Link
             href={`/movie/${e.id}`}
-            className="hov-date block pt-[1.125rem] pr-[1.125rem] pb-5"
+            className="hov-date block pt-4 pr-4 pb-5"
           >
             {e.date && (
-              <span className="date-num t-num block text-[1.875rem]">
+              <span className="date-num t-num block text-figure">
                 {e.date}
               </span>
             )}
             <span
-              className={`block font-display text-[1.0625rem] leading-snug text-paper ${
+              className={`block font-display text-row leading-snug text-paper ${
                 e.date ? "mt-3" : ""
               }`}
             >
               {e.title}
             </span>
             {e.score && (
-              <span className="mt-1 block text-[0.8125rem] text-curtain-ink">
+              <span className="mt-1 block text-ui text-curtain-ink">
                 {e.score}
               </span>
             )}
             {/* line-clamp 自己會設 display，不能再加 block，否則 block 蓋掉它、整段短評全攤開 */}
             {e.note && (
-              <span className="mt-2 line-clamp-3 text-[0.8125rem] leading-relaxed text-paper-faint">
+              <span className="mt-2 line-clamp-3 text-ui leading-relaxed text-paper-faint">
                 {e.note}
               </span>
             )}

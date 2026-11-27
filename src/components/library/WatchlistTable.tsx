@@ -241,7 +241,7 @@ export default function WatchlistTable({
               className="hov-row grid grid-cols-[2.75rem_minmax(0,1fr)] items-baseline gap-x-4 gap-y-1 border-b border-hairline py-4 max-sm:pl-3 min-[900px]:grid-cols-[3.5rem_minmax(0,1.3fr)_minmax(0,1fr)_9.5rem_6.5rem_10.5rem]"
             >
               {/* 序號照加入先後，換了排序也不變，看得出它原本排第幾 */}
-              <span aria-hidden className="t-num text-[1.375rem] text-paper-faint">
+              <span aria-hidden className="t-num text-figure-sm text-paper-faint">
                 {String(rank.get(id) ?? row.queue).padStart(2, "0")}
               </span>
 
@@ -260,11 +260,11 @@ export default function WatchlistTable({
                 )}
               </Link>
 
-              <span className="hidden text-[0.8125rem] text-paper-dim min-[900px]:block">
+              <span className="hidden text-ui text-paper-dim min-[900px]:block">
                 {row.director}
               </span>
 
-              <span className="col-start-2 text-[0.8125rem] text-paper-dim tabular-nums min-[900px]:col-start-auto">
+              <span className="col-start-2 text-ui text-paper-dim tabular-nums min-[900px]:col-start-auto">
                 {row.sub}
                 {/* 手機沒有獨立的加入日欄，接在同一行後面 */}
                 {row.added && (
@@ -284,7 +284,7 @@ export default function WatchlistTable({
                   type="button"
                   onClick={() => markWatched(row)}
                   aria-label={labels.markWatchedNamed.replace("{title}", row.title)}
-                  className="tap-safe text-[0.8125rem] tracking-[0.02em] text-paper-dim transition-colors hover:text-paper"
+                  className="tap-safe text-ui tracking-[0.02em] text-paper-dim transition-colors hover:text-paper"
                 >
                   {labels.markWatched}
                 </button>

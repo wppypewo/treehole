@@ -205,7 +205,7 @@ function RankedRow({
     <li
       className={`${RANK_COLS} hov-row items-center border-b border-hairline py-3.5 max-sm:pl-3 sm:py-4`}
     >
-      <p className="t-num text-[1.375rem] text-paper-faint sm:text-[1.75rem]">
+      <p className="t-num text-figure-sm text-paper-faint sm:text-figure">
         <span className="sr-only">{labels.rank} </span>
         {rank}
       </p>
@@ -225,12 +225,12 @@ function RankedRow({
       <div className="min-w-0">
         <Link
           href={`/movie/${movie.id}`}
-          className="font-display text-[1.0625rem] leading-snug text-paper after:absolute after:inset-0 after:content-[''] sm:text-[1.1875rem]"
+          className="font-display text-row leading-snug text-paper after:absolute after:inset-0 after:content-[''] sm:text-row-lg"
         >
           {movie.title}
         </Link>
         {original && (
-          <p className="mt-0.5 truncate text-[0.8125rem] text-paper-faint">
+          <p className="mt-0.5 truncate text-ui text-paper-faint">
             {original}
           </p>
         )}
@@ -249,7 +249,7 @@ function RankedRow({
           </>
         )}
       </p>
-      <p className="t-num hidden text-right text-[1.125rem] text-paper sm:block">
+      <p className="t-num hidden text-right text-row-lg text-paper sm:block">
         {score && (
           <>
             <span className="sr-only">{labels.score} </span>

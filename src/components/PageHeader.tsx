@@ -25,7 +25,7 @@ export default function PageHeader({
     <header
       className={`animate-rise flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 ${rule ? "border-b border-hairline pb-7" : ""}`}
     >
-      <h1 className="t-film text-[2.125rem] text-paper sm:text-[3rem]">
+      <h1 className="t-film text-title text-paper sm:text-title-lg">
         {title}
       </h1>
       {meta && <p className="t-meta min-w-0 text-paper-faint">{meta}</p>}

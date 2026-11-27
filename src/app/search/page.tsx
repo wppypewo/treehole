@@ -49,7 +49,7 @@ export default async function SearchPage({
     return (
       <section className="page-shell">
         <header className="animate-rise max-w-2xl border-b border-hairline pb-8">
-          <h1 className="t-film text-[2.125rem] text-paper sm:text-[3rem]">
+          <h1 className="t-film text-title text-paper sm:text-title-lg">
             {dict.search.title}
           </h1>
         </header>
@@ -96,7 +96,7 @@ export default async function SearchPage({
       <header className="mt-10 border-b border-hairline pb-7">
         <p className="eyebrow mb-3">{dict.search.resultsFor}</p>
         <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
-          <h1 className="t-film text-[2rem] break-all text-paper sm:text-[2.75rem]">
+          <h1 className="t-film text-title break-all text-paper sm:text-title-lg">
             {query}
           </h1>
           <Suspense key={query} fallback={null}>
@@ -191,7 +191,7 @@ async function SearchResults({
   if (found.results.length === 0) {
     return (
       <div className="py-24 text-center">
-        <p className="text-[0.9375rem] text-paper-dim">{dict.search.noResults}</p>
+        <p className="text-body text-paper-dim">{dict.search.noResults}</p>
         <Link href="/browse" className="btn-line mt-8">
           {dict.common.browse}
         </Link>

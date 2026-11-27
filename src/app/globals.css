@@ -111,6 +111,25 @@
   /* 介面與內文：Geist 撐資訊層，中文交給系統字（PingFang TC）零下載成本。 */
   --font-sans: var(--font-geist-sans), "PingFang TC", "Microsoft JhengHei",
     -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+
+  /* 字級階梯（2026-11-27 unslop 收斂）：原本 TSX 裡有 18 種 text-[Nrem]，
+     收成 11 階，每階以角色命名。只定義字級、不帶 line-height，
+     行高仍由 .t-film / leading-* 決定（與原本 text-[Nrem] 的輸出相同）。
+     名稱刻意避開 Tailwind 內建的 xs/sm/lg…，內建階會連帶輸出 line-height。 */
+  --text-caption: 0.6875rem; /* 11px：海報缺圖字、日期下的小註、語言切換 */
+  --text-small: 0.75rem; /* 12px：區塊右側的「看全部」、說明小字 */
+  --text-ui: 0.8125rem; /* 13px：介面文字、metadata、行內按鈕 */
+  --text-body: 0.9375rem; /* 15px：空狀態與錯誤訊息的段落 */
+  --text-row: 1.0625rem; /* 17px：清單裡的片名（手機） */
+  --text-row-lg: 1.1875rem; /* 19px：清單裡的片名（桌機） */
+  --text-figure-sm: 1.375rem; /* 22px：放映表序號 */
+  --text-figure: 1.75rem; /* 28px：左欄大數字（日期、年份）手機 */
+  --text-figure-lg: 2.25rem; /* 36px：左欄大數字桌機 */
+  --text-title: 2.125rem; /* 34px：頁標題手機 */
+  --text-title-lg: 3rem; /* 48px：頁標題桌機 */
+
+  /* 小字連結與導覽的字距：原本 0.04／0.06／0.08／0.12em 四種，收成一種 */
+  --tracking-label: 0.04em;
 }
 
 /* ── 形狀鎖 ────────────────────────────────────────────────
@@ -228,12 +247,13 @@ body {
     font-variant-numeric: tabular-nums;
   }
 
-  /* eyebrow：全站配額極少，只在首頁開場與詳情頁各用一次 */
+  /* eyebrow：全站配額極少（搜尋結果頁、首頁片庫精選）。
+     2026-11-27 拿掉全大寫與 0.2em 字距：英文版會排成「SEARCH RESULTS」這種
+     模板式標籤，中文版加寬字距只是把字拉散。改成原文大小寫、字距同 tracking-label。 */
   .eyebrow {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 500;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
+    letter-spacing: 0.04em;
     color: var(--paper-faint);
   }
 
