@@ -26,7 +26,7 @@ export default function ListSkeleton({
     return (
       <div className="page-shell min-h-dvh">
         <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2 border-b border-hairline pb-7">
-          <div className="h-[1.02em] w-[5em] max-w-full animate-pulse bg-ink-raised text-[2.125rem] sm:text-[3rem]" />
+          <div className="h-[1.02em] w-[5em] max-w-full animate-pulse bg-ink-raised text-title sm:text-title-lg" />
         </div>
         <div className="mt-10">
           <MovieGridSkeleton />
@@ -37,7 +37,7 @@ export default function ListSkeleton({
   return (
     <div className="page-shell min-h-dvh">
       <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2">
-        <div className="h-[1.02em] w-[5em] max-w-full animate-pulse bg-ink-raised text-[2.125rem] sm:text-[3rem]" />
+        <div className="h-[1.02em] w-[5em] max-w-full animate-pulse bg-ink-raised text-title sm:text-title-lg" />
         {variant === "schedule" && (
           <div className="mb-1 h-3 w-28 animate-pulse bg-ink-raised" />
         )}
@@ -135,7 +135,7 @@ function SearchSkeleton() {
   return (
     <div className="page-shell min-h-dvh">
       <div className="max-w-2xl border-b border-hairline pb-8">
-        <div className={`h-[1.02em] w-[2.5em] text-[2.125rem] sm:text-[3rem] ${bar}`} />
+        <div className={`h-[1.02em] w-[2.5em] text-title sm:text-title-lg ${bar}`} />
       </div>
       <div className={`mt-8 h-16 w-full max-w-2xl ${bar}`} />
     </div>

@@ -14,7 +14,7 @@ export default function SiteFooter({ dict }: { dict: Dictionary }) {
       className="border-t border-hairline"
     >
       <div className="mx-auto flex max-w-[1400px] flex-col gap-2 px-5 pt-6 pb-10 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8 sm:px-8">
-        <p className="text-[0.8125rem] text-paper-dim">
+        <p className="text-ui text-paper-dim">
           <a
             href="https://www.themoviedb.org/"
             rel="noopener noreferrer"
@@ -24,7 +24,7 @@ export default function SiteFooter({ dict }: { dict: Dictionary }) {
             {dict.footer.source}
           </a>
         </p>
-        <p className="text-[0.75rem] leading-relaxed text-paper-faint">
+        <p className="text-small leading-relaxed text-paper-faint">
           {dict.footer.notice}
         </p>
       </div>

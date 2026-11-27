@@ -39,11 +39,11 @@ export default function PersonCard({
           initial
         )}
       </div>
-      <p className="poster-cap mt-3 line-clamp-2 text-[0.75rem]">
+      <p className="poster-cap mt-3 line-clamp-2 text-small">
         {name}
       </p>
       {sub && (
-        <p className="mt-0.5 line-clamp-1 text-[0.6875rem] text-paper-faint">
+        <p className="mt-0.5 line-clamp-1 text-caption text-paper-faint">
           {sub}
         </p>
       )}

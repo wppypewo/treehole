@@ -22,7 +22,7 @@ export default function Loading() {
             <div
               className={`mt-3.5 h-[1.02em] w-[5.5em] max-w-full text-[clamp(2.5rem,6vw,4.75rem)] ${bar}`}
             />
-            <div className="mt-6 grid grid-cols-[3rem_1fr] gap-x-[1.125rem] gap-y-2.5 border-t border-hairline pt-[1.125rem]">
+            <div className="mt-6 grid grid-cols-[3rem_1fr] gap-x-4 gap-y-2.5 border-t border-hairline pt-4">
               {["w-12", "w-20", "w-28", "w-24"].map((w) => (
                 <div key={w} className="contents">
                   <div className={`h-3 w-8 ${bar}`} />
@@ -43,7 +43,7 @@ export default function Loading() {
 
         <div className="mt-22 min-[900px]:mt-32">
           <div className={`h-6 w-24 ${bar}`} />
-          <div className="mt-[1.125rem] border-t border-hairline-strong">
+          <div className="mt-4 border-t border-hairline-strong">
             {[0, 1, 2].map((i) => (
               <div
                 key={i}

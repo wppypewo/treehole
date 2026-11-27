@@ -55,7 +55,7 @@ export default function Biography({
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
           aria-controls="person-bio"
-          className="tap-safe mt-3 text-[0.8125rem] tracking-[0.04em] text-paper-faint transition-colors hover:text-paper"
+          className="tap-safe mt-3 text-ui tracking-label text-paper-faint transition-colors hover:text-paper"
         >
           {expanded ? showLess : showMore}
         </button>

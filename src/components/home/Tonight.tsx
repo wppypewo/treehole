@@ -96,7 +96,7 @@ export default function Tonight({
         )}
 
         {facts.length > 0 && (
-          <dl className="mt-6 grid grid-cols-[auto_1fr] gap-x-[1.125rem] gap-y-1.5 border-t border-hairline pt-[1.125rem] text-[0.8125rem]">
+          <dl className="mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 border-t border-hairline pt-4 text-ui">
             {facts.map((f) => (
               <div key={f.label} className="contents">
                 <dt className="text-paper-faint">{f.label}</dt>

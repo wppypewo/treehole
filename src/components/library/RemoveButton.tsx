@@ -29,7 +29,7 @@ export default function RemoveButton({
       type="button"
       onClick={onRemove}
       aria-label={labels.removeNamed.replace("{title}", title)}
-      className={`tap-safe text-[0.8125rem] tracking-[0.02em] text-paper-faint transition-colors hover:text-paper ${className}`}
+      className={`tap-safe text-ui tracking-[0.02em] text-paper-faint transition-colors hover:text-paper ${className}`}
     >
       {labels.remove}
     </button>

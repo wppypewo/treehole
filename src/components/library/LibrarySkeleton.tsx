@@ -15,7 +15,7 @@ export default function LibrarySkeleton({
   return (
     <div className="page-shell min-h-dvh">
       <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2 border-b border-hairline pb-7">
-        <div className="h-[1.02em] w-[6em] max-w-full animate-pulse bg-ink-raised text-[2.125rem] sm:text-[3rem]" />
+        <div className="h-[1.02em] w-[6em] max-w-full animate-pulse bg-ink-raised text-title sm:text-title-lg" />
         <div className="mb-1 h-3 w-24 animate-pulse bg-ink-raised" />
       </div>
 

@@ -22,10 +22,10 @@ export default async function UnlockPage() {
     <section className="page-shell flex min-h-[78dvh] items-end">
       <div className="w-full max-w-lg pb-[10dvh]">
         <p className="t-meta text-paper-faint">Treehole</p>
-        <h1 className="t-film mt-4 text-[2rem] text-paper sm:text-4xl">
+        <h1 className="t-film mt-4 text-title text-paper sm:text-4xl">
           {dict.unlock.title}
         </h1>
-        <p className="mt-5 text-[0.9375rem] leading-relaxed text-paper-dim">
+        <p className="mt-5 text-body leading-relaxed text-paper-dim">
           {dict.unlock.hint}
         </p>
 

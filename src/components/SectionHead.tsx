@@ -31,7 +31,7 @@ export default function SectionHead({
       {more && (
         <Link
           href={more.href}
-          className="tap-safe shrink-0 text-[0.75rem] tracking-[0.08em] text-paper-faint transition-colors hover:text-paper"
+          className="tap-safe shrink-0 text-small tracking-label text-paper-faint transition-colors hover:text-paper"
         >
           {more.label}
         </Link>

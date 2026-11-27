@@ -73,10 +73,10 @@ export default async function UpcomingPage() {
                     欄寬要放得下最寬的「10/17」（手機 28px 字約 78px），
                     否則全站的 overflow-wrap 會把它斷成「10/1」「7」兩行 */}
                 <p className="self-start leading-none sm:sticky sm:top-24">
-                  <span aria-hidden className="t-num block whitespace-nowrap text-[1.75rem] text-paper sm:text-[2.25rem]">
+                  <span aria-hidden className="t-num block whitespace-nowrap text-figure text-paper sm:text-figure-lg">
                     {d.md}
                   </span>
-                  <span aria-hidden className="mt-1.5 block text-[0.6875rem] tracking-[0.06em] text-paper-faint">
+                  <span aria-hidden className="mt-1.5 block text-caption tracking-label text-paper-faint">
                     {d.weekday}
                   </span>
                   <span className="sr-only">{d.full}</span>
@@ -120,12 +120,12 @@ function ScheduleFilm({ movie }: { movie: MovieSummary }) {
       <div className="min-w-0">
         <Link
           href={`/movie/${movie.id}`}
-          className="font-display text-[1.0625rem] leading-snug text-paper after:absolute after:inset-0 after:content-[''] sm:text-[1.1875rem]"
+          className="font-display text-row leading-snug text-paper after:absolute after:inset-0 after:content-[''] sm:text-row-lg"
         >
           {movie.title}
         </Link>
         {original && (
-          <p className="mt-0.5 truncate text-[0.8125rem] text-paper-faint">
+          <p className="mt-0.5 truncate text-ui text-paper-faint">
             {original}
           </p>
         )}

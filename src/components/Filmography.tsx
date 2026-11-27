@@ -106,7 +106,7 @@ export default function Filmography({
             >
               {/* 年份貼著捲動：一年好幾部時，往下捲還看得到是哪一年 */}
               {y.year ? (
-                <p className="t-num self-start text-[1.75rem] leading-none text-paper sm:sticky sm:top-24 sm:text-[2.25rem]">
+                <p className="t-num self-start text-figure leading-none text-paper sm:sticky sm:top-24 sm:text-figure-lg">
                   {y.year}
                 </p>
               ) : (
@@ -163,7 +163,7 @@ function CreditRow({
       <div className="min-w-0">
         <Link
           href={`/movie/${row.id}`}
-          className="font-display text-[1.0625rem] leading-snug text-paper after:absolute after:inset-0 after:content-[''] sm:text-[1.1875rem]"
+          className="font-display text-row leading-snug text-paper after:absolute after:inset-0 after:content-[''] sm:text-row-lg"
         >
           {row.title}
         </Link>
@@ -173,12 +173,12 @@ function CreditRow({
           </span>
         )}
         {row.original && (
-          <p lang="und" className="mt-0.5 truncate text-[0.8125rem] text-paper-faint">
+          <p lang="und" className="mt-0.5 truncate text-ui text-paper-faint">
             {row.original}
           </p>
         )}
         {(row.role || row.lead || row.opens) && (
-          <p className="mt-1 text-[0.8125rem] leading-snug text-paper-dim">
+          <p className="mt-1 text-ui leading-snug text-paper-dim">
             {row.lead && (
               <span className="t-label mr-2 text-paper">{leadLabel}</span>
             )}

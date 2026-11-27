@@ -31,7 +31,7 @@ export default function UndoStatus({
   return (
     <p
       role="status"
-      className={`flex items-center text-[0.8125rem] text-paper-dim ${className}`}
+      className={`flex items-center text-ui text-paper-dim ${className}`}
     >
       {shown && (
         <span

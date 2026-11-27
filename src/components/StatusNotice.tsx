@@ -32,14 +32,14 @@ export default function StatusNotice({
         }`}
       >
         {code && (
-          <p className="t-num pt-1.5 text-[1.75rem] leading-none text-paper-faint sm:text-[2.25rem]">
+          <p className="t-num pt-1.5 text-figure leading-none text-paper-faint sm:text-figure-lg">
             {code}
           </p>
         )}
         <div className="min-w-0 max-w-[40rem]">
-          <h1 className="t-film text-[2rem] text-paper sm:text-[2.75rem]">{title}</h1>
+          <h1 className="t-film text-title text-paper sm:text-title-lg">{title}</h1>
           {body && (
-            <p className="mt-4 max-w-[52ch] text-[0.9375rem] leading-relaxed text-paper-dim">
+            <p className="mt-4 max-w-[52ch] text-body leading-relaxed text-paper-dim">
               {body}
             </p>
           )}

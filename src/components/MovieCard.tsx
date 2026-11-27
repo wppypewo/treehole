@@ -38,7 +38,7 @@ export default function MovieCard({
 
   // 沒有海報、或海報載不出來，都在框裡排片名
   const titleSlate = (
-    <div className="flex h-full w-full items-center justify-center px-3 text-center text-[0.6875rem] tracking-wide text-paper-dim">
+    <div className="flex h-full w-full items-center justify-center px-3 text-center text-caption tracking-wide text-paper-dim">
       {movie.title}
     </div>
   );
@@ -68,7 +68,7 @@ export default function MovieCard({
       <div className="mt-3">
         <h3
           className={`poster-cap line-clamp-2 ${
-            size === "lg" ? "text-[0.9375rem]" : "text-[0.8125rem]"
+            size === "lg" ? "text-body" : "text-ui"
           }`}
         >
           {movie.title}

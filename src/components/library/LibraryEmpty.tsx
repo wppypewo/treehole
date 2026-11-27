@@ -22,11 +22,11 @@ export default function LibraryEmpty({
 }) {
   return (
     <div className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-baseline gap-x-4 border-b border-hairline pt-8 pb-10 min-[900px]:grid-cols-[3.5rem_minmax(0,1fr)]">
-      <span aria-hidden className="t-num text-[1.375rem] text-paper-faint">
+      <span aria-hidden className="t-num text-figure-sm text-paper-faint">
         00
       </span>
       <div className="min-w-0">
-        <p className="max-w-[44ch] text-pretty text-[0.9375rem] leading-relaxed text-paper-dim">
+        <p className="max-w-[44ch] text-pretty text-body leading-relaxed text-paper-dim">
           {text}
         </p>
         <Link ref={linkRef} href="/browse" className="btn-line mt-6">

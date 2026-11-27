@@ -24,7 +24,7 @@ export interface ScheduleItem {
  */
 export default function ScheduleList({ items }: { items: ScheduleItem[] }) {
   return (
-    <ol className="mt-[1.125rem] columns-1 gap-12 border-t border-hairline-strong min-[800px]:columns-2">
+    <ol className="mt-4 columns-1 gap-12 border-t border-hairline-strong min-[800px]:columns-2">
       {items.map((m, i) => {
         const repeat = i > 0 && items[i - 1].date === m.date;
         return (
@@ -34,7 +34,7 @@ export default function ScheduleList({ items }: { items: ScheduleItem[] }) {
           >
             <Link
               href={`/movie/${m.id}`}
-              className="hov-row flex items-baseline gap-[1.125rem] py-3 max-sm:pl-3"
+              className="hov-row flex items-baseline gap-4 py-3 max-sm:pl-3"
             >
               <span
                 className={

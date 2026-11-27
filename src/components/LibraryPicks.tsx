@@ -37,7 +37,7 @@ export default function LibraryPicks({
         <h2 className="eyebrow">{title}</h2>
         <Link
           href={moreHref}
-          className="tap-inline text-[0.75rem] tracking-[0.08em] text-paper-faint transition-colors hover:text-paper"
+          className="tap-inline text-small tracking-label text-paper-faint transition-colors hover:text-paper"
         >
           {moreLabel}
         </Link>
@@ -65,7 +65,7 @@ export default function LibraryPicks({
                     <TitleSlate title={movie.title} />
                   )}
                 </div>
-                <h3 className="poster-cap mt-2 line-clamp-2 text-[0.75rem] leading-snug">
+                <h3 className="poster-cap mt-2 line-clamp-2 text-small leading-snug">
                   {movie.title}
                 </h3>
               </Link>
@@ -80,7 +80,7 @@ export default function LibraryPicks({
 // 沒有海報、或海報載不出來，都在框裡排片名
 function TitleSlate({ title }: { title: string }) {
   return (
-    <div className="flex h-full w-full items-center justify-center px-2 text-center text-[0.625rem] text-paper-dim">
+    <div className="flex h-full w-full items-center justify-center px-2 text-center text-caption text-paper-dim">
       {title}
     </div>
   );
